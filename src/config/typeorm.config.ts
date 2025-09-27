@@ -11,7 +11,9 @@ const typeOrmConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_DATABASE || 'webprogramming',
-  entities: [User],
+  entities: [
+    User
+  ],
   synchronize: true, // In production, this should be false and migrations should be used
 };
 

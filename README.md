@@ -7,6 +7,7 @@
 - [설치](#설치)
 - [구성](#구성)
 - [애플리케이션 실행](#애플리케이션-실행)
+- [Swagger API 문서](#swagger-api-문서)
 - [프로젝트 구조](#프로젝트-구조)
 - [사용자 모듈 예시](#사용자-모듈-예시)
 - [코드 품질](#코드-품질)
@@ -71,6 +72,14 @@ TypeORM 구성은 `src/config/typeorm.config.ts`에 있습니다. PostgreSQL 데
     ```bash
     docker-compose down
     ```
+
+## Swagger API 문서
+
+애플리케이션이 실행 중일 때 다음 URL에서 Swagger API 문서를 확인할 수 있습니다:
+
+-   **Swagger UI:** `http://localhost:3000/api`
+
+이 문서는 API 엔드포인트, 요청/응답 모델 및 기타 세부 정보를 탐색하는 데 도움이 됩니다.
 
 ## 프로젝트 구조
 
