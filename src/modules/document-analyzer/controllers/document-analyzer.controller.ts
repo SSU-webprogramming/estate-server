@@ -2,6 +2,8 @@ import { Controller, Post, UseInterceptors, UploadedFile, ParseFilePipe, MaxFile
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentAnalyzerService } from '../services/document-analyzer.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { CustomException } from 'src/common/errors/custom-exception';
+import { ErrorCode } from 'src/common/errors/error';
 
 @ApiTags('문서 분석기')
 @Controller('document-analyzer')
@@ -37,7 +39,7 @@ export class DocumentAnalyzerController {
     file: Express.Multer.File,
   ): Promise<string> {
     if (!file) {
-      throw new BadRequestException('업로드된 파일이 없습니다.');
+      throw new CustomException(ErrorCode.FILE_NOT_FOUND)
     }
     return this.documentAnalyzerService.analyzeDocument(file.buffer, file.mimetype);
   }

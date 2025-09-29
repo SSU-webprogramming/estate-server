@@ -1,6 +1,8 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { CustomException } from 'src/common/errors/custom-exception';
+import { ErrorCode } from 'src/common/errors/error';
 
 @Injectable()
 export class DocumentAnalyzerService {
@@ -9,7 +11,7 @@ export class DocumentAnalyzerService {
   constructor(private readonly configService: ConfigService) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
     if (!apiKey) {
-      throw new InternalServerErrorException('Gemini API 키가 설정되지 않았습니다.');
+      throw new CustomException(ErrorCode.GEMINI_API_KEY_INVALID);
     }
     this.geminiApi = new GoogleGenerativeAI(apiKey);
   }
@@ -86,9 +88,9 @@ PDF, 이미지에 포함된 부동산 관련 문서를 분석하여
     } catch (error) {
       console.error('Gemini API로 문서 분석 중 오류 발생:', error);
       if (error.message.includes('API key not valid')) {
-        throw new BadRequestException('잘못된 Gemini API 키입니다. .env 파일을 확인하세요.');
+        throw new CustomException(ErrorCode.GEMINI_API_KEY_INVALID);
       }
-      throw new InternalServerErrorException('Gemini API로 문서를 분석하지 못했습니다. 서버 로그에서 자세한 내용을 확인하세요.');
+      throw new CustomException(ErrorCode.GEMINI_API_REQUEST_FAILED);
     }
   }
 }

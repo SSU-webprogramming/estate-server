@@ -6,6 +6,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
 import { DocumentAnalyzerModule } from './modules/document-analyzer/document-analyzer.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { DocumentAnalyzerModule } from './modules/document-analyzer/document-ana
       useFactory: getTypeOrmConfig,
     }), 
     UserModule, 
-    DocumentAnalyzerModule
+    DocumentAnalyzerModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -8,7 +8,7 @@ import { ErrorCode } from '../../../common/errors/error';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(public readonly userRepository: UserRepository) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const user = this.userRepository.create(createUserDto);
@@ -25,6 +25,10 @@ export class UserService {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
     return user;
+  }
+
+  async findByProvider(provider: string, providerId: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { provider, providerId } });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {

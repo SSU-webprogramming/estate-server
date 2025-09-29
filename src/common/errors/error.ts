@@ -16,6 +16,13 @@ export enum ErrorCode {
   // Document Analyzer
   GEMINI_API_ERROR = 'A001',
   FILE_UPLOAD_ERROR = 'A002',
+  FILE_NOT_FOUND = 'A003',
+  GEMINI_API_KEY_INVALID = 'A004',
+  GEMINI_API_REQUEST_FAILED = 'A005',
+
+  // Auth
+  TOKEN_NOT_FOUND = 'AUTH001',
+  KAKAO_VAL_NOT_FOUND = 'AUTH002'
 }
 
 export const ErrorDictionary: Record<ErrorCode, { status: HttpStatus; message: string }> = {
@@ -51,4 +58,24 @@ export const ErrorDictionary: Record<ErrorCode, { status: HttpStatus; message: s
     status: HttpStatus.BAD_REQUEST,
     message: '파일 업로드 중 오류가 발생했습니다.',
   },
+  [ErrorCode.FILE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '파일을 찾을 수 없습니다.',
+  },
+  [ErrorCode.GEMINI_API_KEY_INVALID]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '잘못된 Gemini API 키입니다. .env 파일을 확인하세요.',
+  },
+  [ErrorCode.GEMINI_API_REQUEST_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: 'Gemini API로 문서를 분석하지 못했습니다. 서버 로그에서 자세한 내용을 확인하세요.',
+  },
+  [ErrorCode.TOKEN_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '토큰을 찾을 수 없습니다.',
+  },
+  [ErrorCode.KAKAO_VAL_NOT_FOUND]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '카카오 환경변수가 설정되지 않았습니다.',
+  }
 };

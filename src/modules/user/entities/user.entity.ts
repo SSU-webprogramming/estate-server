@@ -8,9 +8,15 @@ export class User {
   @Column({ unique: true })
   username: string;
 
-  @Column()
+  @Column({ nullable: true })
   email: string;
 
-  @Column({ select: false }) // Do not select password by default
-  password: string;
+  @Column({ select: false, nullable: true })
+  password?: string;
+
+  @Column({ nullable: true })
+  provider?: string;
+
+  @Column({ nullable: true })
+  providerId?: string;
 }
