@@ -1,15 +1,17 @@
 import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
 
 @Injectable()
 export class DocumentAnalyzerService {
   private readonly geminiApi: GoogleGenerativeAI;
 
-  constructor() {
-    this.geminiApi = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  constructor(private readonly configService: ConfigService) {
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    if (!apiKey) {
+      throw new InternalServerErrorException('Gemini API 키가 설정되지 않았습니다.');
+    }
+    this.geminiApi = new GoogleGenerativeAI(apiKey);
   }
 
     async analyzeDocument(fileBuffer: Buffer, mimeType: string): Promise<string> {

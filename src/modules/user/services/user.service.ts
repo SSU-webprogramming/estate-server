@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../repositories/user.repository';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
+import { CustomException } from '../../../common/errors/custom-exception';
+import { ErrorCode } from '../../../common/errors/error';
 
 @Injectable()
 export class UserService {
@@ -20,7 +22,7 @@ export class UserService {
   async findOne(id: number): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException(`ID가 "${id}"인 사용자를 찾을 수 없습니다.`);
+      throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
     return user;
   }
@@ -34,7 +36,7 @@ export class UserService {
   async remove(id: number): Promise<void> {
     const result = await this.userRepository.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`ID가 "${id}"인 사용자를 찾을 수 없습니다.`);
+      throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
   }
 }

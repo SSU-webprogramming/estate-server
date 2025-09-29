@@ -1,20 +1,16 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import * as dotenv from 'dotenv';
+import { ConfigService } from '@nestjs/config';
 import { User } from '../modules/user/entities/user.entity';
 
-dotenv.config();
-
-const typeOrmConfig: TypeOrmModuleOptions = {
+export const getTypeOrmConfig = async (configService: ConfigService): Promise<TypeOrmModuleOptions> => ({
   type: 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  username: process.env.DB_USERNAME || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_DATABASE || 'webprogramming',
+  host: configService.get<string>('DB_HOST'),
+  port: configService.get<number>('DB_PORT'),
+  username: configService.get<string>('DB_USERNAME'),
+  password: configService.get<string>('DB_PASSWORD'),
+  database: configService.get<string>('DB_DATABASE'),
   entities: [
     User
   ],
   synchronize: true, // In production, this should be false and migrations should be used
-};
-
-export default typeOrmConfig;
+});
