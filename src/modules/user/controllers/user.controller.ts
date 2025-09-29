@@ -5,48 +5,48 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 
-@ApiTags('users')
+@ApiTags('사용자')
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new user' })
-  @ApiResponse({ status: 201, description: 'The user has been successfully created.', type: User })
-  @ApiResponse({ status: 400, description: 'Bad Request.' })
+  @ApiOperation({ summary: '새 사용자 생성' })
+  @ApiResponse({ status: 201, description: '사용자가 성공적으로 생성되었습니다.', type: User })
+  @ApiResponse({ status: 400, description: '잘못된 요청입니다.' })
   @ApiBody({ type: CreateUserDto })
   create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.userService.create(createUserDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Retrieve all users' })
-  @ApiResponse({ status: 200, description: 'Returns all users.', type: [User] })
+  @ApiOperation({ summary: '모든 사용자 조회' })
+  @ApiResponse({ status: 200, description: '모든 사용자를 반환합니다.', type: [User] })
   findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Retrieve a user by ID' })
-  @ApiResponse({ status: 200, description: 'Returns a single user.', type: User })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiOperation({ summary: 'ID로 사용자 조회' })
+  @ApiResponse({ status: 200, description: '단일 사용자를 반환합니다.', type: User })
+  @ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' })
   findOne(@Param('id') id: string): Promise<User> {
     return this.userService.findOne(+id);
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Update a user by ID' })
-  @ApiResponse({ status: 200, description: 'The user has been successfully updated.', type: User })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiOperation({ summary: 'ID로 사용자 업데이트' })
+  @ApiResponse({ status: 200, description: '사용자가 성공적으로 업데이트되었습니다.', type: User })
+  @ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' })
   @ApiBody({ type: UpdateUserDto })
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
     return this.userService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Delete a user by ID' })
-  @ApiResponse({ status: 204, description: 'The user has been successfully deleted.' })
-  @ApiResponse({ status: 404, description: 'User not found.' })
+  @ApiOperation({ summary: 'ID로 사용자 삭제' })
+  @ApiResponse({ status: 204, description: '사용자가 성공적으로 삭제되었습니다.' })
+  @ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' })
   remove(@Param('id') id: string): Promise<void> {
     return this.userService.remove(+id);
   }

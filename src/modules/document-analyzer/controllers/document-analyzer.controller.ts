@@ -3,16 +3,16 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentAnalyzerService } from '../services/document-analyzer.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
 
-@ApiTags('document-analyzer')
+@ApiTags('문서 분석기')
 @Controller('document-analyzer')
 export class DocumentAnalyzerController {
   constructor(private readonly documentAnalyzerService: DocumentAnalyzerService) {}
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: 'Upload a PDF or JPG document for analysis' })
-  @ApiResponse({ status: 200, description: 'Document analyzed successfully.', type: String })
-  @ApiResponse({ status: 400, description: 'Bad Request or unsupported file type.' })
+  @ApiOperation({ summary: '분석을 위해 PDF 또는 JPG 문서 업로드' })
+  @ApiResponse({ status: 200, description: '문서가 성공적으로 분석되었습니다.', type: String })
+  @ApiResponse({ status: 400, description: '잘못된 요청 또는 지원하지 않는 파일 형식입니다.' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -37,7 +37,7 @@ export class DocumentAnalyzerController {
     file: Express.Multer.File,
   ): Promise<string> {
     if (!file) {
-      throw new BadRequestException('No file uploaded.');
+      throw new BadRequestException('업로드된 파일이 없습니다.');
     }
     return this.documentAnalyzerService.analyzeDocument(file.buffer, file.mimetype);
   }

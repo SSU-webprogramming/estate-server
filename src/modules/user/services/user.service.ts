@@ -20,7 +20,7 @@ export class UserService {
   async findOne(id: number): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException(`User with ID "${id}" not found`);
+      throw new NotFoundException(`ID가 "${id}"인 사용자를 찾을 수 없습니다.`);
     }
     return user;
   }
@@ -34,7 +34,7 @@ export class UserService {
   async remove(id: number): Promise<void> {
     const result = await this.userRepository.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`User with ID "${id}" not found`);
+      throw new NotFoundException(`ID가 "${id}"인 사용자를 찾을 수 없습니다.`);
     }
   }
 }

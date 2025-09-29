@@ -15,10 +15,11 @@ async function bootstrap() {
   }));
 
   const config = new DocumentBuilder()
-    .setTitle('NestJS Layered Architecture API')
-    .setDescription('API documentation for the NestJS layered architecture project')
+    .setTitle('NestJS 계층형 아키텍처 API')
+    .setDescription('NestJS 계층형 아키텍처 프로젝트를 위한 API 문서')
     .setVersion('1.0')
-    .addTag('users')
+    .addTag('사용자')
+    .addTag('문서 분석기')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
