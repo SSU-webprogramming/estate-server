@@ -22,10 +22,13 @@ export enum ErrorCode {
 
   // Auth
   TOKEN_NOT_FOUND = 'AUTH001',
-  KAKAO_VAL_NOT_FOUND = 'AUTH002'
+  KAKAO_VAL_NOT_FOUND = 'AUTH002',
 }
 
-export const ErrorDictionary: Record<ErrorCode, { status: HttpStatus; message: string }> = {
+export const ErrorDictionary: Record<
+  ErrorCode,
+  { status: HttpStatus; message: string }
+> = {
   [ErrorCode.INTERNAL_SERVER_ERROR]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: '서버 내부 오류가 발생했습니다. 관리자에게 문의해주세요.',
@@ -68,7 +71,8 @@ export const ErrorDictionary: Record<ErrorCode, { status: HttpStatus; message: s
   },
   [ErrorCode.GEMINI_API_REQUEST_FAILED]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
-    message: 'Gemini API로 문서를 분석하지 못했습니다. 서버 로그에서 자세한 내용을 확인하세요.',
+    message:
+      'Gemini API로 문서를 분석하지 못했습니다. 서버 로그에서 자세한 내용을 확인하세요.',
   },
   [ErrorCode.TOKEN_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
@@ -77,5 +81,5 @@ export const ErrorDictionary: Record<ErrorCode, { status: HttpStatus; message: s
   [ErrorCode.KAKAO_VAL_NOT_FOUND]: {
     status: HttpStatus.BAD_REQUEST,
     message: '카카오 환경변수가 설정되지 않았습니다.',
-  }
+  },
 };

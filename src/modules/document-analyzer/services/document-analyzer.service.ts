@@ -16,9 +16,11 @@ export class DocumentAnalyzerService {
     this.geminiApi = new GoogleGenerativeAI(apiKey);
   }
 
-    async analyzeDocument(fileBuffer: Buffer, mimeType: string): Promise<string> {
+  async analyzeDocument(fileBuffer: Buffer, mimeType: string): Promise<string> {
     try {
-      const model = this.geminiApi.getGenerativeModel({ model: 'gemini-2.5-flash' });
+      const model = this.geminiApi.getGenerativeModel({
+        model: 'gemini-2.5-flash',
+      });
 
       // 이미지 부분
       const imagePart = {
@@ -76,8 +78,8 @@ PDF, 이미지에 포함된 부동산 관련 문서를 분석하여
             role: 'user',
             parts: [
               { text: systemPrompt }, // 시스템 지침
-              { text: userPrompt },   // 사용자 요청
-              imagePart,              // 이미지
+              { text: userPrompt }, // 사용자 요청
+              imagePart, // 이미지
             ],
           },
         ],

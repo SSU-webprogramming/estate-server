@@ -27,7 +27,10 @@ export class UserService {
     return user;
   }
 
-  async findByProvider(provider: string, providerId: string): Promise<User | null> {
+  async findByProvider(
+    provider: string,
+    providerId: string,
+  ): Promise<User | null> {
     return this.userRepository.findOne({ where: { provider, providerId } });
   }
 

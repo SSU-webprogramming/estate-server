@@ -1,4 +1,11 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Inject } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+  Inject,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError, TypeORMError } from 'typeorm';
 import { CustomException } from '../errors/custom-exception';
@@ -24,7 +31,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof CustomException) {
       statusCode = exception.getStatus();
-      const errorResponse = exception.getResponse() as { errorCode: ErrorCode; message: string };
+      const errorResponse = exception.getResponse() as {
+        errorCode: ErrorCode;
+        message: string;
+      };
       errorCode = errorResponse.errorCode;
       error = exception.constructor.name;
       message = errorResponse.message;

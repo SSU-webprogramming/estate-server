@@ -5,7 +5,7 @@ import winstonDaily from 'winston-daily-rotate-file';
 
 const { combine, timestamp, printf, colorize } = format;
 
-const logFormat = printf(info => {
+const logFormat = printf((info) => {
   return `${info.timestamp} [${info.level}] ${info.context}: ${info.message}`;
 });
 
