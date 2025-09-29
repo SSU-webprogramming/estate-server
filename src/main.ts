@@ -19,8 +19,8 @@ async function bootstrap() {
   }));
 
   const config = new DocumentBuilder()
-    .setTitle('NestJS 계층형 아키텍처 API')
-    .setDescription('NestJS 계층형 아키텍처 프로젝트를 위한 API 문서')
+    .setTitle('SSU 고급웹프로그래밍 부동산 프로젝트(가제) 서버')
+    .setDescription('SSU 고급웹프로그래밍 부동산 프로젝트(가제) 서버 api 문서')
     .setVersion('1.0')
     .addTag('사용자')
     .addTag('문서 분석기')
