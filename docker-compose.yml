@@ -1,24 +1,4 @@
-version: '3.8'
-
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: postgres
-      DB_DATABASE: webprogramming
-    volumes:
-      - .:/app
-    command: npm run start:dev
-
   db:
     image: postgres:13
     restart: always

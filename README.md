@@ -10,6 +10,7 @@
 - [Swagger API 문서](#swagger-api-문서)
 - [프로젝트 구조](#프로젝트-구조)
 - [사용자 모듈 예시](#사용자-모듈-예시)
+- [문서 분석기 모듈](#문서-분석기-모듈)
 - [코드 품질](#코드-품질)
 
 ## 설치
@@ -37,9 +38,10 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_DATABASE=webprogramming
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY # Gemini API 키를 여기에 입력하세요
 ```
 
-**참고:** PostgreSQL 설정에 따라 이 값을 조정하십시오.
+**참고:** PostgreSQL 설정에 따라 이 값을 조정하십시오. Gemini API 키는 Google AI Studio에서 얻을 수 있습니다.
 
 ### TypeORM
 
@@ -62,16 +64,7 @@ TypeORM 구성은 `src/config/typeorm.config.ts`에 있습니다. PostgreSQL 데
     npm run start
     ```
 
-4.  **Docker Compose로 애플리케이션 실행 (권장):**
-    ```bash
-    npm run docker:up
-    ```
-    이 명령은 백그라운드에서 PostgreSQL 데이터베이스와 NestJS 애플리케이션을 모두 빌드하고 시작합니다. 애플리케이션은 `http://localhost:3000`에서 액세스할 수 있습니다.
 
-    Docker Compose 서비스를 중지하려면 다음을 실행하십시오:
-    ```bash
-    docker-compose down
-    ```
 
 ## Swagger API 문서
 
@@ -92,19 +85,25 @@ src/
 ├── config/
 │   └── typeorm.config.ts
 └── modules/
-    └── user/
+    ├── user/
+    │   ├── controllers/
+    │   │   └── user.controller.ts
+    │   ├── services/
+    │   │   └── user.service.ts
+    │   ├── repositories/
+    │   │   └── user.repository.ts
+    │   ├── entities/
+    │   │   └── user.entity.ts
+    │   ├── dto/
+    │   │   ├── create-user.dto.ts
+    │   │   └── update-user.dto.ts
+    │   └── user.module.ts
+    └── document-analyzer/
         ├── controllers/
-        │   └── user.controller.ts
-        ├── services/
-        │   └── user.service.ts
-        ├── repositories/
-        │   └── user.repository.ts
-        ├── entities/
-        │   └── user.entity.ts
-        ├── dto/
-        │   ├── create-user.dto.ts
-        │   └── update-user.dto.ts
-        └── user.module.ts
+        │   └── document-analyzer.controller.ts
+        └── services/
+            └── document-analyzer.service.ts
+        └── document-analyzer.module.ts
 ```
 
 ## 사용자 모듈 예시
@@ -116,6 +115,13 @@ src/
 -   **`UserService` (`src/modules/user/services/user.service.ts`):** `UserRepository`와 상호 작용하여 사용자 관련 작업에 대한 비즈니스 로직을 포함합니다.
 -   **`UserController` (`src/modules/user/controllers/user.controller.ts`):** 들어오는 HTTP 요청을 처리하고, `UserService`에 위임하고, 응답을 반환합니다. 사용자 생성, 검색, 업데이트 및 삭제를 위한 API 엔드포인트를 정의합니다.
 -   **`CreateUserDto` 및 `UpdateUserDto` (`src/modules/user/dto/`):** `class-validator`를 사용하여 들어오는 요청 페이로드를 유효성 검사하는 데 사용되는 데이터 전송 객체(DTO)입니다.
+
+## 문서 분석기 모듈
+
+`DocumentAnalyzer` 모듈은 Gemini API를 사용하여 PDF 또는 JPG 파일을 분석하는 기능을 제공합니다.
+
+-   **`DocumentAnalyzerService` (`src/modules/document-analyzer/services/document-analyzer.service.ts`):** 업로드된 파일의 내용을 Gemini API로 전송하고, 응답을 받아 문서 또는 이미지에 대한 해석을 반환합니다.
+-   **`DocumentAnalyzerController` (`src/modules/document-analyzer/controllers/document-analyzer.controller.ts`):** `/document-analyzer/upload` 엔드포인트를 통해 PDF 또는 JPG 파일 업로드를 처리합니다. 파일 유효성 검사(크기 및 유형)를 수행하고 `DocumentAnalyzerService`를 호출합니다.
 
 ## 코드 품질
 
