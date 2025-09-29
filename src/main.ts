@@ -2,13 +2,12 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // 글로벌 예외 필터
-  app.useGlobalFilters(new GlobalExceptionFilter());
+  app.useLogger(app.get(WINSTON_MODULE_PROVIDER));
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,

@@ -1,11 +1,17 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError, TypeORMError } from 'typeorm';
 import { CustomException } from '../errors/custom-exception';
 import { ErrorCode } from '../errors/error';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -50,19 +56,14 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorCode,
       error,
       message,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString(), // 클라이언트 응답은 ISO 형식 유지
       path: request.url,
     };
 
-    console.error(
-      `[GlobalExceptionFilter] ${new Date().toISOString()} | ${request.method} ${request.url}`,
-      `\n- Status: ${statusCode}`,
-      `\n- ErrorCode: ${errorCode}`,
-      `\n- Error: ${error}`,
-      `\n- Message: ${message}`,
-      `\n- Exception:`,
-      exception,
-    );
+    this.logger.error(message, {
+      ...errorResponsePayload,
+      stack: (exception as any).stack,
+    });
 
     // Sentry.captureException(exception);
 
