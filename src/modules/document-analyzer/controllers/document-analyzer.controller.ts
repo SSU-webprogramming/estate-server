@@ -20,24 +20,24 @@ import {
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
 
-@ApiTags('문서 분석기')
-@Controller('document-analyzer')
+@ApiTags('Analyses')
+@Controller('analyses')
 export class DocumentAnalyzerController {
   constructor(
     private readonly documentAnalyzerService: DocumentAnalyzerService,
   ) {}
 
-  @Post('upload')
+  @Post()
   @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: '분석을 위해 PDF 또는 JPG 문서 업로드' })
+  @ApiOperation({ summary: 'Upload a document (PDF or JPG) for analysis' })
   @ApiResponse({
     status: 200,
-    description: '문서가 성공적으로 분석되었습니다.',
+    description: 'The document was successfully analyzed.',
     type: String,
   })
   @ApiResponse({
     status: 400,
-    description: '잘못된 요청 또는 지원하지 않는 파일 형식입니다.',
+    description: 'Bad request or unsupported file type.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -51,7 +51,7 @@ export class DocumentAnalyzerController {
       },
     },
   })
-  async uploadFile(
+  async analyzeDocument(
     @UploadedFile(
       new ParseFilePipe({
         validators: [
