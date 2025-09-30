@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Document } from '../../document/entities/document.entity';
 
 @Entity()
 export class User {
@@ -28,4 +29,7 @@ export class User {
 
   @Column({ select: false, nullable: true })
   refreshToken?: string;
+
+  @OneToMany(() => Document, (document) => document.user)
+  documents: Document[];
 }

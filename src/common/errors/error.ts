@@ -19,6 +19,9 @@ export enum ErrorCode {
   GEMINI_API_KEY_INVALID = 'A004',
   GEMINI_API_REQUEST_FAILED = 'A005',
   GPT_API_REQUEST_FAILED = 'A006',
+  GPT_API_KEY_INVALID = 'A007',
+  GEMINI_MODEL_NAME_INVALID = 'A008',
+  GPT_MODEL_NAME_INVALID = 'A009',
 
   // Auth
   TOKEN_NOT_FOUND = 'AUTH001',
@@ -64,6 +67,18 @@ export const ErrorDictionary: Record<
   [ErrorCode.GEMINI_API_KEY_INVALID]: {
     status: HttpStatus.BAD_REQUEST,
     message: '잘못된 Gemini API 키입니다. .env 파일을 확인하세요.',
+  },
+  [ErrorCode.GPT_API_KEY_INVALID]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '잘못된 GPT API 키입니다. .env 파일을 확인하세요.',
+  },
+  [ErrorCode.GEMINI_MODEL_NAME_INVALID]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '잘못된 Gemini 모델 이름입니다. .env 파일을 확인하세요.',
+  },
+  [ErrorCode.GPT_MODEL_NAME_INVALID]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '잘못된 GPT 모델 이름입니다. .env 파일을 확인하세요.',
   },
   [ErrorCode.GEMINI_API_REQUEST_FAILED]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,

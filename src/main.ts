@@ -24,8 +24,7 @@ async function bootstrap() {
     .setTitle('SSU 고급웹프로그래밍 부동산 프로젝트(가제) 서버')
     .setDescription('SSU 고급웹프로그래밍 부동산 프로젝트(가제) 서버 api 문서')
     .setVersion('1.0')
-    .addTag('사용자')
-    .addTag('문서 분석기')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);

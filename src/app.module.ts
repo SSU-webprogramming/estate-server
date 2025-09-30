@@ -18,6 +18,7 @@ import { UserModule } from './modules/user/user.module';
 import { DocumentAnalyzerModule } from './modules/document-analyzer/document-analyzer.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
+import { DocumentModule } from './modules/document/document.module';
 
 // Config
 import { getTypeOrmConfig } from './config/typeorm.config';
@@ -37,6 +38,7 @@ import { getTypeOrmConfig } from './config/typeorm.config';
     UserModule,
     DocumentAnalyzerModule,
     AuthModule,
+    DocumentModule,
   ],
   providers: [
     {
