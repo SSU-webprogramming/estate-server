@@ -1,34 +1,48 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from '../../user/services/user.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService,
   ) {}
 
-  async validateUser(
+  async validateAndSaveUser(
     provider: string,
     providerId: string,
     username: string,
     email: string,
+    birthdate: string,
+    gender: string,
+    accessToken: string,
+    refreshToken: string,
   ): Promise<User> {
-    let user = await this.userService.findByProvider(provider, providerId);
+    let user = await this.userRepository.findOne({ where: { provider, providerId } });
 
-    if (!user) {
-      const newUser = this.userService.userRepository.create({
+    if (user) {
+      // Update tokens for existing user
+      user.accessToken = accessToken;
+      user.refreshToken = refreshToken;
+    } else {
+      // Create new user with tokens
+      user = this.userRepository.create({
         provider,
         providerId,
         username,
         email,
+        birthdate,
+        gender,
+        accessToken,
+        refreshToken,
       });
-      user = await this.userService.userRepository.save(newUser);
     }
 
-    return user;
+    return this.userRepository.save(user);
   }
 
   async login(user: User) {

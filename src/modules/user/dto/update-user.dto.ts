@@ -1,5 +1,10 @@
-import { IsString, IsEmail, MinLength, IsOptional } from 'class-validator';
+import { IsString, MinLength, IsOptional, IsEmail, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+
+enum Gender {
+  MALE = 'male',
+  FEMALE = 'female',
+}
 
 export class UpdateUserDto {
   @ApiProperty({ description: '사용자 이름', minLength: 3, required: false })
@@ -8,14 +13,18 @@ export class UpdateUserDto {
   @MinLength(3)
   username?: string;
 
-  @ApiProperty({ description: '이메일 주소', required: false })
+  @ApiProperty({ description: '이메일', required: false })
   @IsOptional()
   @IsEmail()
   email?: string;
 
-  @ApiProperty({ description: '비밀번호', minLength: 6, required: false })
+  @ApiProperty({ description: '생년월일 (MMDD)', required: false })
   @IsOptional()
   @IsString()
-  @MinLength(6)
-  password?: string;
+  birthdate?: string;
+
+  @ApiProperty({ description: '성별', enum: Gender, required: false })
+  @IsOptional()
+  @IsEnum(Gender)
+  gender?: Gender;
 }

@@ -27,22 +27,23 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any, done: any) {
-    // For debugging purposes, you can log the profile object
-    console.log('Kakao Profile:', JSON.stringify(profile, null, 2));
-
     const { id, username, _json } = profile;
-    const email = _json?.kakao_account?.email; // Safely access email
+    const email = _json?.kakao_account?.email;
+    const birthday = _json?.kakao_account?.birthday;
+    const gender = _json?.kakao_account?.gender;
 
     if (!id) {
-      // If for some reason ID is not present, fail the authentication
       return done(new Error('Kakao profile did not return a user ID.'), null);
     }
-
-    const user = await this.authService.validateUser(
+    const user = await this.authService.validateAndSaveUser(
       'kakao',
       id.toString(),
       username,
-      email, // email can be undefined if user did not consent
+      email,
+      birthday,
+      gender,
+      accessToken,
+      refreshToken,
     );
 
     done(null, user);

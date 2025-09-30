@@ -26,19 +26,6 @@ import { AuthGuard } from '@nestjs/passport';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  @ApiOperation({ summary: '새 사용자 생성' })
-  @ApiResponse({
-    status: 201,
-    description: '사용자가 성공적으로 생성되었습니다.',
-    type: User,
-  })
-  @ApiResponse({ status: 400, description: '잘못된 요청입니다.' })
-  @ApiBody({ type: CreateUserDto })
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.userService.create(createUserDto);
-  }
-
   @Get()
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()

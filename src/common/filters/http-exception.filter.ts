@@ -70,9 +70,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       path: request.url,
     };
 
+    const { message: _, ...payload } = errorResponsePayload;
     this.logger.error(message, {
-      ...errorResponsePayload,
+      ...payload,
       stack: (exception as any).stack,
+      context: GlobalExceptionFilter.name,
     });
 
     // Sentry.captureException(exception);
