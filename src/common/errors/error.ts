@@ -18,6 +18,7 @@ export enum ErrorCode {
   FILE_NOT_FOUND = 'A003',
   GEMINI_API_KEY_INVALID = 'A004',
   GEMINI_API_REQUEST_FAILED = 'A005',
+  GPT_API_REQUEST_FAILED = 'A006',
 
   // Auth
   TOKEN_NOT_FOUND = 'AUTH001',
@@ -68,6 +69,11 @@ export const ErrorDictionary: Record<
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message:
       'Gemini API로 문서를 분석하지 못했습니다. 서버 로그에서 자세한 내용을 확인하세요.',
+  },
+  [ErrorCode.GPT_API_REQUEST_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message:
+      'GPT API로 문서를 분석하지 못했습니다. 서버 로그에서 자세한 내용을 확인하세요.',
   },
   [ErrorCode.TOKEN_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,

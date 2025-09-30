@@ -37,7 +37,17 @@ DB_PORT=5432
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_DATABASE=webprogramming
-GEMINI_API_KEY=YOUR_GEMINI_API_KEY # Google AI Studio에서 발급
+
+# Kakao Login
+KAKAO_CLIENT_ID=KAKAO_CLIENT_ID
+KAKAO_CLIENT_SECRET=KAKAO_CLIENT_SECRET
+
+# JWT
+JWT_SECRET=YOUR_JWT_SECRET
+
+# api key 멀티모달이 되는 api
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 ```
 
 **참고:** 본인의 PostgreSQL 설정에 맞게 수정하세요.
@@ -105,9 +115,9 @@ src/
 
 ## 문서 분석기 모듈
 
-`DocumentAnalyzer` 모듈은 Gemini API로 PDF나 JPG 파일을 분석합니다.
+`DocumentAnalyzer` 모듈은 AI 공급자(Gemini 또는 ChatGPT)를 사용하여 PDF나 JPG 파일을 분석합니다. `.env` 파일의 `AI_PROVIDER` 설정에 따라 사용할 서비스가 동적으로 결정됩니다.
 
--   **`DocumentAnalyzerService` (`src/modules/document-analyzer/services/document-analyzer.service.ts`):** 업로드한 파일을 Gemini API에 보내고 분석 결과를 받아옵니다.
+-   **`DocumentAnalyzerService` (`src/modules/document-analyzer/services/document-analyzer.service.ts`):** 업로드한 파일을 설정된 AI 공급자에게 보내고 분석 결과를 받아옵니다.
 -   **`DocumentAnalyzerController` (`src/modules/document-analyzer/controllers/document-analyzer.controller.ts`):** `POST /analyses` 엔드포인트로 PDF/JPG 파일 업로드를 처리합니다. 파일 크기랑 형식을 확인한 다음 `DocumentAnalyzerService`를 호출합니다.
 
 ## 코드 품질
