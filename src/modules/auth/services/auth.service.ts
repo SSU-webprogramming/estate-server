@@ -22,7 +22,9 @@ export class AuthService {
     accessToken: string,
     refreshToken: string,
   ): Promise<User> {
-    let user = await this.userRepository.findOne({ where: { provider, providerId } });
+    let user = await this.userRepository.findOne({
+      where: { provider, providerId },
+    });
 
     if (user) {
       // Update tokens for existing user

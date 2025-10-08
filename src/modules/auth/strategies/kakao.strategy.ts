@@ -26,7 +26,12 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any, done: any) {
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: any,
+  ) {
     const { id, username, _json } = profile;
     const email = _json?.kakao_account?.email;
     const birthday = _json?.kakao_account?.birthday;

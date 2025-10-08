@@ -16,7 +16,9 @@ export class AuthController {
 
   @Get('kakao/callback')
   @UseGuards(AuthGuard('kakao'))
-  async kakaoLoginCallback(@Req() req: RequestWithUser): Promise<{ access_token: string }> {
+  async kakaoLoginCallback(
+    @Req() req: RequestWithUser,
+  ): Promise<{ access_token: string }> {
     const { user } = req;
     const token = await this.authService.login(user);
     return token;

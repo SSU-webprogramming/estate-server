@@ -1,4 +1,10 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, PutObjectCommandOutput, S3ClientConfig } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  PutObjectCommandOutput,
+  S3ClientConfig,
+} from '@aws-sdk/client-s3';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Port } from '../../../common/ports/s3.port';
@@ -13,10 +19,18 @@ export class S3Service implements S3Port {
     const endpoint = this.configService.get<string>('AWS_S3_ENDPOINT');
     const region = this.configService.get<string>('AWS_REGION');
     const accessKeyId = this.configService.get<string>('AWS_ACCESS_KEY_ID');
-    const secretAccessKey = this.configService.get<string>('AWS_SECRET_ACCESS_KEY');
+    const secretAccessKey = this.configService.get<string>(
+      'AWS_SECRET_ACCESS_KEY',
+    );
     const bucketName = this.configService.get<string>('AWS_S3_BUCKET_NAME');
 
-    if (!endpoint || !region || !accessKeyId || !secretAccessKey || !bucketName) {
+    if (
+      !endpoint ||
+      !region ||
+      !accessKeyId ||
+      !secretAccessKey ||
+      !bucketName
+    ) {
       throw new Error('Missing AWS S3 configuration in .env file');
     }
 
@@ -80,10 +94,14 @@ export class S3Service implements S3Port {
 
       // Handle other body types if necessary (e.g., Blob in browser)
       // For this server-side app, we primarily expect a Readable stream.
-      throw new InternalServerErrorException('Unsupported S3 object body type.');
+      throw new InternalServerErrorException(
+        'Unsupported S3 object body type.',
+      );
     } catch (error) {
       console.error('Error downloading file from S3:', error);
-      throw new InternalServerErrorException('Failed to download file from S3.');
+      throw new InternalServerErrorException(
+        'Failed to download file from S3.',
+      );
     }
   }
 }

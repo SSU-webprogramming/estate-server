@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
+import { ChatCompletionMessageParam } from 'openai/resources';
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
-import { TextGeneratorPort } from '../../../document-analyzer/ports/text-generator.port';
+import {
+  FileWithMimeType,
+  TextGeneratorPort,
+} from '../../../document-analyzer/ports/text-generator.port';
 import { Observable } from 'rxjs';
 
 @Injectable()
@@ -75,9 +79,29 @@ export class ChatGptService implements TextGeneratorPort {
     fileBuffer: Buffer,
     mimeType: string,
   ): Observable<string> {
+    return this.generateTextFromImagesStream(systemPrompt, userPrompt, [
+      { buffer: fileBuffer, mimeType },
+    ]);
+  }
+
+  generateTextFromImagesStream(
+    systemPrompt: string,
+    userPrompt: string,
+    files: FileWithMimeType[],
+  ): Observable<string> {
     return new Observable((subscriber) => {
-      const base64Image = fileBuffer.toString('base64');
-      const dataUrl = `data:${mimeType};base64,${base64Image}`;
+      const imageUrls = files.map((file) => {
+        const base64Image = file.buffer.toString('base64');
+        return `data:${file.mimeType};base64,${base64Image}`;
+      });
+
+      const userContent: ChatCompletionMessageParam['content'] = [
+        { type: 'text', text: userPrompt },
+        ...imageUrls.map((url) => ({
+          type: 'image_url' as const,
+          image_url: { url },
+        })),
+      ];
 
       const streamCompletion = async () => {
         try {
@@ -90,15 +114,7 @@ export class ChatGptService implements TextGeneratorPort {
               },
               {
                 role: 'user',
-                content: [
-                  { type: 'text', text: userPrompt },
-                  {
-                    type: 'image_url',
-                    image_url: {
-                      url: dataUrl,
-                    },
-                  },
-                ],
+                content: userContent,
               },
             ],
             max_tokens: 2048,
@@ -114,7 +130,9 @@ export class ChatGptService implements TextGeneratorPort {
           subscriber.complete();
         } catch (error) {
           console.error('Error streaming text from image with ChatGPT:', error);
-          subscriber.error(new CustomException(ErrorCode.GPT_API_REQUEST_FAILED));
+          subscriber.error(
+            new CustomException(ErrorCode.GPT_API_REQUEST_FAILED),
+          );
         }
       };
 

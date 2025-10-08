@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, Part } from '@google/generative-ai';
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
-import { TextGeneratorPort } from 'src/modules/document-analyzer/ports/text-generator.port';
+import {
+  FileWithMimeType,
+  TextGeneratorPort,
+} from 'src/modules/document-analyzer/ports/text-generator.port';
 import { Observable } from 'rxjs';
 
 @Injectable()
@@ -47,11 +50,7 @@ export class GeminiService implements TextGeneratorPort {
         contents: [
           {
             role: 'user',
-            parts: [
-              { text: systemPrompt },
-              { text: userPrompt },
-              imagePart,
-            ],
+            parts: [{ text: systemPrompt }, { text: userPrompt }, imagePart],
           },
         ],
       });
@@ -73,17 +72,27 @@ export class GeminiService implements TextGeneratorPort {
     fileBuffer: Buffer,
     mimeType: string,
   ): Observable<string> {
+    return this.generateTextFromImagesStream(systemPrompt, userPrompt, [
+      { buffer: fileBuffer, mimeType },
+    ]);
+  }
+
+  generateTextFromImagesStream(
+    systemPrompt: string,
+    userPrompt: string,
+    files: FileWithMimeType[],
+  ): Observable<string> {
     return new Observable((subscriber) => {
       const model = this.geminiApi.getGenerativeModel({
         model: this.geminiModelName,
       });
 
-      const imagePart = {
+      const imageParts: Part[] = files.map((file) => ({
         inlineData: {
-          data: fileBuffer.toString('base64'),
-          mimeType,
+          data: file.buffer.toString('base64'),
+          mimeType: file.mimeType,
         },
-      };
+      }));
 
       const streamResult = async () => {
         try {
@@ -94,7 +103,7 @@ export class GeminiService implements TextGeneratorPort {
                 parts: [
                   { text: systemPrompt },
                   { text: userPrompt },
-                  imagePart,
+                  ...imageParts,
                 ],
               },
             ],

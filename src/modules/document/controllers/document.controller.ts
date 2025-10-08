@@ -11,7 +11,8 @@ import {
   Req,
   Sse,
   MessageEvent,
-  Headers, Header,
+  Headers,
+  Header,
   Query,
   ParseArrayPipe,
 } from '@nestjs/common';
@@ -19,7 +20,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
 import { AuthGuard } from '@nestjs/passport';
 import type { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
-import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiConsumes,
+  ApiBody,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 
 @ApiTags('Documents')
@@ -70,11 +78,19 @@ export class DocumentController {
   @Header('Cache-Control', 'no-cache, no-transform')
   @Header('Connection', 'keep-alive')
   @Header('X-Accel-Buffering', 'no')
-  @ApiOperation({ summary: 'Analyze selected user documents and stream results' })
-  @ApiQuery({ name: 'documentIds', type: [Number], description: '분석할 문서 ID 목록 (쉼표로 구분)', required: false })
+  @ApiOperation({
+    summary: 'Analyze selected user documents and stream results',
+  })
+  @ApiQuery({
+    name: 'documentIds',
+    type: [Number],
+    description: '분석할 문서 ID 목록 (쉼표로 구분)',
+    required: false,
+  })
   analyzeDocumentsStream(
     @Req() req: RequestWithUser,
-    @Query('documentIds', new ParseArrayPipe({ items: Number, optional: true })) documentIds?: number[],
+    @Query('documentIds', new ParseArrayPipe({ items: Number, optional: true }))
+    documentIds?: number[],
   ): Observable<MessageEvent> {
     const { user } = req;
     return this.documentService.analyzeUserDocuments(user, documentIds);

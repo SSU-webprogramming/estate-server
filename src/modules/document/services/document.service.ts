@@ -6,7 +6,10 @@ import { User } from '../../user/entities/user.entity';
 import { S3Port } from '../../../common/ports/s3.port';
 import { v4 as uuidv4 } from 'uuid';
 import { Observable, Subject } from 'rxjs';
-import { TextGeneratorPort } from '../../document-analyzer/ports/text-generator.port';
+import {
+  FileWithMimeType,
+  TextGeneratorPort,
+} from '../../document-analyzer/ports/text-generator.port';
 import { SYSTEM_PROMPT } from '../../document-analyzer/prompts/system.prompt';
 
 @Injectable()
@@ -37,12 +40,18 @@ export class DocumentService {
     return this.documentRepository.save(newDocument);
   }
 
-  analyzeUserDocuments(user: User, documentIds?: Number[]): Observable<MessageEvent> {
+  analyzeUserDocuments(
+    user: User,
+    documentIds?: number[],
+  ): Observable<MessageEvent> {
     const subject = new Subject<MessageEvent>();
 
     const process = async () => {
       console.log('Analyzing user documents...');
-      const whereCondition: any = { user: { id: user.id }, status: DocumentStatus.UPLOADED };
+      const whereCondition: any = {
+        user: { id: user.id },
+        status: DocumentStatus.UPLOADED,
+      };
 
       if (documentIds && documentIds.length > 0) {
         whereCondition.id = In(documentIds);
@@ -52,81 +61,98 @@ export class DocumentService {
         where: whereCondition,
       });
 
+      if (documents.length === 0) {
+        console.log('No documents to analyze.');
+        subject.complete();
+        return;
+      }
+
       console.log(`Found ${documents.length} documents to analyze.`);
-      for (const doc of documents) {
-        try {
-          console.log(`Analyzing document ${doc.id}...`);
-          await this.documentRepository.update(doc.id, {
-            status: DocumentStatus.ANALYZING,
-          });
-          subject.next({
-            data: JSON.stringify({
-              documentId: doc.id,
-              status: 'start'
-            }),
-          } as MessageEvent);
+      const docIds = documents.map((doc) => doc.id);
 
-          const fileBuffer = await this.s3Port.download(doc.s3Path);
+      try {
+        console.log(`Analyzing documents ${docIds.join(', ')}...`);
+        await this.documentRepository.update(docIds, {
+          status: DocumentStatus.ANALYZING,
+        });
 
-          const analysisStream = this.textGeneratorPort.generateTextFromImageStream(
+        subject.next({
+          data: JSON.stringify({
+            documentIds: docIds,
+            status: 'start',
+          }),
+        } as MessageEvent);
+
+        const fileBuffers = await Promise.all(
+          documents.map((doc) =>
+            this.s3Port
+              .download(doc.s3Path)
+              .then((buffer) => ({ buffer, mimeType: doc.mimeType })),
+          ),
+        );
+
+        const analysisStream =
+          this.textGeneratorPort.generateTextFromImagesStream(
             SYSTEM_PROMPT,
-            `다음 문서를 분석하세요: ${doc.originalName}`,
-            fileBuffer,
-            doc.mimeType,
+            `다음 문서들을 분석하세요: ${documents.map((d) => d.originalName).join(', ')}`,
+            fileBuffers,
           );
 
-          let fullAnalysisResult = '';
-          await new Promise<void>((resolve, reject) => {
-            analysisStream.subscribe({
-              next: (chunk: string) => {
-                console.log(`Received chunk: ${chunk}`);
-                fullAnalysisResult += chunk;
-                subject.next({
-                  data: JSON.stringify({
-                    documentId: doc.id,
-                    status: 'analyzing',
-                    chunk: chunk,
-                  }),
-                } as MessageEvent);
-              },
-              error: (err: Error) => {
-                reject(err);
-              },
-              complete: () => {
-                resolve();
-              },
-            });
+        let fullAnalysisResult = '';
+        await new Promise<void>((resolve, reject) => {
+          analysisStream.subscribe({
+            next: (chunk: string) => {
+              console.log(`Received chunk: ${chunk}`);
+              fullAnalysisResult += chunk;
+              subject.next({
+                data: JSON.stringify({
+                  documentIds: docIds,
+                  status: 'analyzing',
+                  chunk: chunk,
+                }),
+              } as MessageEvent);
+            },
+            error: (err: Error) => {
+              reject(err);
+            },
+            complete: () => {
+              resolve();
+            },
           });
+        });
 
-          await this.documentRepository.update(doc.id, {
-            status: DocumentStatus.COMPLETED,
-            analysisResult: fullAnalysisResult,
-          });
+        await this.documentRepository.update(docIds, {
+          status: DocumentStatus.COMPLETED,
+          analysisResult: fullAnalysisResult,
+        });
 
-          console.log(`Document ${doc.id} analyzed successfully.`);
-          console.log(`Full analysis result: ${fullAnalysisResult}`);
+        console.log(`Documents ${docIds.join(', ')} analyzed successfully.`);
+        console.log(`Full analysis result: ${fullAnalysisResult}`);
 
-          subject.next({
-            data: JSON.stringify({
-              documentId: doc.id,
-              status: 'completed'
-            }),
-          } as MessageEvent);
-        } catch (error) {
-          console.error(`Failed to analyze document ${doc.id}:`, error);
-          await this.documentRepository.update(doc.id, {
-            status: DocumentStatus.FAILED,
-          });
-          subject.next({
-            data: JSON.stringify({
-              documentId: doc.id,
-              status: 'failed',
-              error: error.message,
-            }),
-          } as MessageEvent);
-        }
+        subject.next({
+          data: JSON.stringify({
+            documentIds: docIds,
+            status: 'completed',
+          }),
+        } as MessageEvent);
+      } catch (error) {
+        console.error(
+          `Failed to analyze documents ${docIds.join(', ')}:`,
+          error,
+        );
+        await this.documentRepository.update(docIds, {
+          status: DocumentStatus.FAILED,
+        });
+        subject.next({
+          data: JSON.stringify({
+            documentIds: docIds,
+            status: 'failed',
+            error: error.message,
+          }),
+        } as MessageEvent);
+      } finally {
+        subject.complete();
       }
-      subject.complete();
     };
 
     process();

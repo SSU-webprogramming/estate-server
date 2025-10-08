@@ -1,5 +1,10 @@
 import { Observable } from 'rxjs';
 
+export interface FileWithMimeType {
+  buffer: Buffer;
+  mimeType: string;
+}
+
 export abstract class TextGeneratorPort {
   abstract generateTextFromImage(
     systemPrompt: string,
@@ -13,5 +18,11 @@ export abstract class TextGeneratorPort {
     userPrompt: string,
     fileBuffer: Buffer,
     mimeType: string,
+  ): Observable<string>;
+
+  abstract generateTextFromImagesStream(
+    systemPrompt: string,
+    userPrompt: string,
+    files: FileWithMimeType[],
   ): Observable<string>;
 }

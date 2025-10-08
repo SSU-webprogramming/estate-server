@@ -1,4 +1,10 @@
-import { IsString, MinLength, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsString,
+  MinLength,
+  IsEmail,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 enum Gender {
