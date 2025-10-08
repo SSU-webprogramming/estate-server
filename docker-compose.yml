@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   db:
     image: postgres:13
@@ -14,14 +15,34 @@ services:
   minio:
     image: minio/minio:latest
     ports:
-      - "9000:9000"  # API port
-      - "9001:9001"  # Console port
+      - "9000:9000"
+      - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin # .env 파일의 AWS_ACCESS_KEY_ID와 동일하게 설정
-      MINIO_ROOT_PASSWORD: minioadmin # .env 파일의 AWS_SECRET_ACCESS_KEY와 동일하게 설정
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     volumes:
       - miniodata:/data
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s # 점검 간격을 짧게 조정
+      timeout: 5s
+      retries: 5
+
+  # documents 버킷을 생성하고 바로 종료되는 서비스
+  create-buckets:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc ls local/documents || /usr/bin/mc mb local/documents;
+      /usr/bin/mc policy set download local/documents;
+      exit 0;
+      "
+    restart: 'no'
 
 volumes:
   pgdata:
