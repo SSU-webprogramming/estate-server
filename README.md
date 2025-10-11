@@ -26,14 +26,20 @@ NestJS로 만든 샘플 애플리케이션입니다. Controller, Service, Reposi
 
 ## 환경 설정
 
+```
+nvm use 22
+```
+
 ### 환경 변수
+
+
 
 프로젝트 루트에 `.env` 파일을 작성 후 실행:
 
 ```env
 # --- Database
 DB_HOST=localhost
-DB_PORT=5432
+DB_PORT=54322
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_DATABASE=webprogramming
