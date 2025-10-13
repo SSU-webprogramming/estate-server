@@ -5,6 +5,9 @@ import { Repository } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 import { RedisService } from '../../redis/redis.service';
 import { ConfigService } from '@nestjs/config';
+import { CustomException } from '../../../common/errors/custom-exception';
+import { ErrorCode } from '../../../common/errors/error';
+import { RefreshTokenDto } from '../dto/refresh-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -62,5 +65,33 @@ export class AuthService {
       access_token: accessToken,
       refresh_token: refreshToken,
     };
+  }
+
+  async refreshTokens(refreshTokenDto: RefreshTokenDto): Promise<{ access_token: string; refresh_token: string }> {
+    // Refresh token 검증
+    const payload = this.jwtService.verify(refreshTokenDto.refresh_token, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+    });
+
+    // Redis에서 저장된 refresh token과 비교 (선택사항)
+    const storedToken = await this.redisService.get(`refresh_token:${payload.sub}`);
+    if (storedToken !== refreshTokenDto.refresh_token) {
+      throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN)
+    }
+
+    // 사용자 존재 확인
+    const user = await this.userRepository.findOne({
+      where: { id: payload.sub },
+    });
+
+    if (!user) {
+      throw new CustomException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    // 이전 refresh token 삭제
+    await this.redisService.del(`refresh_token:${user.id}`);
+
+    // 새로운 토큰 발급
+    return await this.login(user);
   }
 }

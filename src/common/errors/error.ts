@@ -26,6 +26,7 @@ export enum ErrorCode {
   // Auth
   TOKEN_NOT_FOUND = 'AUTH001',
   KAKAO_VAL_NOT_FOUND = 'AUTH002',
+  INVALID_REFRESH_TOKEN = 'AUTH003',
 }
 
 export const ErrorDictionary: Record<
@@ -97,5 +98,9 @@ export const ErrorDictionary: Record<
   [ErrorCode.KAKAO_VAL_NOT_FOUND]: {
     status: HttpStatus.BAD_REQUEST,
     message: '카카오 환경변수가 설정되지 않았습니다.',
+  },
+  [ErrorCode.INVALID_REFRESH_TOKEN]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '올바르지 않은 리프레시 토큰입니다.',
   },
 };
