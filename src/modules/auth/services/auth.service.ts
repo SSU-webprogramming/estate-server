@@ -73,7 +73,7 @@ export class AuthService {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
 
-    // Redis에서 저장된 refresh token과 비교 (선택사항)
+    // Redis에서 저장된 refresh token과 비교
     const storedToken = await this.redisService.get(`refresh_token:${payload.sub}`);
     if (storedToken !== refreshTokenDto.refresh_token) {
       throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN)
@@ -93,5 +93,19 @@ export class AuthService {
 
     // 새로운 토큰 발급
     return await this.login(user);
+  }
+
+  async logout(userId: number) {
+    // 사용자 존재 확인
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new CustomException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    // 이전 refresh token 삭제
+    await this.redisService.del(`refresh_token:${user.id}`);
   }
 }
