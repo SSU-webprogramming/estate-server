@@ -15,7 +15,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiConsumes,
-  ApiBody,
+  ApiBody, ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
@@ -31,6 +31,7 @@ export class DocumentAnalyzerController {
   @Post()
   @UseInterceptors(FileInterceptor('file') as any)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Upload a document (PDF or JPG) for analysis' })
   @ApiResponse({
     status: 200,

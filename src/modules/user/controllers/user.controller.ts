@@ -40,6 +40,7 @@ export class UserController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'ID로 사용자 조회' })
   @ApiResponse({
     status: 200,
@@ -53,6 +54,7 @@ export class UserController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'ID로 사용자 업데이트' })
   @ApiResponse({
     status: 200,
@@ -70,6 +72,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'ID로 사용자 삭제' })
   @ApiResponse({
     status: 204,

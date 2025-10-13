@@ -4,6 +4,7 @@ import type { RequestWithUser } from '../interfaces/request-with-user.interface'
 import { KakaoAuthGuard } from '../guards/kakao-auth.guard';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -31,6 +32,7 @@ export class AuthController {
 
   @Delete('logout')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   async logout(@Req() req: RequestWithUser): Promise<{ message: string }> {
     await this.authService.logout(req.user.id);
     return { message: 'Logged out successfully' };
