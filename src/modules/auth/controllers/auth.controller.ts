@@ -1,26 +1,23 @@
 import { Controller, Get, UseGuards, Req, Res } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../services/auth.service';
-import type { Response } from 'express';
 import type { RequestWithUser } from '../interfaces/request-with-user.interface';
-
+import { KakaoAuthGuard } from '../guards/kakao-auth.guard';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('kakao')
-  @UseGuards(AuthGuard('kakao'))
+  @UseGuards(KakaoAuthGuard)
   kakaoLogin() {
     // This endpoint will trigger the Kakao login flow
   }
 
   @Get('kakao/callback')
-  @UseGuards(AuthGuard('kakao'))
+  @UseGuards(KakaoAuthGuard)
   async kakaoLoginCallback(
     @Req() req: RequestWithUser,
-  ): Promise<{ access_token: string }> {
+  ): Promise<{ access_token: string, refresh_token }> {
     const { user } = req;
-    const token = await this.authService.login(user);
-    return token;
+    return await this.authService.login(user);
   }
 }

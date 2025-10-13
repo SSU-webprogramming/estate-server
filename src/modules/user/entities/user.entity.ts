@@ -24,12 +24,6 @@ export class User {
   @Column({ nullable: true })
   gender?: string;
 
-  @Column({ select: false, nullable: true })
-  accessToken?: string;
-
-  @Column({ select: false, nullable: true })
-  refreshToken?: string;
-
   @OneToMany(() => Document, (document) => document.user)
   documents: Document[];
 }

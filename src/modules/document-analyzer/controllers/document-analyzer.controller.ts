@@ -6,7 +6,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
-  BadRequestException,
+  BadRequestException, UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentAnalyzerService } from '../services/document-analyzer.service';
@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @ApiTags('Analyses')
 @Controller('analyses')
@@ -28,7 +29,8 @@ export class DocumentAnalyzerController {
   ) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file') as any)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Upload a document (PDF or JPG) for analysis' })
   @ApiResponse({
     status: 200,

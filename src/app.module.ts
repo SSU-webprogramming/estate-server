@@ -19,14 +19,20 @@ import { DocumentAnalyzerModule } from './modules/document-analyzer/document-ana
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { DocumentModule } from './modules/document/document.module';
+import { RedisModule } from './modules/redis/redis.module';
 
 // Config
 import { getTypeOrmConfig } from './config/typeorm.config';
+import redisConfig from './config/redis.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }), // env 환경변수
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [redisConfig],
+    }),
     LoggerModule, // Winston log
+    RedisModule.register(),
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

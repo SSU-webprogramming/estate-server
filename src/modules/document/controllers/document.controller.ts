@@ -11,14 +11,12 @@ import {
   Req,
   Sse,
   MessageEvent,
-  Headers,
   Header,
   Query,
   ParseArrayPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
-import { AuthGuard } from '@nestjs/passport';
 import type { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
 import {
   ApiTags,
@@ -29,6 +27,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+
 
 @ApiTags('Documents')
 @Controller('documents')
@@ -36,9 +36,9 @@ export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file') as any)
   @ApiOperation({ summary: 'Upload a document for later analysis' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -72,7 +72,7 @@ export class DocumentController {
 
   @Get('analyze/stream')
   @Sse()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Header('Content-Type', 'text/event-stream')
   @Header('Cache-Control', 'no-cache, no-transform')

@@ -8,11 +8,14 @@ import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
 import { KakaoStrategy } from './strategies/kakao.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-
+import { RedisModule } from '../redis/redis.module';
+import { KakaoAuthGuard } from './guards/kakao-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule,
+    RedisModule.register(),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -23,6 +26,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, KakaoStrategy, JwtStrategy],
+  providers: [AuthService, KakaoStrategy, JwtStrategy, KakaoAuthGuard, JwtAuthGuard],
+  exports: [KakaoAuthGuard, JwtAuthGuard]
 })
 export class AuthModule {}

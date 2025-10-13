@@ -23,7 +23,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       clientID,
       clientSecret,
       callbackURL: '/auth/kakao/callback',
-    });
+    } as any);
   }
 
   async validate(
@@ -46,9 +46,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       username,
       email,
       birthday,
-      gender,
-      accessToken,
-      refreshToken,
+      gender
     );
 
     done(null, user);

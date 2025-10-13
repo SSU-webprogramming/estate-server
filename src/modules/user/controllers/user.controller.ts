@@ -9,7 +9,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserService } from '../services/user.service';
-import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import { User } from '../entities/user.entity';
 import {
@@ -19,7 +18,7 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 
 @ApiTags('사용자')
 @Controller('users')
@@ -27,7 +26,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: '모든 사용자 조회' })
   @ApiResponse({
@@ -40,6 +39,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'ID로 사용자 조회' })
   @ApiResponse({
     status: 200,
@@ -52,6 +52,7 @@ export class UserController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'ID로 사용자 업데이트' })
   @ApiResponse({
     status: 200,
@@ -68,6 +69,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'ID로 사용자 삭제' })
   @ApiResponse({
     status: 204,
