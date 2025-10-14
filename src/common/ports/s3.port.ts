@@ -8,4 +8,6 @@ export abstract class S3Port {
   ): Promise<PutObjectCommandOutput>;
 
   abstract download(key: string): Promise<Buffer>;
+
+  abstract downloadAsBase64(key: string): Promise<string>;
 }

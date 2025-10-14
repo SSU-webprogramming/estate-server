@@ -6,7 +6,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   FileTypeValidator,
-  BadRequestException, UseGuards,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentAnalyzerService } from '../services/document-analyzer.service';
@@ -15,7 +15,8 @@ import {
   ApiOperation,
   ApiResponse,
   ApiConsumes,
-  ApiBody, ApiBearerAuth,
+  ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';

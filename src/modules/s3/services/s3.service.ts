@@ -104,4 +104,9 @@ export class S3Service implements S3Port {
       );
     }
   }
+
+  async downloadAsBase64(key: string): Promise<string>{
+    const buffer = await this.download(key);
+    return buffer.toString('base64');
+  }
 }
