@@ -76,7 +76,10 @@ TypeORM 설정 파일은 `src/config/typeorm.config.ts`. 현재는 PostgreSQL에
 **⚠️ 운영 환경에서는  `synchronize: false`로 사용.**
 
 ## 실행 방법
-
+0. local 환경 세팅: 
+   ```bash
+   npm run docker:up
+   ```
 1.  **PostgreSQL 확인:** `.env`에 설정한 내용대로 PostgreSQL이 켜져있는지 확인하세요.
 
 2.  **개발 모드 실행**
