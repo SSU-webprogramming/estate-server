@@ -57,7 +57,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async logout(@Req() req: RequestWithUser): Promise<{ message: string }> {
-    await this.authService.logout(req.user.id);
+    await this.authService.logout(req.user.userId);
     return { message: 'Logged out successfully' };
   }
 }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Document } from './entities/document.entity';
+import { Estate } from '../estate/entities/estate.entity';
 import { DocumentService } from './services/document.service';
 import { DocumentController } from './controllers/document.controller';
 import { S3Module } from '../s3/s3.module';
@@ -9,7 +10,7 @@ import { OcrModule } from '../ocr/ocr.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Document]),
+    TypeOrmModule.forFeature([Document, Estate]),
     S3Module,
     AiProviderModule,
     OcrModule,

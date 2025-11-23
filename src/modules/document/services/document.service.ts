@@ -1,8 +1,8 @@
 import { Injectable, MessageEvent } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { Document, DocumentStatus } from '../entities/document.entity';
-import { User } from '../../user/entities/user.entity';
+import { Document, DocumentType } from '../entities/document.entity';
+import { Estate } from '../../estate/entities/estate.entity';
 import { S3Port } from '../../../common/ports/s3.port';
 import { OcrPort } from '../../../common/ports/ocr.port';
 import { v4 as uuidV4 } from 'uuid';
@@ -25,6 +25,8 @@ export class DocumentService {
   constructor(
     @InjectRepository(Document)
     private readonly documentRepository: Repository<Document>,
+    @InjectRepository(Estate)
+    private readonly estateRepository: Repository<Estate>,
     private readonly s3Port: S3Port,
     private readonly textGeneratorPort: TextGeneratorPort,
     private readonly ocrPort: OcrPort,
@@ -32,23 +34,36 @@ export class DocumentService {
 
   /**
    * 파일 업로드
-   * @param user 사용자 정보
+   * @param estateId 부동산 ID
    * @param file 업로드할 파일
+   * @param docType 문서 타입
    */
   async uploadAndCreateDocument(
-    user: User,
+    estateId: string,
     file: Express.Multer.File,
+    docType: DocumentType = DocumentType.REGISTRY,
   ): Promise<Document> {
-    const key = `${user.id}/${uuidV4()}-${file.originalname}`;
+    const estate = await this.estateRepository.findOne({
+      where: { estateId },
+    });
+
+    if (!estate) {
+      throw new Error(`Estate with id ${estateId} not found`);
+    }
+
+    const docId = uuidV4();
+    const key = `${estateId}/${docId}-${file.originalname}`;
 
     await this.s3Port.upload(file.buffer, key, file.mimetype);
 
     const newDocument = this.documentRepository.create({
-      user,
+      docId,
+      estateId,
+      estate,
+      docType,
       originalName: file.originalname,
-      mimeType: file.mimetype,
-      s3Path: key,
-      status: DocumentStatus.UPLOADED,
+      s3Key: key,
+      contentType: file.mimetype,
     });
 
     return this.documentRepository.save(newDocument);
@@ -56,16 +71,16 @@ export class DocumentService {
 
   /**
    * 올린 파일들을 분석하는 메서드
-   * @param user 사용자 정보
+   * @param estateId 부동산 ID
    * @param documentIds 파일 아이디 목록
    */
-  analyzeUserDocuments(
-    user: User,
-    documentIds?: number[],
+  analyzeEstateDocuments(
+    estateId: string,
+    documentIds?: string[],
   ): Observable<MessageEvent> {
     const subject = new Subject<MessageEvent>();
 
-    this.processDocumentAnalysis(user, documentIds, subject).catch((error) => {
+    this.processDocumentAnalysis(estateId, documentIds, subject).catch((error) => {
       console.error('Unexpected error in document analysis:', error);
       subject.error(error);
     });
@@ -77,12 +92,12 @@ export class DocumentService {
    * 문서 분석 프로세스 실행
    */
   private async processDocumentAnalysis(
-    user: User,
-    documentIds: number[] | undefined,
+    estateId: string,
+    documentIds: string[] | undefined,
     subject: Subject<MessageEvent>,
   ): Promise<void> {
     try {
-      const documents = await this.findDocumentsToAnalyze(user.id, documentIds);
+      const documents = await this.findDocumentsToAnalyze(estateId, documentIds);
 
       if (documents.length === 0) {
         console.log('No documents to analyze.');
@@ -91,9 +106,8 @@ export class DocumentService {
       }
 
       console.log(`Found ${documents.length} documents to analyze.`);
-      const docIds = documents.map((doc) => doc.id);
+      const docIds = documents.map((doc) => doc.docId);
 
-      await this.updateDocumentStatus(docIds, DocumentStatus.ANALYZING);
       this.emitStatusEvent(subject, docIds, 'start');
 
       const documentData = await this.prepareDocumentData(documents);
@@ -106,7 +120,7 @@ export class DocumentService {
         docIds,
       );
 
-      await this.saveAnalysisResult(docIds, analysisResult);
+      await this.saveAnalysisResult(documents, analysisResult);
       this.emitStatusEvent(subject, docIds, 'completed');
 
       console.log(`Documents ${docIds.join(', ')} analyzed successfully.`);
@@ -121,29 +135,18 @@ export class DocumentService {
    * 분석할 문서 조회
    */
   private async findDocumentsToAnalyze(
-    userId: number,
-    documentIds?: number[],
+    estateId: string,
+    documentIds?: string[],
   ): Promise<Document[]> {
     const whereCondition: any = {
-      user: { id: userId },
-      status: DocumentStatus.UPLOADED,
+      estateId,
     };
 
     if (documentIds && documentIds.length > 0) {
-      whereCondition.id = In(documentIds);
+      whereCondition.docId = In(documentIds);
     }
 
     return this.documentRepository.find({ where: whereCondition });
-  }
-
-  /**
-   * 문서 상태 업데이트
-   */
-  private async updateDocumentStatus(
-    documentIds: number[],
-    status: DocumentStatus,
-  ): Promise<void> {
-    await this.documentRepository.update(documentIds, { status });
   }
 
   /**
@@ -154,8 +157,8 @@ export class DocumentService {
   ): Promise<DocumentData[]> {
     return Promise.all(
       documents.map(async (doc): Promise<DocumentData> => {
-        const base64 = await this.s3Port.downloadAsBase64(doc.s3Path);
-        const buffer = await this.s3Port.download(doc.s3Path);
+        const base64 = await this.s3Port.downloadAsBase64(doc.s3Key);
+        const buffer = await this.s3Port.download(doc.s3Key);
 
         const fileName = doc.originalName || 'unknown';
         const nameWithoutExt =
@@ -164,7 +167,7 @@ export class DocumentService {
         return {
           base64,
           buffer,
-          mimeType: doc.mimeType,
+          mimeType: doc.contentType || 'application/octet-stream',
           name: nameWithoutExt,
         };
       }),
@@ -200,7 +203,7 @@ export class DocumentService {
     documentData: DocumentData[],
     ocrText: string,
     subject: Subject<MessageEvent>,
-    docIds: number[],
+    docIds: string[],
   ): Promise<string> {
     const fileBuffers: FileWithMimeType[] = documentData.map((data) => ({
       buffer: data.buffer,
@@ -231,7 +234,7 @@ export class DocumentService {
   private async streamAnalysisResult(
     analysisStream: Observable<string>,
     subject: Subject<MessageEvent>,
-    docIds: number[],
+    docIds: string[],
   ): Promise<string> {
     let fullAnalysisResult = '';
 
@@ -253,13 +256,14 @@ export class DocumentService {
    * 분석 결과 저장
    */
   private async saveAnalysisResult(
-    documentIds: number[],
+    documents: Document[],
     analysisResult: string,
   ): Promise<void> {
-    await this.documentRepository.update(documentIds, {
-      status: DocumentStatus.COMPLETED,
-      analysisResult,
-    });
+    // OCR 추출 텍스트를 문서에 저장
+    for (const doc of documents) {
+      doc.extractedText = analysisResult;
+      await this.documentRepository.save(doc);
+    }
   }
 
   /**
@@ -267,13 +271,12 @@ export class DocumentService {
    */
   private async handleAnalysisError(
     error: any,
-    documentIds: number[] | undefined,
+    documentIds: string[] | undefined,
     subject: Subject<MessageEvent>,
   ): Promise<void> {
     console.error('Failed to analyze documents:', error);
 
     if (documentIds && documentIds.length > 0) {
-      // await this.updateDocumentStatus(documentIds, DocumentStatus.FAILED);
       this.emitErrorEvent(subject, documentIds, error.message);
     }
   }
@@ -283,7 +286,7 @@ export class DocumentService {
    */
   private emitStatusEvent(
     subject: Subject<MessageEvent>,
-    documentIds: number[],
+    documentIds: string[],
     status: string,
   ): void {
     subject.next({
@@ -299,7 +302,7 @@ export class DocumentService {
    */
   private emitAnalyzingEvent(
     subject: Subject<MessageEvent>,
-    documentIds: number[],
+    documentIds: string[],
     chunk: string,
   ): void {
     subject.next({
@@ -316,7 +319,7 @@ export class DocumentService {
    */
   private emitErrorEvent(
     subject: Subject<MessageEvent>,
-    documentIds: number[],
+    documentIds: string[],
     errorMessage: string,
   ): void {
     subject.next({

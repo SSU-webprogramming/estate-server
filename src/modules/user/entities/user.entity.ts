@@ -1,29 +1,66 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Document } from '../../document/entities/document.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
+import { Estate } from '../../estate/entities/estate.entity';
 
-@Entity()
+/**
+ * OAuth ??? ??
+ */
+export enum ProviderType {
+  /** ??? */
+  KAKAO = '1',
+}
+
+/**
+ * ??? ???
+ * OAuth? ?? ?? ??? ??? ??? ??
+ */
+@Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  /** ??? ID (PK) */
+  @PrimaryGeneratedColumn({ name: 'user_id', type: 'bigint' })
+  userId: number;
 
-  @Column({ unique: true })
-  username: string;
+  /** ??? ?? (???) */
+  @Column({ type: 'varchar', length: 255, unique: true })
+  email: string;
 
-  @Column({ nullable: true })
-  provider?: string;
+  /** ???? */
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  username: string | null;
 
-  @Column({ nullable: true })
-  providerId?: string;
+  /** OAuth ??? ?? (1: ???) */
+  @Column({
+    name: 'provider_type',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+    enum: ProviderType,
+  })
+  providerType: ProviderType | null;
 
-  @Column({ unique: true, nullable: true })
-  email?: string;
+  /** OAuth ????? ??? ??? ID */
+  @Column({ name: 'provider_id', type: 'varchar', length: 255, nullable: true })
+  providerId: string | null;
 
-  @Column({ nullable: true })
-  birthdate?: string;
+  /** ??? ?? (???: 'USER') */
+  @Column({ type: 'varchar', length: 20, default: 'USER' })
+  role: string;
 
-  @Column({ nullable: true })
-  gender?: string;
+  /** ?? ?? */
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
 
-  @OneToMany(() => Document, (document) => document.user)
-  documents: Document[];
+  /** ?? ?? */
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  updatedAt: Date;
+
+  /** ???? ??? ??? ?? */
+  @OneToMany(() => Estate, (estate) => estate.user)
+  estates: Estate[];
 }

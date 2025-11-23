@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
+import { DocumentType } from '../entities/document.entity';
 import type { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
 import {
   ApiTags,
@@ -49,11 +50,32 @@ export class DocumentController {
           type: 'string',
           format: 'binary',
         },
+        estateId: {
+          type: 'string',
+          description: '부동산 ID',
+        },
+        docType: {
+          type: 'string',
+          description: '문서 타입',
+        },
       },
     },
   })
+  @ApiQuery({
+    name: 'estateId',
+    type: String,
+    description: '부동산 ID',
+    required: true,
+  })
+  @ApiQuery({
+    name: 'docType',
+    type: String,
+    description: '문서 타입 (1: 등기부등본, 2: 토지대장)',
+    required: false,
+    enum: DocumentType,
+  })
   async uploadDocument(
-    @Req() req: RequestWithUser,
+    @Query('estateId') estateId: string,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -65,9 +87,20 @@ export class DocumentController {
       }),
     )
     file: Express.Multer.File,
+    @Query('docType') docType?: string,
   ) {
-    const { user } = req;
-    return this.documentService.uploadAndCreateDocument(user, file);
+    const documentType: DocumentType = docType
+      ? (docType as DocumentType)
+      : DocumentType.REGISTRY;
+    
+    // 유효한 enum 값인지 검증
+    if (docType && !Object.values(DocumentType).includes(docType as DocumentType)) {
+      throw new Error(
+        `Invalid docType: ${docType}. Valid values are: ${Object.values(DocumentType).join(', ')}`,
+      );
+    }
+
+    return this.documentService.uploadAndCreateDocument(estateId, file, documentType);
   }
 
   @Get('analyze/stream')
@@ -79,20 +112,25 @@ export class DocumentController {
   @Header('Connection', 'keep-alive')
   @Header('X-Accel-Buffering', 'no')
   @ApiOperation({
-    summary: 'Analyze selected user documents and stream results',
+    summary: 'Analyze selected estate documents and stream results',
+  })
+  @ApiQuery({
+    name: 'estateId',
+    type: String,
+    description: '부동산 ID',
+    required: true,
   })
   @ApiQuery({
     name: 'documentIds',
-    type: [Number],
+    type: [String],
     description: '분석할 문서 ID 목록 (쉼표로 구분)',
     required: false,
   })
   analyzeDocumentsStream(
-    @Req() req: RequestWithUser,
-    @Query('documentIds', new ParseArrayPipe({ items: Number, optional: true }))
-    documentIds?: number[],
+    @Query('estateId') estateId: string,
+    @Query('documentIds', new ParseArrayPipe({ items: String, optional: true }))
+    documentIds?: string[],
   ): Observable<MessageEvent> {
-    const { user } = req;
-    return this.documentService.analyzeUserDocuments(user, documentIds);
+    return this.documentService.analyzeEstateDocuments(estateId, documentIds);
   }
 }

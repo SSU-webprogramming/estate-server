@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
 import { AuthService } from '../services/auth.service';
+import { ProviderType } from '../../user/entities/user.entity';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
@@ -41,12 +42,10 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
       return done(new Error('Kakao profile did not return a user ID.'), null);
     }
     const user = await this.authService.validateAndSaveUser(
-      'kakao',
+      ProviderType.KAKAO,
       id.toString(),
       username,
       email,
-      birthday,
-      gender
     );
 
     done(null, user);
