@@ -2,6 +2,8 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  DeleteObjectCommand,
+  CopyObjectCommand,
   PutObjectCommandOutput,
   S3ClientConfig,
 } from '@aws-sdk/client-s3';
@@ -108,5 +110,34 @@ export class S3Service implements S3Port {
   async downloadAsBase64(key: string): Promise<string>{
     const buffer = await this.download(key);
     return buffer.toString('base64');
+  }
+
+  async delete(key: string): Promise<void> {
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    try {
+      await this.s3Client.send(command);
+    } catch (error) {
+      console.error('Error deleting file from S3:', error);
+      throw new InternalServerErrorException('Failed to delete file from S3.');
+    }
+  }
+
+  async copy(sourceKey: string, destinationKey: string): Promise<void> {
+    const command = new CopyObjectCommand({
+      Bucket: this.bucketName,
+      CopySource: `${this.bucketName}/${sourceKey}`,
+      Key: destinationKey,
+    });
+
+    try {
+      await this.s3Client.send(command);
+    } catch (error) {
+      console.error('Error copying file in S3:', error);
+      throw new InternalServerErrorException('Failed to copy file in S3.');
+    }
   }
 }

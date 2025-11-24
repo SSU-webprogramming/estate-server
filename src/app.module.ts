@@ -7,6 +7,7 @@ import {
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_FILTER } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 
 // Common Modules
 import { LoggerModule } from './common/logger/logger.module';
@@ -32,6 +33,7 @@ import redisConfig from './config/redis.config';
       isGlobal: true,
       load: [redisConfig],
     }),
+    ScheduleModule.forRoot(),
     LoggerModule, // Winston log
     RedisModule.register(),
 

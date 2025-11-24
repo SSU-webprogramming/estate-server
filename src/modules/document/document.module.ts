@@ -4,6 +4,7 @@ import { Document } from './entities/document.entity';
 import { Estate } from '../estate/entities/estate.entity';
 import { DocumentService } from './services/document.service';
 import { DocumentController } from './controllers/document.controller';
+import { DocumentCleanupService } from './services/document-cleanup.service';
 import { S3Module } from '../s3/s3.module';
 import { AiProviderModule } from '../ai-provider/ai-provider.module';
 import { OcrModule } from '../ocr/ocr.module';
@@ -16,6 +17,6 @@ import { OcrModule } from '../ocr/ocr.module';
     OcrModule,
   ],
   controllers: [DocumentController],
-  providers: [DocumentService],
+  providers: [DocumentService, DocumentCleanupService],
 })
 export class DocumentModule {}

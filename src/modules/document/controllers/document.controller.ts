@@ -51,22 +51,12 @@ export class DocumentController {
           type: 'string',
           format: 'binary',
         },
-        estateId: {
-          type: 'number',
-          description: '부동산 ID',
-        },
         docType: {
           type: 'string',
           description: '문서 타입',
         },
       },
     },
-  })
-  @ApiQuery({
-    name: 'estateId',
-    type: Number,
-    description: '부동산 ID',
-    required: true,
   })
   @ApiQuery({
     name: 'docType',
@@ -76,7 +66,6 @@ export class DocumentController {
     enum: DocumentType,
   })
   async uploadDocument(
-    @Query('estateId', ParseIntPipe) estateId: number,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -101,7 +90,7 @@ export class DocumentController {
       );
     }
 
-    return this.documentService.uploadAndCreateDocument(estateId, file, documentType);
+    return this.documentService.uploadAndCreateDocument(file, documentType);
   }
 
   @Get('analyze/stream')

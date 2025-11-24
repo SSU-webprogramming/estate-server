@@ -10,4 +10,8 @@ export abstract class S3Port {
   abstract download(key: string): Promise<Buffer>;
 
   abstract downloadAsBase64(key: string): Promise<string>;
+
+  abstract delete(key: string): Promise<void>;
+
+  abstract copy(sourceKey: string, destinationKey: string): Promise<void>;
 }

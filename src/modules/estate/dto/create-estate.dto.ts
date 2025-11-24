@@ -5,6 +5,8 @@ import {
   IsEnum,
   Min,
   MaxLength,
+  IsArray,
+  IsInt,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ContractType } from '../entities/contract-type.enum';
@@ -80,4 +82,15 @@ export class CreateEstateDto {
   @IsNumber()
   @Min(0)
   kbMarketPrice?: number;
+
+  @ApiProperty({
+    description: '연결할 문서 ID 목록',
+    example: [1, 2, 3],
+    type: [Number],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsInt({ each: true })
+  documentIds?: number[];
 }

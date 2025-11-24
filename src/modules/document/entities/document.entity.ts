@@ -20,7 +20,7 @@ export enum DocumentType {
 
 /**
  * 문서 엔티티
- * 부동산 관련 문서(등기부등본, 토지대장 등) 정보를 관리
+ * 부동산 관련 문서(등기부등본, 토지대장 등) 정보를 저장
  */
 @Entity('documents')
 export class Document {
@@ -29,15 +29,16 @@ export class Document {
   docId: number;
 
   /** 소속 부동산 ID (FK) */
-  @Column({ name: 'estate_id', type: 'bigint' })
-  estateId: number;
+  @Column({ name: 'estate_id', type: 'bigint', nullable: true })
+  estateId: number | null;
 
   /** 소속 부동산 정보 */
   @ManyToOne(() => Estate, (estate) => estate.documents, {
     onDelete: 'CASCADE',
+    nullable: true,
   })
   @JoinColumn({ name: 'estate_id' })
-  estate: Estate;
+  estate: Estate | null;
 
   /** 문서 타입 (1: 등기부등본, 2: 토지대장) */
   @Column({
@@ -48,7 +49,7 @@ export class Document {
   })
   docType: DocumentType;
 
-  /** 원본 파일명 */
+  /** 문서 파일명 */
   @Column({ name: 'original_name', type: 'varchar', length: 255 })
   originalName: string;
 
@@ -64,11 +65,11 @@ export class Document {
   @Column({ name: 'content_type', type: 'varchar', length: 100, nullable: true })
   contentType: string | null;
 
-  /** 정렬 순서 (기본값: 0) */
+  /** 문서 순서 (기본값: 0) */
   @Column({ name: 'sort_order', type: 'int', default: 0 })
   sortOrder: number;
 
-  /** OCR로 추출된 텍스트 */
+  /** OCR로 추출한 텍스트 */
   @Column({ name: 'extracted_text', type: 'text', nullable: true })
   extractedText: string | null;
 

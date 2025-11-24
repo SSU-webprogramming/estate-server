@@ -34,34 +34,24 @@ export class DocumentService {
 
   /**
    * 파일 업로드
-   * @param estateId 부동산 ID
    * @param file 업로드할 파일
    * @param docType 문서 타입
    */
   async uploadAndCreateDocument(
-    estateId: number,
     file: Express.Multer.File,
     docType: DocumentType = DocumentType.REGISTRY,
   ): Promise<Document> {
-    const estate = await this.estateRepository.findOne({
-      where: { estateId },
-    });
-
-    if (!estate) {
-      throw new Error(`Estate with id ${estateId} not found`);
-    }
-
     // S3 키 생성을 위한 UUID 생성
     const fileUuid = uuidV4();
-    const key = `${estateId}/${fileUuid}-${file.originalname}`;
+    const key = `temp/${fileUuid}-${file.originalname}`;
 
     // S3에 파일 업로드
     await this.s3Port.upload(file.buffer, key, file.mimetype);
 
-    // 문서 엔티티 생성 및 저장
+    // 문서 엔티티 생성 및 저장 (estateId 없이)
     const newDocument = this.documentRepository.create({
-      estateId,
-      estate,
+      estateId: null,
+      estate: null,
       docType,
       originalName: file.originalname,
       s3Key: key,
