@@ -31,17 +31,13 @@ export class Estate {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  /** 도로명 주소 */
-  @Column({ name: 'address_road', type: 'varchar', length: 255, nullable: true })
-  addressRoad: string | null;
+  /** 주소 */
+  @Column({ name: 'address', type: 'varchar', length: 255, nullable: true })
+  address: string | null;
 
   /** 상세 주소 */
   @Column({ name: 'address_detail', type: 'varchar', length: 100, nullable: true })
   addressDetail: string | null;
-
-  /** 건물 타입 */
-  @Column({ name: 'building_type', type: 'varchar', length: 50, nullable: true })
-  buildingType: string | null;
 
   /** 계약 타입 (전세, 월세, 매매 등) */
   @Column({ name: 'contract_type', type: 'varchar', length: 20, nullable: true })
