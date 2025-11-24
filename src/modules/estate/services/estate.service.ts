@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Estate } from '../entities/estate.entity';
+import { CreateEstateDto } from '../dto/create-estate.dto';
 import { v4 as uuidV4 } from 'uuid';
 
 @Injectable()
@@ -11,10 +12,25 @@ export class EstateService {
     private readonly estateRepository: Repository<Estate>,
   ) {}
 
-  async create(estateData: Partial<Estate>): Promise<Estate> {
+  /**
+   * 부동산 정보를 생성합니다.
+   * @param userId 사용자 ID
+   * @param createEstateDto 부동산 생성 DTO
+   * @returns 생성된 부동산 엔티티
+   */
+  async create(
+    userId: number,
+    createEstateDto: CreateEstateDto,
+  ): Promise<Estate> {
     const estate = this.estateRepository.create({
       estateId: uuidV4(),
-      ...estateData,
+      userId,
+      address: createEstateDto.address ?? null,
+      addressDetail: createEstateDto.addressDetail ?? null,
+      contractType: createEstateDto.contractType ?? null,
+      deposit: createEstateDto.deposit ?? 0,
+      monthlyRent: createEstateDto.monthlyRent ?? 0,
+      kbMarketPrice: createEstateDto.kbMarketPrice ?? 0
     });
     return this.estateRepository.save(estate);
   }

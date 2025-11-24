@@ -11,6 +11,7 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { AnalysisResult } from '../../analysis-result/entities/analysis-result.entity';
 import { Document } from '../../document/entities/document.entity';
+import { ContractType } from './contract-type.enum';
 
 /**
  * 부동산 엔티티
@@ -39,9 +40,15 @@ export class Estate {
   @Column({ name: 'address_detail', type: 'varchar', length: 100, nullable: true })
   addressDetail: string | null;
 
-  /** 계약 타입 (전세, 월세, 매매 등) */
-  @Column({ name: 'contract_type', type: 'varchar', length: 20, nullable: true })
-  contractType: string | null;
+  /** 계약 타입 (전세, 월세 등) */
+  @Column({
+    name: 'contract_type',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+    enum: ContractType,
+  })
+  contractType: ContractType | null;
 
   /** 보증금 (기본값: 0) */
   @Column({ type: 'bigint', default: 0 })

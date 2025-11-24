@@ -19,6 +19,7 @@ import { DocumentAnalyzerModule } from './modules/document-analyzer/document-ana
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { DocumentModule } from './modules/document/document.module';
+import { EstateModule } from './modules/estate/estate.module';
 import { RedisModule } from './modules/redis/redis.module';
 
 // Config
@@ -45,6 +46,7 @@ import redisConfig from './config/redis.config';
     DocumentAnalyzerModule,
     AuthModule,
     DocumentModule,
+    EstateModule,
   ],
   providers: [
     {
