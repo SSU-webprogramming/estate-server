@@ -1,6 +1,6 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   ManyToOne,
@@ -24,13 +24,13 @@ export enum DocumentType {
  */
 @Entity('documents')
 export class Document {
-  /** 문서 ID (PK, UUID) */
-  @PrimaryColumn({ name: 'doc_id', type: 'varchar', length: 36 })
-  docId: string;
+  /** 문서 ID (PK) */
+  @PrimaryGeneratedColumn({ name: 'doc_id', type: 'bigint' })
+  docId: number;
 
   /** 소속 부동산 ID (FK) */
-  @Column({ name: 'estate_id', type: 'varchar', length: 36 })
-  estateId: string;
+  @Column({ name: 'estate_id', type: 'bigint' })
+  estateId: number;
 
   /** 소속 부동산 정보 */
   @ManyToOne(() => Estate, (estate) => estate.documents, {

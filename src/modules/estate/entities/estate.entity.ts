@@ -1,6 +1,6 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
@@ -19,9 +19,9 @@ import { ContractType } from './contract-type.enum';
  */
 @Entity('estates')
 export class Estate {
-  /** 부동산 ID (PK, UUID) */
-  @PrimaryColumn({ name: 'estate_id', type: 'varchar', length: 36 })
-  estateId: string;
+  /** 부동산 ID (PK) */
+  @PrimaryGeneratedColumn({ name: 'estate_id', type: 'bigint' })
+  estateId: number;
 
   /** 소유자 사용자 ID (FK) */
   @Column({ name: 'user_id', type: 'bigint' })
@@ -61,10 +61,6 @@ export class Estate {
   /** KB 시세 (기본값: 0) */
   @Column({ name: 'kb_market_price', type: 'bigint', default: 0 })
   kbMarketPrice: number;
-
-  /** 부동산 상태 (기본값: 'PENDING') */
-  @Column({ type: 'varchar', length: 20, default: 'PENDING' })
-  status: string;
 
   /** 생성 일시 */
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

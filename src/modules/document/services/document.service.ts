@@ -39,7 +39,7 @@ export class DocumentService {
    * @param docType 문서 타입
    */
   async uploadAndCreateDocument(
-    estateId: string,
+    estateId: number,
     file: Express.Multer.File,
     docType: DocumentType = DocumentType.REGISTRY,
   ): Promise<Document> {
@@ -51,13 +51,15 @@ export class DocumentService {
       throw new Error(`Estate with id ${estateId} not found`);
     }
 
-    const docId = uuidV4();
-    const key = `${estateId}/${docId}-${file.originalname}`;
+    // S3 키 생성을 위한 UUID 생성
+    const fileUuid = uuidV4();
+    const key = `${estateId}/${fileUuid}-${file.originalname}`;
 
+    // S3에 파일 업로드
     await this.s3Port.upload(file.buffer, key, file.mimetype);
 
+    // 문서 엔티티 생성 및 저장
     const newDocument = this.documentRepository.create({
-      docId,
       estateId,
       estate,
       docType,
@@ -66,7 +68,9 @@ export class DocumentService {
       contentType: file.mimetype,
     });
 
-    return this.documentRepository.save(newDocument);
+    const savedDocument = await this.documentRepository.save(newDocument);
+
+    return savedDocument;
   }
 
   /**
@@ -75,8 +79,8 @@ export class DocumentService {
    * @param documentIds 파일 아이디 목록
    */
   analyzeEstateDocuments(
-    estateId: string,
-    documentIds?: string[],
+    estateId: number,
+    documentIds?: number[],
   ): Observable<MessageEvent> {
     const subject = new Subject<MessageEvent>();
 
@@ -92,8 +96,8 @@ export class DocumentService {
    * 문서 분석 프로세스 실행
    */
   private async processDocumentAnalysis(
-    estateId: string,
-    documentIds: string[] | undefined,
+    estateId: number,
+    documentIds: number[] | undefined,
     subject: Subject<MessageEvent>,
   ): Promise<void> {
     try {
@@ -135,8 +139,8 @@ export class DocumentService {
    * 분석할 문서 조회
    */
   private async findDocumentsToAnalyze(
-    estateId: string,
-    documentIds?: string[],
+    estateId: number,
+    documentIds?: number[],
   ): Promise<Document[]> {
     const whereCondition: any = {
       estateId,
@@ -203,7 +207,7 @@ export class DocumentService {
     documentData: DocumentData[],
     ocrText: string,
     subject: Subject<MessageEvent>,
-    docIds: string[],
+    docIds: number[],
   ): Promise<string> {
     const fileBuffers: FileWithMimeType[] = documentData.map((data) => ({
       buffer: data.buffer,
@@ -234,7 +238,7 @@ export class DocumentService {
   private async streamAnalysisResult(
     analysisStream: Observable<string>,
     subject: Subject<MessageEvent>,
-    docIds: string[],
+    docIds: number[],
   ): Promise<string> {
     let fullAnalysisResult = '';
 
@@ -271,7 +275,7 @@ export class DocumentService {
    */
   private async handleAnalysisError(
     error: any,
-    documentIds: string[] | undefined,
+    documentIds: number[] | undefined,
     subject: Subject<MessageEvent>,
   ): Promise<void> {
     console.error('Failed to analyze documents:', error);
@@ -286,7 +290,7 @@ export class DocumentService {
    */
   private emitStatusEvent(
     subject: Subject<MessageEvent>,
-    documentIds: string[],
+    documentIds: number[],
     status: string,
   ): void {
     subject.next({
@@ -302,7 +306,7 @@ export class DocumentService {
    */
   private emitAnalyzingEvent(
     subject: Subject<MessageEvent>,
-    documentIds: string[],
+    documentIds: number[],
     chunk: string,
   ): void {
     subject.next({
@@ -319,7 +323,7 @@ export class DocumentService {
    */
   private emitErrorEvent(
     subject: Subject<MessageEvent>,
-    documentIds: string[],
+    documentIds: number[],
     errorMessage: string,
   ): void {
     subject.next({

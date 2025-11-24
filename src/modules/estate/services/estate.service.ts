@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Estate } from '../entities/estate.entity';
 import { CreateEstateDto } from '../dto/create-estate.dto';
-import { v4 as uuidV4 } from 'uuid';
 
 @Injectable()
 export class EstateService {
@@ -23,7 +22,6 @@ export class EstateService {
     createEstateDto: CreateEstateDto,
   ): Promise<Estate> {
     const estate = this.estateRepository.create({
-      estateId: uuidV4(),
       userId,
       address: createEstateDto.address ?? null,
       addressDetail: createEstateDto.addressDetail ?? null,
@@ -41,7 +39,7 @@ export class EstateService {
     });
   }
 
-  async findOne(estateId: string): Promise<Estate> {
+  async findOne(estateId: number): Promise<Estate> {
     const estate = await this.estateRepository.findOne({
       where: { estateId },
       relations: ['user', 'documents', 'analysisResults'],
@@ -59,13 +57,13 @@ export class EstateService {
     });
   }
 
-  async update(estateId: string, updateData: Partial<Estate>): Promise<Estate> {
+  async update(estateId: number, updateData: Partial<Estate>): Promise<Estate> {
     const estate = await this.findOne(estateId);
     Object.assign(estate, updateData);
     return this.estateRepository.save(estate);
   }
 
-  async remove(estateId: string): Promise<void> {
+  async remove(estateId: number): Promise<void> {
     const result = await this.estateRepository.delete(estateId);
     if (result.affected === 0) {
       throw new Error(`Estate with id ${estateId} not found`);

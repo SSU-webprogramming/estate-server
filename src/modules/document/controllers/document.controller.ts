@@ -14,6 +14,7 @@ import {
   Header,
   Query,
   ParseArrayPipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
@@ -51,7 +52,7 @@ export class DocumentController {
           format: 'binary',
         },
         estateId: {
-          type: 'string',
+          type: 'number',
           description: '부동산 ID',
         },
         docType: {
@@ -63,7 +64,7 @@ export class DocumentController {
   })
   @ApiQuery({
     name: 'estateId',
-    type: String,
+    type: Number,
     description: '부동산 ID',
     required: true,
   })
@@ -75,7 +76,7 @@ export class DocumentController {
     enum: DocumentType,
   })
   async uploadDocument(
-    @Query('estateId') estateId: string,
+    @Query('estateId', ParseIntPipe) estateId: number,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -116,20 +117,20 @@ export class DocumentController {
   })
   @ApiQuery({
     name: 'estateId',
-    type: String,
+    type: Number,
     description: '부동산 ID',
     required: true,
   })
   @ApiQuery({
     name: 'documentIds',
-    type: [String],
+    type: [Number],
     description: '분석할 문서 ID 목록 (쉼표로 구분)',
     required: false,
   })
   analyzeDocumentsStream(
-    @Query('estateId') estateId: string,
-    @Query('documentIds', new ParseArrayPipe({ items: String, optional: true }))
-    documentIds?: string[],
+    @Query('estateId', ParseIntPipe) estateId: number,
+    @Query('documentIds', new ParseArrayPipe({ items: Number, optional: true }))
+    documentIds?: number[],
   ): Observable<MessageEvent> {
     return this.documentService.analyzeEstateDocuments(estateId, documentIds);
   }

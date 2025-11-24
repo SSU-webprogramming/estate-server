@@ -14,7 +14,7 @@ export class AnalysisResultService {
   ) {}
 
   async create(
-    estateId: string,
+    estateId: number,
     analysisScore: number | null,
   ): Promise<AnalysisResult> {
     const estate = await this.estateRepository.findOne({
@@ -51,7 +51,7 @@ export class AnalysisResultService {
     return result;
   }
 
-  async findByEstateId(estateId: string): Promise<AnalysisResult[]> {
+  async findByEstateId(estateId: number): Promise<AnalysisResult[]> {
     return this.analysisResultRepository.find({
       where: { estateId },
       relations: ['estate'],
@@ -59,7 +59,7 @@ export class AnalysisResultService {
     });
   }
 
-  async findLatestByEstateId(estateId: string): Promise<AnalysisResult | null> {
+  async findLatestByEstateId(estateId: number): Promise<AnalysisResult | null> {
     return this.analysisResultRepository.findOne({
       where: { estateId },
       relations: ['estate'],

@@ -19,8 +19,8 @@ export class AnalysisResult {
   resultId: number;
 
   /** 분석 대상 부동산 ID (FK) */
-  @Column({ name: 'estate_id', type: 'varchar', length: 36 })
-  estateId: string;
+  @Column({ name: 'estate_id', type: 'bigint' })
+  estateId: number;
 
   /** 분석 대상 부동산 정보 */
   @ManyToOne(() => Estate, (estate) => estate.analysisResults, {

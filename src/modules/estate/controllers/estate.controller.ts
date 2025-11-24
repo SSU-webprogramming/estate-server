@@ -78,7 +78,6 @@ export class EstateController {
       deposit: estate.deposit,
       monthlyRent: estate.monthlyRent,
       kbMarketPrice: estate.kbMarketPrice,
-      status: estate.status,
       createdAt: estate.createdAt,
       updatedAt: estate.updatedAt,
     };

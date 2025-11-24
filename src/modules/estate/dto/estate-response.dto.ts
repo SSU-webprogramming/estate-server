@@ -6,10 +6,10 @@ import { ContractType } from '../entities/contract-type.enum';
  */
 export class EstateResponseDto {
   @ApiProperty({
-    description: '부동산 ID (UUID)',
-    example: '123e4567-e89b-12d3-a456-426614174000',
+    description: '부동산 ID',
+    example: 1,
   })
-  estateId: string;
+  estateId: number;
 
   @ApiProperty({
     description: '소유자 사용자 ID',
@@ -57,11 +57,6 @@ export class EstateResponseDto {
   })
   kbMarketPrice: number;
 
-  @ApiProperty({
-    description: '부동산 상태',
-    example: 'PENDING',
-  })
-  status: string;
 
   @ApiProperty({
     description: '생성 일시',
