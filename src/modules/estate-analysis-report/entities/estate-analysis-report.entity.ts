@@ -6,6 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Estate } from '../../estate/entities/estate.entity';
+import { AnalysisResultStatus } from './analysis-result-status.enum';
 
 /**
  * 부동산 분석 리포트 엔티티
@@ -200,6 +201,66 @@ export class EstateAnalysisReport {
     comment: '소유권 제한 여부'
   })
   hasOwnershipRestriction: boolean | null;
+
+  /** 표제부 분석 요약 */
+  @Column({ 
+    name: 'title_section_analysis_summary', 
+    type: 'text', 
+    nullable: true,
+    comment: '표제부 분석 요약'
+  })
+  titleSectionAnalysisSummary: string | null;
+
+  /** 표제부 분석 결과 */
+  @Column({ 
+    name: 'title_section_analysis_result', 
+    type: 'varchar', 
+    length: 20,
+    nullable: true,
+    enum: AnalysisResultStatus,
+    comment: '표제부 분석 결과 (안전, 주의, 위험, 확인 불가)'
+  })
+  titleSectionAnalysisResult: AnalysisResultStatus | null;
+
+  /** 갑구(소유권) 분석 요약 */
+  @Column({ 
+    name: 'ownership_section_analysis_summary', 
+    type: 'text', 
+    nullable: true,
+    comment: '갑구(소유권) 분석 요약'
+  })
+  ownershipSectionAnalysisSummary: string | null;
+
+  /** 갑구(소유권) 분석 결과 */
+  @Column({ 
+    name: 'ownership_section_analysis_result', 
+    type: 'varchar', 
+    length: 20,
+    nullable: true,
+    enum: AnalysisResultStatus,
+    comment: '갑구(소유권) 분석 결과 (안전, 주의, 위험, 확인 불가)'
+  })
+  ownershipSectionAnalysisResult: AnalysisResultStatus | null;
+
+  /** 을구(소유권 외 권리) 분석 요약 */
+  @Column({ 
+    name: 'rights_section_analysis_summary', 
+    type: 'text', 
+    nullable: true,
+    comment: '을구(소유권 외 권리) 분석 요약'
+  })
+  rightsSectionAnalysisSummary: string | null;
+
+  /** 을구(소유권 외 권리) 분석 결과 */
+  @Column({ 
+    name: 'rights_section_analysis_result', 
+    type: 'varchar', 
+    length: 20,
+    nullable: true,
+    enum: AnalysisResultStatus,
+    comment: '을구(소유권 외 권리) 분석 결과 (안전, 주의, 위험, 확인 불가)'
+  })
+  rightsSectionAnalysisResult: AnalysisResultStatus | null;
 
   /** 권리 분석 요약 */
   @Column({ 

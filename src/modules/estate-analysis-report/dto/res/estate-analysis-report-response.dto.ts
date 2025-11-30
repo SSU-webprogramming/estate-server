@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { AnalysisResultStatus } from '../../entities/analysis-result-status.enum';
 
 /**
  * 부동산 분석 리포트 응답 DTO
@@ -136,6 +137,51 @@ export class EstateAnalysisReportResponseDto {
     nullable: true,
   })
   hasOwnershipRestriction: boolean | null;
+
+  @ApiProperty({
+    description: '표제부 분석 요약',
+    example: '표제부 분석 결과, 부동산의 기본 정보가 확인되었습니다...',
+    nullable: true,
+  })
+  titleSectionAnalysisSummary: string | null;
+
+  @ApiProperty({
+    description: '표제부 분석 결과',
+    enum: AnalysisResultStatus,
+    example: AnalysisResultStatus.안전,
+    nullable: true,
+  })
+  titleSectionAnalysisResult: AnalysisResultStatus | null;
+
+  @ApiProperty({
+    description: '갑구(소유권) 분석 요약',
+    example: '갑구 분석 결과, 소유권 변동 이력이 확인되었습니다...',
+    nullable: true,
+  })
+  ownershipSectionAnalysisSummary: string | null;
+
+  @ApiProperty({
+    description: '갑구(소유권) 분석 결과',
+    enum: AnalysisResultStatus,
+    example: AnalysisResultStatus.주의,
+    nullable: true,
+  })
+  ownershipSectionAnalysisResult: AnalysisResultStatus | null;
+
+  @ApiProperty({
+    description: '을구(소유권 외 권리) 분석 요약',
+    example: '을구 분석 결과, 근저당권 설정이 확인되었습니다...',
+    nullable: true,
+  })
+  rightsSectionAnalysisSummary: string | null;
+
+  @ApiProperty({
+    description: '을구(소유권 외 권리) 분석 결과',
+    enum: AnalysisResultStatus,
+    example: AnalysisResultStatus.위험,
+    nullable: true,
+  })
+  rightsSectionAnalysisResult: AnalysisResultStatus | null;
 
   @ApiProperty({
     description: '권리 분석 요약',

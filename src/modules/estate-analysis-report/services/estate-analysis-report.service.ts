@@ -9,6 +9,7 @@ import { EstateAnalysisReport } from '../entities/estate-analysis-report.entity'
 import { CreateEstateAnalysisDto } from '../dto/req/estate-analysis-req.dto';
 import { OcrPort } from '../../../common/ports/ocr.port';
 import { S3Port } from '../../../common/ports/s3.port';
+import { AnalysisResultStatus } from '../entities/analysis-result-status.enum';
 
 @Injectable()
 export class EstateAnalysisReportService {
@@ -73,6 +74,8 @@ export class EstateAnalysisReportService {
     }
     await this.documentRepository.save(documents);
 
+
+    
     // 4. OCR 수행 및 extractedText 저장
     const documentData = await this.prepareDocumentData(documents);
     const ocrText = await this.extractTextWithOcr(documentData);
@@ -132,6 +135,12 @@ export class EstateAnalysisReportService {
       transferCause: parsedAnalysis.transferCause || null,
       pastOwnerChangeCount: parsedAnalysis.pastOwnerChangeCount || null,
       hasOwnershipRestriction: parsedAnalysis.hasOwnershipRestriction ?? null,
+      titleSectionAnalysisSummary: parsedAnalysis.titleSectionAnalysisSummary || null,
+      titleSectionAnalysisResult: this.parseAnalysisResultStatus(parsedAnalysis.titleSectionAnalysisResult),
+      ownershipSectionAnalysisSummary: parsedAnalysis.ownershipSectionAnalysisSummary || null,
+      ownershipSectionAnalysisResult: this.parseAnalysisResultStatus(parsedAnalysis.ownershipSectionAnalysisResult),
+      rightsSectionAnalysisSummary: parsedAnalysis.rightsSectionAnalysisSummary || null,
+      rightsSectionAnalysisResult: this.parseAnalysisResultStatus(parsedAnalysis.rightsSectionAnalysisResult),
       rightsAnalysisSummary: parsedAnalysis.rightsAnalysisSummary || analysisResult,
       recommendedContractClauses: parsedAnalysis.recommendedContractClauses || null,
       isInsuranceEligible: parsedAnalysis.isInsuranceEligible ?? null,
@@ -236,5 +245,34 @@ export class EstateAnalysisReportService {
     return await this.analysisReportRepository.findOne({
       where: { estateId },
     });
+  }
+
+  /**
+   * 분석 결과 상태 문자열을 enum으로 변환
+   * @param status 분석 결과 상태 문자열 (SAFE, CAUTION, DANGER, UNKNOWN)
+   * @returns AnalysisResultStatus enum 값 또는 null
+   */
+  private parseAnalysisResultStatus(status: string | undefined): AnalysisResultStatus | null {
+    if (!status) {
+      return null;
+    }
+    
+    const upperStatus = status.toUpperCase();
+    
+    // enum 값으로 직접 매칭
+    if (upperStatus === 'SAFE') {
+      return AnalysisResultStatus.안전;
+    }
+    if (upperStatus === 'CAUTION') {
+      return AnalysisResultStatus.주의;
+    }
+    if (upperStatus === 'DANGER') {
+      return AnalysisResultStatus.위험;
+    }
+    if (upperStatus === 'UNKNOWN') {
+      return AnalysisResultStatus.확인불가;
+    }
+    
+    return null;
   }
 }

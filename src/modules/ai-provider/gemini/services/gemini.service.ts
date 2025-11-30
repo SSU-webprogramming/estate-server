@@ -161,6 +161,36 @@ export class GeminiService implements TextGeneratorPort {
                 description: '소유권 제한 여부',
                 nullable: true,
               },
+              titleSectionAnalysisSummary: {
+                type: SchemaType.STRING,
+                description: '표제부 분석 요약',
+                nullable: true,
+              },
+              titleSectionAnalysisResult: {
+                type: SchemaType.STRING,
+                description: '표제부 분석 결과 (반드시 "SAFE", "CAUTION", "DANGER", "UNKNOWN" 중 하나의 값만 사용)',
+                nullable: true,
+              },
+              ownershipSectionAnalysisSummary: {
+                type: SchemaType.STRING,
+                description: '갑구(소유권) 분석 요약',
+                nullable: true,
+              },
+              ownershipSectionAnalysisResult: {
+                type: SchemaType.STRING,
+                description: '갑구(소유권) 분석 결과 (반드시 "SAFE", "CAUTION", "DANGER", "UNKNOWN" 중 하나의 값만 사용)',
+                nullable: true,
+              },
+              rightsSectionAnalysisSummary: {
+                type: SchemaType.STRING,
+                description: '을구(소유권 외 권리) 분석 요약',
+                nullable: true,
+              },
+              rightsSectionAnalysisResult: {
+                type: SchemaType.STRING,
+                description: '을구(소유권 외 권리) 분석 결과 (반드시 "SAFE", "CAUTION", "DANGER", "UNKNOWN" 중 하나의 값만 사용)',
+                nullable: true,
+              },
               rightsAnalysisSummary: {
                 type: SchemaType.STRING,
                 description: '권리 분석 요약',
@@ -168,7 +198,7 @@ export class GeminiService implements TextGeneratorPort {
               },
               recommendedContractClauses: {
                 type: SchemaType.ARRAY,
-                description: '권장 계약 조항',
+                description: '권장 계약 조항 (1개에서 3개)',
                 items: {
                   type: SchemaType.OBJECT,
                   properties: {

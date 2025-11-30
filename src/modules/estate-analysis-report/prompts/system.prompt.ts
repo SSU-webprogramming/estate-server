@@ -41,6 +41,12 @@ PDF, 이미지에 포함된 부동산 관련 문서를 분석하여
 - transferCause: 양도 사유
 - pastOwnerChangeCount: 과거 소유자 변경 횟수 (숫자)
 - hasOwnershipRestriction: 소유권 제한 여부 (boolean, 가압류/압류/가처분 등)
+- titleSectionAnalysisSummary: 표제부 분석 요약 (일반인이 이해할 수 있도록 쉬운 말로 설명, 등기부등본의 표제부 정보 분석)
+- titleSectionAnalysisResult: 표제부 분석 결과 (문자열, "SAFE", "CAUTION", "DANGER", "UNKNOWN" 중 하나. SAFE=안전, CAUTION=주의, DANGER=위험, UNKNOWN=확인 불가)
+- ownershipSectionAnalysisSummary: 갑구(소유권) 분석 요약 (일반인이 이해할 수 있도록 쉬운 말로 설명, 등기부등본의 갑구 소유권 변동 이력 분석)
+- ownershipSectionAnalysisResult: 갑구(소유권) 분석 결과 (문자열, "SAFE", "CAUTION", "DANGER", "UNKNOWN" 중 하나. SAFE=안전, CAUTION=주의, DANGER=위험, UNKNOWN=확인 불가)
+- rightsSectionAnalysisSummary: 을구(소유권 외 권리) 분석 요약 (일반인이 이해할 수 있도록 쉬운 말로 설명, 등기부등본의 을구 근저당권 등 권리 분석)
+- rightsSectionAnalysisResult: 을구(소유권 외 권리) 분석 결과 (문자열, "SAFE", "CAUTION", "DANGER", "UNKNOWN" 중 하나. SAFE=안전, CAUTION=주의, DANGER=위험, UNKNOWN=확인 불가)
 - rightsAnalysisSummary: 권리 분석 요약 (일반인이 이해할 수 있도록 쉬운 말로 설명)
 - recommendedContractClauses: 권장 계약 조항 (배열, 각 항목은 {항목: string, 내용: string} 형태)
 - isInsuranceEligible: 보험 가입 가능 여부 (boolean)
