@@ -114,7 +114,7 @@ export class EstateAnalysisReportService {
       estateId: savedEstate.estateId,
       estate: savedEstate,
       analyzedAt: new Date(),
-      safetyGrade: parsedAnalysis.safetyGrade || 'NORMAL',
+      safetyScore: parsedAnalysis.safetyScore ?? null,
       address: parsedAnalysis.address || savedEstate.address || '',
       ownershipStatus: parsedAnalysis.ownershipStatus || 'UNKNOWN',
       buildingStructure: parsedAnalysis.buildingStructure || null,

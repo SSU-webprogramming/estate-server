@@ -26,11 +26,11 @@ export class EstateAnalysisReportResponseDto {
   analyzedAt: Date | null;
 
   @ApiProperty({
-    description: '안전 등급',
-    example: 'NORMAL',
+    description: '안전 점수 (100점 만점)',
+    example: 85,
     nullable: true,
   })
-  safetyGrade: string | null;
+  safetyScore: number | null;
 
   @ApiProperty({
     description: '주소',

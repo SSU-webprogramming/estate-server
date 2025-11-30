@@ -23,7 +23,7 @@ PDF, 이미지에 포함된 부동산 관련 문서를 분석하여
 반드시 JSON 형식으로 응답해야 합니다. 다음 필드들을 포함해야 합니다:
 
 필수 필드:
-- safetyGrade: 안전 등급 (예: "SAFE", "NORMAL", "WARNING", "DANGER")
+- safetyScore: 안전 점수 (0~100 사이의 정수, 100점 만점)
 - address: 주소 (문서에서 추출한 주소)
 - ownershipStatus: 소유권 상태 (예: "CLEAR", "RESTRICTED", "DISPUTED", "UNKNOWN")
 
@@ -49,7 +49,7 @@ PDF, 이미지에 포함된 부동산 관련 문서를 분석하여
 
 [주의사항]
 - 문서에서 확인할 수 없는 정보는 null로 설정하거나 필드를 생략할 수 있습니다.
-- 안전 등급(safetyGrade)은 위험 요소를 종합적으로 평가하여 결정하세요.
+- 안전 점수(safetyScore)는 위험 요소를 종합적으로 평가하여 0~100 사이의 정수로 결정하세요. (100점이 가장 안전, 0점이 가장 위험)
 - 권리 분석 요약(rightsAnalysisSummary)에는 전문 용어를 사용할 때 괄호나 예시로 쉽게 풀이하세요.
-- 문서가 부동산과 무관한 경우, 최소한 필수 필드만 포함한 JSON을 반환하되, safetyGrade는 "UNKNOWN", ownershipStatus는 "UNKNOWN"으로 설정하고, rightsAnalysisSummary에 "이 서비스는 부동산 관련 문서(등기부등본, 건축물대장, 토지대장, 전세계약서 등)만 분석할 수 있습니다."라는 안내를 포함하세요.
+- 문서가 부동산과 무관한 경우, 최소한 필수 필드만 포함한 JSON을 반환하되, safetyScore는 0, ownershipStatus는 "UNKNOWN"으로 설정하고, rightsAnalysisSummary에 "이 서비스는 부동산 관련 문서(등기부등본, 건축물대장, 토지대장, 전세계약서 등)만 분석할 수 있습니다."라는 안내를 포함하세요.
 `;

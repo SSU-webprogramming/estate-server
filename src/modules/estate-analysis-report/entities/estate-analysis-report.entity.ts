@@ -48,14 +48,14 @@ export class EstateAnalysisReport {
   })
   analyzedAt: Date | null;
 
-  /** 안전 등급 */
+  /** 안전 점수 */
   @Column({ 
-    name: 'safety_grade', 
-    type: 'varchar', 
-    length: 20,
-    comment: '안전 등급'
+    name: 'safety_score', 
+    type: 'int', 
+    nullable: true,
+    comment: '안전 점수 (100점 만점)'
   })
-  safetyGrade: string;
+  safetyScore: number | null;
 
   /** 주소 */
   @Column({ 

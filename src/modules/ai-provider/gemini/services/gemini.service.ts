@@ -84,9 +84,9 @@ export class GeminiService implements TextGeneratorPort {
           responseSchema: {
             type: SchemaType.OBJECT,
             properties: {
-              safetyGrade: {
-                type: SchemaType.STRING,
-                description: '안전 등급',
+              safetyScore: {
+                type: SchemaType.NUMBER,
+                description: '안전 점수 (0~100 사이의 정수, 100점 만점)',
               },
               address: {
                 type: SchemaType.STRING,
@@ -205,7 +205,7 @@ export class GeminiService implements TextGeneratorPort {
                 nullable: true,
               },
             },
-            required: ['safetyGrade', 'address', 'ownershipStatus'],
+            required: ['safetyScore', 'address', 'ownershipStatus'],
           },
         },
       });
