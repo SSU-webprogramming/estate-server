@@ -10,7 +10,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { AnalysisResult } from '../../analysis-result/entities/analysis-result.entity';
+import { AnalysisResult } from '../../estate-analysis-report/entities/estate-analysis-report.entity';
 import { Document } from '../../document/entities/document.entity';
 import { ContractType } from './contract-type.enum';
 

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TextGeneratorPort } from '../document-analyzer/ports/text-generator.port';
+import { TextGeneratorPort } from '../estate-analysis-report/ports/text-generator.port';
 import { GeminiService } from './gemini/services/gemini.service';
 import { ChatGptService } from './chatgpt/services/chatgpt.service';
 

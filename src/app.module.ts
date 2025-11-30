@@ -16,7 +16,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 // Feature Modules
 import { UserModule } from './modules/user/user.module';
-import { DocumentAnalyzerModule } from './modules/document-analyzer/document-analyzer.module';
+import { EstateAnalysisReportModule } from './modules/estate-analysis-report/estate-analysis-report.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 import { DocumentModule } from './modules/document/document.module';
@@ -45,7 +45,7 @@ import redisConfig from './config/redis.config';
 
     HealthModule,
     UserModule,
-    DocumentAnalyzerModule,
+    EstateAnalysisReportModule,
     AuthModule,
     DocumentModule,
     EstateModule,

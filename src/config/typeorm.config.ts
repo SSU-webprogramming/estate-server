@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '../modules/user/entities/user.entity';
 import { Document } from '../modules/document/entities/document.entity';
 import { Estate } from '../modules/estate/entities/estate.entity';
-import { AnalysisResult } from '../modules/analysis-result/entities/analysis-result.entity';
+import { AnalysisResult } from '../modules/estate-analysis-report/entities/estate-analysis-report.entity';
 
 export const getTypeOrmConfig = async (
   configService: ConfigService,

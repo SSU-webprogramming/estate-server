@@ -10,8 +10,8 @@ import { Observable, Subject } from 'rxjs';
 import {
   FileWithMimeType,
   TextGeneratorPort,
-} from '../../document-analyzer/ports/text-generator.port';
-import { SYSTEM_PROMPT } from '../../document-analyzer/prompts/system.prompt';
+} from '../../estate-analysis-report/ports/text-generator.port';
+import { SYSTEM_PROMPT } from '../../estate-analysis-report/prompts/system.prompt';
 
 interface DocumentData {
   base64: string;

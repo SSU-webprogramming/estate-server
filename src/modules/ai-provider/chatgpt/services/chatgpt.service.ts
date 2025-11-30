@@ -7,7 +7,7 @@ import { ErrorCode } from 'src/common/errors/error';
 import {
   FileWithMimeType,
   TextGeneratorPort,
-} from '../../../document-analyzer/ports/text-generator.port';
+} from '../../../estate-analysis-report/ports/text-generator.port';
 import { Observable } from 'rxjs';
 
 @Injectable()

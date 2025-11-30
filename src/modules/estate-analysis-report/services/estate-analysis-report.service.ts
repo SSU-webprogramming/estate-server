@@ -3,7 +3,7 @@ import { TextGeneratorPort } from '../ports/text-generator.port';
 import { SYSTEM_PROMPT } from '../prompts/system.prompt';
 
 @Injectable()
-export class DocumentAnalyzerService {
+export class EstateAnalysisReportService {
   constructor(private readonly textGeneratorPort: TextGeneratorPort) {}
 
   async analyzeDocument(fileBuffer: Buffer, mimeType: string): Promise<string> {
