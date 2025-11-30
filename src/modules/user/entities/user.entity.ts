@@ -23,15 +23,31 @@ export enum ProviderType {
 @Entity('users')
 export class User {
   /** 사용자 ID (PK) */
-  @PrimaryGeneratedColumn({ name: 'user_id', type: 'bigint' })
+  @PrimaryGeneratedColumn({ 
+    name: 'user_id', 
+    type: 'bigint',
+    comment: '사용자 ID (PK)'
+  })
   userId: number;
 
   /** 이메일 주소 (고유값) */
-  @Column({ type: 'varchar', length: 255, unique: true })
+  @Column({ 
+    name: 'email',
+    type: 'varchar', 
+    length: 255, 
+    unique: true,
+    comment: '이메일 주소'
+  })
   email: string;
 
   /** 사용자명 */
-  @Column({ type: 'varchar', length: 100, nullable: true })
+  @Column({ 
+    name: 'username',
+    type: 'varchar', 
+    length: 100, 
+    nullable: true,
+    comment: '사용자명'
+  })
   username: string | null;
 
   /** OAuth 제공자 타입 (1: 카카오) */
@@ -41,23 +57,47 @@ export class User {
     length: 50,
     nullable: true,
     enum: ProviderType,
+    comment: 'OAuth 제공자 타입 (1: 카카오)'
   })
   providerType: ProviderType | null;
 
   /** OAuth 제공자에서 발급한 사용자 ID */
-  @Column({ name: 'provider_id', type: 'varchar', length: 255, nullable: true })
+  @Column({ 
+    name: 'provider_id', 
+    type: 'varchar', 
+    length: 255, 
+    nullable: true,
+    comment: 'OAuth 제공자에서 발급한 사용자 ID'
+  })
   providerId: string | null;
 
   /** 사용자 역할 (기본값: 'USER') */
-  @Column({ type: 'varchar', length: 20, default: 'USER' })
+  @Column({ 
+    name: 'role',
+    type: 'varchar', 
+    length: 20, 
+    default: 'USER',
+    comment: '사용자 역할'
+  })
   role: string;
 
   /** 생성 일시 */
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ 
+    name: 'created_at', 
+    type: 'timestamp', 
+    default: () => 'CURRENT_TIMESTAMP',
+    comment: '생성 일시'
+  })
   createdAt: Date;
 
   /** 수정 일시 */
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({ 
+    name: 'updated_at', 
+    type: 'timestamp', 
+    default: () => 'CURRENT_TIMESTAMP', 
+    onUpdate: 'CURRENT_TIMESTAMP',
+    comment: '수정 일시'
+  })
   updatedAt: Date;
 
   /** 사용자가 소유한 부동산 목록 */

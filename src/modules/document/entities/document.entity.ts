@@ -9,30 +9,39 @@ import {
 import { Estate } from '../../estate/entities/estate.entity';
 
 /**
- * ¹®¼­ Å¸ÀÔ
+ * ë¬¸ì„œ íƒ€ì…
  */
 export enum DocumentType {
-  /** µî±âºÎµîº» */
+  /** ë“±ê¸°ë¶€ë“±ë³¸ */
   REGISTRY = '1',
-  /** ÅäÁö´ëÀå */
+  /** í† ì§€ëŒ€ì¥ */
   LAND_REGISTER = '2',
 }
 
 /**
- * ¹®¼­ ¿£Æ¼Æ¼
- * ºÎµ¿»ê °ü·Ã ¹®¼­(µî±âºÎµîº», ÅäÁö´ëÀå µî) Á¤º¸¸¦ ÀúÀå
+ * ë¬¸ì„œ ì—”í‹°í‹°
+ * ë¶€ë™ì‚° ê´€ë ¨ ë¬¸ì„œ(ë“±ê¸°ë¶€ë“±ë³¸, í† ì§€ëŒ€ì¥ ë“±) ì •ë³´ë¥¼ ì €ì¥
  */
 @Entity('documents')
 export class Document {
-  /** ¹®¼­ ID (PK) */
-  @PrimaryGeneratedColumn({ name: 'doc_id', type: 'bigint' })
+  /** ë¬¸ì„œ ID (PK) */
+  @PrimaryGeneratedColumn({ 
+    name: 'doc_id', 
+    type: 'bigint',
+    comment: 'ë¬¸ì„œ ID (PK)'
+  })
   docId: number;
 
-  /** ¼Ò¼Ó ºÎµ¿»ê ID (FK) */
-  @Column({ name: 'estate_id', type: 'bigint', nullable: true })
+  /** ì†Œì† ë¶€ë™ì‚° ID (FK) */
+  @Column({ 
+    name: 'estate_id', 
+    type: 'bigint', 
+    nullable: true,
+    comment: 'ì†Œì† ë¶€ë™ì‚° ID (FK)'
+  })
   estateId: number | null;
 
-  /** ¼Ò¼Ó ºÎµ¿»ê Á¤º¸ */
+  /** ì†Œì† ë¶€ë™ì‚° ì •ë³´ */
   @ManyToOne(() => Estate, (estate) => estate.documents, {
     onDelete: 'CASCADE',
     nullable: true,
@@ -40,40 +49,78 @@ export class Document {
   @JoinColumn({ name: 'estate_id' })
   estate: Estate | null;
 
-  /** ¹®¼­ Å¸ÀÔ (1: µî±âºÎµîº», 2: ÅäÁö´ëÀå) */
+  /** ë¬¸ì„œ íƒ€ì… (1: ë“±ê¸°ë¶€ë“±ë³¸, 2: í† ì§€ëŒ€ì¥) */
   @Column({
     name: 'doc_type',
     type: 'varchar',
     length: 50,
     enum: DocumentType,
+    comment: 'ë¬¸ì„œ íƒ€ì… (1: ë“±ê¸°ë¶€ë“±ë³¸, 2: í† ì§€ëŒ€ì¥)'
   })
   docType: DocumentType;
 
-  /** ¹®¼­ ÆÄÀÏ¸í */
-  @Column({ name: 'original_name', type: 'varchar', length: 255 })
+  /** ë¬¸ì„œ íŒŒì¼ëª… */
+  @Column({ 
+    name: 'original_name', 
+    type: 'varchar', 
+    length: 255,
+    comment: 'ë¬¸ì„œ íŒŒì¼ëª…'
+  })
   originalName: string;
 
-  /** S3 ÀúÀå Å° */
-  @Column({ name: 's3_key', type: 'varchar', length: 255 })
+  /** S3 ì €ì¥ í‚¤ */
+  @Column({ 
+    name: 's3_key', 
+    type: 'varchar', 
+    length: 255,
+    comment: 'S3 ì €ì¥ í‚¤'
+  })
   s3Key: string;
 
-  /** ÆÄÀÏ URL */
-  @Column({ name: 'file_url', type: 'varchar', length: 500, nullable: true })
+  /** íŒŒì¼ URL */
+  @Column({ 
+    name: 'file_url', 
+    type: 'varchar', 
+    length: 500, 
+    nullable: true,
+    comment: 'íŒŒì¼ URL'
+  })
   fileUrl: string | null;
 
-  /** ÆÄÀÏ MIME Å¸ÀÔ */
-  @Column({ name: 'content_type', type: 'varchar', length: 100, nullable: true })
+  /** íŒŒì¼ MIME íƒ€ì… */
+  @Column({ 
+    name: 'content_type', 
+    type: 'varchar', 
+    length: 100, 
+    nullable: true,
+    comment: 'íŒŒì¼ MIME íƒ€ì…'
+  })
   contentType: string | null;
 
-  /** ¹®¼­ ¼ø¼­ (±âº»°ª: 0) */
-  @Column({ name: 'sort_order', type: 'int', default: 0 })
+  /** ë¬¸ì„œ ìˆœì„œ (ê¸°ë³¸ê°’: 0) */
+  @Column({ 
+    name: 'sort_order', 
+    type: 'int', 
+    default: 0,
+    comment: 'ë¬¸ì„œ ìˆœì„œ'
+  })
   sortOrder: number;
 
-  /** OCR·Î ÃßÃâÇÑ ÅØ½ºÆ® */
-  @Column({ name: 'extracted_text', type: 'text', nullable: true })
+  /** OCRë¡œ ì¶”ì¶œí•œ í…ìŠ¤íŠ¸ */
+  @Column({ 
+    name: 'extracted_text', 
+    type: 'text', 
+    nullable: true,
+    comment: 'OCRë¡œ ì¶”ì¶œí•œ í…ìŠ¤íŠ¸'
+  })
   extractedText: string | null;
 
-  /** ¾÷·Îµå ÀÏ½Ã */
-  @CreateDateColumn({ name: 'uploaded_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  /** ì—…ë¡œë“œ ì¼ì‹œ */
+  @CreateDateColumn({ 
+    name: 'uploaded_at', 
+    type: 'timestamp', 
+    default: () => 'CURRENT_TIMESTAMP',
+    comment: 'ì—…ë¡œë“œ ì¼ì‹œ'
+  })
   uploadedAt: Date;
 }

@@ -2,84 +2,64 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AnalysisResult } from '../entities/analysis-result.entity';
-import { Estate } from '../../estate/entities/estate.entity';
 
 @Injectable()
 export class AnalysisResultService {
   constructor(
     @InjectRepository(AnalysisResult)
     private readonly analysisResultRepository: Repository<AnalysisResult>,
-    @InjectRepository(Estate)
-    private readonly estateRepository: Repository<Estate>,
   ) {}
 
   async create(
-    estateId: number,
-    analysisScore: number | null,
+    createData: Partial<AnalysisResult>,
   ): Promise<AnalysisResult> {
-    const estate = await this.estateRepository.findOne({
-      where: { estateId },
-    });
-
-    if (!estate) {
-      throw new Error(`Estate with id ${estateId} not found`);
-    }
-
-    const analysisResult = this.analysisResultRepository.create({
-      estateId,
-      estate,
-      analysisScore,
-    });
-
+    const analysisResult = this.analysisResultRepository.create(createData);
     return this.analysisResultRepository.save(analysisResult);
   }
 
   async findAll(): Promise<AnalysisResult[]> {
     return this.analysisResultRepository.find({
-      relations: ['estate'],
-    });
-  }
-
-  async findOne(resultId: number): Promise<AnalysisResult> {
-    const result = await this.analysisResultRepository.findOne({
-      where: { resultId },
-      relations: ['estate'],
-    });
-    if (!result) {
-      throw new Error(`AnalysisResult with id ${resultId} not found`);
-    }
-    return result;
-  }
-
-  async findByEstateId(estateId: number): Promise<AnalysisResult[]> {
-    return this.analysisResultRepository.find({
-      where: { estateId },
-      relations: ['estate'],
       order: { analyzedAt: 'DESC' },
     });
   }
 
-  async findLatestByEstateId(estateId: number): Promise<AnalysisResult | null> {
+  async findOne(id: number): Promise<AnalysisResult> {
+    const result = await this.analysisResultRepository.findOne({
+      where: { id },
+    });
+    if (!result) {
+      throw new Error(`AnalysisResult with id ${id} not found`);
+    }
+    return result;
+  }
+
+  async findByAddress(address: string): Promise<AnalysisResult[]> {
+    return this.analysisResultRepository.find({
+      where: { address },
+      order: { analyzedAt: 'DESC' },
+    });
+  }
+
+  async findLatestByAddress(address: string): Promise<AnalysisResult | null> {
     return this.analysisResultRepository.findOne({
-      where: { estateId },
-      relations: ['estate'],
+      where: { address },
       order: { analyzedAt: 'DESC' },
     });
   }
 
   async update(
-    resultId: number,
+    id: number,
     updateData: Partial<AnalysisResult>,
   ): Promise<AnalysisResult> {
-    const result = await this.findOne(resultId);
+    const result = await this.findOne(id);
     Object.assign(result, updateData);
     return this.analysisResultRepository.save(result);
   }
 
-  async remove(resultId: number): Promise<void> {
-    const result = await this.analysisResultRepository.delete(resultId);
+  async remove(id: number): Promise<void> {
+    const result = await this.analysisResultRepository.delete(id);
     if (result.affected === 0) {
-      throw new Error(`AnalysisResult with id ${resultId} not found`);
+      throw new Error(`AnalysisResult with id ${id} not found`);
     }
   }
 }

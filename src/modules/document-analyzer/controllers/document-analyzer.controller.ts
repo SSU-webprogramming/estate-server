@@ -29,51 +29,51 @@ export class DocumentAnalyzerController {
     private readonly documentAnalyzerService: DocumentAnalyzerService,
   ) {}
 
-  @Post()
-  @UseInterceptors(FileInterceptor('file') as any)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Upload a document (PDF or JPG) for analysis' })
-  @ApiResponse({
-    status: 200,
-    description: 'The document was successfully analyzed.',
-    type: String,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request or unsupported file type.',
-  })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
-  })
-  async analyzeDocument(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB limit
-          new FileTypeValidator({
-            fileType: new RegExp('application/pdf|image/jpeg'),
-          }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-  ): Promise<string> {
-    if (!file) {
-      throw new CustomException(ErrorCode.FILE_NOT_FOUND);
-    }
-    return this.documentAnalyzerService.analyzeDocument(
-      file.buffer,
-      file.mimetype,
-    );
-  }
+  // @Post()
+  // @UseInterceptors(FileInterceptor('file') as any)
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // @ApiOperation({ summary: 'Upload a document (PDF or JPG) for analysis' })
+  // @ApiResponse({
+  //   status: 200,
+  //   description: 'The document was successfully analyzed.',
+  //   type: String,
+  // })
+  // @ApiResponse({
+  //   status: 400,
+  //   description: 'Bad request or unsupported file type.',
+  // })
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: {
+  //       file: {
+  //         type: 'string',
+  //         format: 'binary',
+  //       },
+  //     },
+  //   },
+  // })
+  // async analyzeDocument(
+  //   @UploadedFile(
+  //     new ParseFilePipe({
+  //       validators: [
+  //         new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB limit
+  //         new FileTypeValidator({
+  //           fileType: new RegExp('application/pdf|image/jpeg'),
+  //         }),
+  //       ],
+  //     }),
+  //   )
+  //   file: Express.Multer.File,
+  // ): Promise<string> {
+  //   if (!file) {
+  //     throw new CustomException(ErrorCode.FILE_NOT_FOUND);
+  //   }
+  //   return this.documentAnalyzerService.analyzeDocument(
+  //     file.buffer,
+  //     file.mimetype,
+  //   );
+  // }
 }

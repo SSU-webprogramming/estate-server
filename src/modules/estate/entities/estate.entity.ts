@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToOne,
   OneToMany,
   JoinColumn,
 } from 'typeorm';
@@ -14,68 +15,114 @@ import { Document } from '../../document/entities/document.entity';
 import { ContractType } from './contract-type.enum';
 
 /**
- * ºÎµ¿»ê ¿£Æ¼Æ¼
- * »ç¿ëÀÚ°¡ µî·ÏÇÑ ºÎµ¿»ê Á¤º¸¸¦ °ü¸®
+ * ë¶€ë™ì‚° ì—”í‹°í‹°
+ * ì‚¬ìš©ìžê°€ ë“±ë¡í•œ ë¶€ë™ì‚° ì •ë³´ë¥¼ ê´€ë¦¬
  */
 @Entity('estates')
 export class Estate {
-  /** ºÎµ¿»ê ID (PK) */
-  @PrimaryGeneratedColumn({ name: 'estate_id', type: 'bigint' })
+  /** ë¶€ë™ì‚° ID (PK) */
+  @PrimaryGeneratedColumn({ 
+    name: 'estate_id', 
+    type: 'bigint',
+    comment: 'ë¶€ë™ì‚° ID (PK)'
+  })
   estateId: number;
 
-  /** ¼ÒÀ¯ÀÚ »ç¿ëÀÚ ID (FK) */
-  @Column({ name: 'user_id', type: 'bigint' })
+  /** ì†Œìœ ìž ì‚¬ìš©ìž ID (FK) */
+  @Column({ 
+    name: 'user_id', 
+    type: 'bigint',
+    comment: 'ì†Œìœ ìž ì‚¬ìš©ìž ID (FK)'
+  })
   userId: number;
 
-  /** ¼ÒÀ¯ÀÚ »ç¿ëÀÚ Á¤º¸ */
+  /** ì†Œìœ ìž ì‚¬ìš©ìž ì •ë³´ */
   @ManyToOne(() => User, (user) => user.estates)
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  /** ÁÖ¼Ò */
-  @Column({ name: 'address', type: 'varchar', length: 255, nullable: true })
+  /** ì£¼ì†Œ */
+  @Column({ 
+    name: 'address', 
+    type: 'varchar', 
+    length: 255, 
+    nullable: true,
+    comment: 'ì£¼ì†Œ'
+  })
   address: string | null;
 
-  /** »ó¼¼ ÁÖ¼Ò */
-  @Column({ name: 'address_detail', type: 'varchar', length: 100, nullable: true })
+  /** ìƒì„¸ ì£¼ì†Œ */
+  @Column({ 
+    name: 'address_detail', 
+    type: 'varchar', 
+    length: 100, 
+    nullable: true,
+    comment: 'ìƒì„¸ ì£¼ì†Œ'
+  })
   addressDetail: string | null;
 
-  /** °è¾à Å¸ÀÔ (Àü¼¼, ¿ù¼¼ µî) */
+  /** ê³„ì•½ íƒ€ìž… (ì „ì„¸, ì›”ì„¸ ë“±) */
   @Column({
     name: 'contract_type',
     type: 'varchar',
     length: 20,
     nullable: true,
     enum: ContractType,
+    comment: 'ê³„ì•½ íƒ€ìž… (ì „ì„¸, ì›”ì„¸ ë“±)'
   })
   contractType: ContractType | null;
 
-  /** º¸Áõ±Ý (±âº»°ª: 0) */
-  @Column({ type: 'bigint', default: 0 })
+  /** ë³´ì¦ê¸ˆ (ê¸°ë³¸ê°’: 0) */
+  @Column({ 
+    name: 'deposit',
+    type: 'bigint', 
+    default: 0,
+    comment: 'ë³´ì¦ê¸ˆ'
+  })
   deposit: number;
 
-  /** ¿ù¼¼ (±âº»°ª: 0) */
-  @Column({ name: 'monthly_rent', type: 'bigint', default: 0 })
+  /** ì›”ì„¸ (ê¸°ë³¸ê°’: 0) */
+  @Column({ 
+    name: 'monthly_rent', 
+    type: 'bigint', 
+    default: 0,
+    comment: 'ì›”ì„¸'
+  })
   monthlyRent: number;
 
-  /** KB ½Ã¼¼ (±âº»°ª: 0) */
-  @Column({ name: 'kb_market_price', type: 'bigint', default: 0 })
+  /** KB ì‹œì„¸ (ê¸°ë³¸ê°’: 0) */
+  @Column({ 
+    name: 'kb_market_price', 
+    type: 'bigint', 
+    default: 0,
+    comment: 'KB ì‹œì„¸'
+  })
   kbMarketPrice: number;
 
-  /** »ý¼º ÀÏ½Ã */
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  /** ìƒì„± ì¼ì‹œ */
+  @CreateDateColumn({ 
+    name: 'created_at', 
+    type: 'timestamp', 
+    default: () => 'CURRENT_TIMESTAMP',
+    comment: 'ìƒì„± ì¼ì‹œ'
+  })
   createdAt: Date;
 
-  /** ¼öÁ¤ ÀÏ½Ã */
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  /** ìˆ˜ì • ì¼ì‹œ */
+  @UpdateDateColumn({ 
+    name: 'updated_at', 
+    type: 'timestamp', 
+    default: () => 'CURRENT_TIMESTAMP', 
+    onUpdate: 'CURRENT_TIMESTAMP',
+    comment: 'ìˆ˜ì • ì¼ì‹œ'
+  })
   updatedAt: Date;
 
-  /** ºÎµ¿»ê ºÐ¼® °á°ú ¸ñ·Ï */
-  @OneToMany(() => AnalysisResult, (analysisResult) => analysisResult.estate)
-  analysisResults: AnalysisResult[];
+  /** ë¶€ë™ì‚° ë¶„ì„ ê²°ê³¼ */
+  @OneToOne(() => AnalysisResult, (analysisResult) => analysisResult.estate)
+  analysisResult: AnalysisResult | null;
 
-  /** ºÎµ¿»ê °ü·Ã ¹®¼­ ¸ñ·Ï */
+  /** ë¶€ë™ì‚° ê´€ë ¨ ë¬¸ì„œ ëª©ë¡ */
   @OneToMany(() => Document, (document) => document.estate)
   documents: Document[];
 }
-

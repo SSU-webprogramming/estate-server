@@ -100,14 +100,14 @@ export class EstateService {
 
   async findAll(): Promise<Estate[]> {
     return this.estateRepository.find({
-      relations: ['user', 'documents', 'analysisResults'],
+      relations: ['user', 'documents', 'analysisResult'],
     });
   }
 
   async findOne(estateId: number): Promise<Estate> {
     const estate = await this.estateRepository.findOne({
       where: { estateId },
-      relations: ['user', 'documents', 'analysisResults'],
+      relations: ['user', 'documents', 'analysisResult'],
     });
     if (!estate) {
       throw new Error(`Estate with id ${estateId} not found`);
@@ -118,7 +118,7 @@ export class EstateService {
   async findByUserId(userId: number): Promise<Estate[]> {
     return this.estateRepository.find({
       where: { userId },
-      relations: ['documents', 'analysisResults'],
+      relations: ['documents', 'analysisResult'],
     });
   }
 
