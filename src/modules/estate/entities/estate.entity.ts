@@ -10,7 +10,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
-import { AnalysisResult } from '../../estate-analysis-report/entities/estate-analysis-report.entity';
+import { EstateAnalysisReport } from '../../estate-analysis-report/entities/estate-analysis-report.entity';
 import { Document } from '../../document/entities/document.entity';
 import { ContractType } from './contract-type.enum';
 
@@ -119,8 +119,8 @@ export class Estate {
   updatedAt: Date;
 
   /** 부동산 분석 결과 */
-  @OneToOne(() => AnalysisResult, (analysisResult) => analysisResult.estate)
-  analysisResult: AnalysisResult | null;
+  @OneToOne(() => EstateAnalysisReport, (analysisResult) => analysisResult.estate)
+  analysisResult: EstateAnalysisReport | null;
 
   /** 부동산 관련 문서 목록 */
   @OneToMany(() => Document, (document) => document.estate)

@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { User } from '../modules/user/entities/user.entity';
 import { Document } from '../modules/document/entities/document.entity';
 import { Estate } from '../modules/estate/entities/estate.entity';
-import { AnalysisResult } from '../modules/estate-analysis-report/entities/estate-analysis-report.entity';
+import { EstateAnalysisReport } from '../modules/estate-analysis-report/entities/estate-analysis-report.entity';
 
 export const getTypeOrmConfig = async (
   configService: ConfigService,
@@ -14,6 +14,6 @@ export const getTypeOrmConfig = async (
   username: configService.get<string>('DB_USERNAME'),
   password: configService.get<string>('DB_PASSWORD'),
   database: configService.get<string>('DB_DATABASE'),
-  entities: [User, Document, Estate, AnalysisResult],
+  entities: [User, Document, Estate, EstateAnalysisReport],
   synchronize: true, // In production, this should be false and migrations should be used
 });

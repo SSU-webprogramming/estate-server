@@ -12,7 +12,7 @@ import { Estate } from '../../estate/entities/estate.entity';
  * 부동산 문서 분석 결과를 관리
  */
 @Entity('estate_analysis_report')
-export class AnalysisResult {
+export class EstateAnalysisReport {
   /** 분석 리포트 ID (PK) */
   @PrimaryGeneratedColumn({ 
     name: 'id', 
