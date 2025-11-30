@@ -1,11 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AiProviderModule } from '../ai-provider/ai-provider.module';
-import { AnalysisResult } from './entities/estate-analysis-report.entity';
+import { EstateAnalysisReport } from './entities/estate-analysis-report.entity';
 import { EstateAnalysisReportService } from './services/estate-analysis-report.service';
+import { EstateAnalysisReportController } from './controller/estate-analysis-report.controller';
+import { Estate } from '../estate/entities/estate.entity';
+import { Document } from '../document/entities/document.entity';
+import { OcrModule } from '../ocr/ocr.module';
+import { S3Module } from '../s3/s3.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AnalysisResult]), AiProviderModule],
+  imports: [
+    TypeOrmModule.forFeature([EstateAnalysisReport, Estate, Document]),
+    AiProviderModule,
+    OcrModule,
+    S3Module,
+  ],
+  controllers: [EstateAnalysisReportController],
   providers: [EstateAnalysisReportService],
   exports: [EstateAnalysisReportService],
 })

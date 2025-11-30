@@ -13,6 +13,12 @@ export abstract class TextGeneratorPort {
     mimeType: string,
   ): Promise<string>;
 
+  abstract generateTextFromImages(
+    systemPrompt: string,
+    userPrompt: string,
+    files: FileWithMimeType[]
+  ): Promise<string>;
+
   abstract generateTextFromImageStream(
     systemPrompt: string,
     userPrompt: string,

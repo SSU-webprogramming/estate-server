@@ -1,79 +1,179 @@
 import {
   Controller,
   Post,
-  UseInterceptors,
-  UploadedFile,
-  ParseFilePipe,
-  MaxFileSizeValidator,
-  FileTypeValidator,
+  Get,
+  Body,
+  Param,
+  ParseIntPipe,
   UseGuards,
+  Req,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { EstateAnalysisReportService } from '../services/estate-analysis-report.service';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiConsumes,
   ApiBody,
   ApiBearerAuth,
+  ApiParam,
 } from '@nestjs/swagger';
-import { CustomException } from 'src/common/errors/custom-exception';
-import { ErrorCode } from 'src/common/errors/error';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import type { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
+import { CreateEstateAnalysisDto } from '../dto/req/estate-analysis-req.dto';
+import { EstateAnalysisReport } from '../entities/estate-analysis-report.entity';
+import { EstateAnalysisReportResponseDto } from '../dto/res/estate-analysis-report-response.dto';
 
 @ApiTags('분석')
-@Controller()
+@Controller('estate-analysis')
 export class EstateAnalysisReportController {
   constructor(
-    private readonly documentAnalyzerService: EstateAnalysisReportService,
+    private readonly estateAnalysisReportService: EstateAnalysisReportService,
   ) {}
 
-  @Post('estate-analyzer')
-  @UseInterceptors(FileInterceptor('file') as any)
+  @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: '문서(PDF 또는 JPG) 업로드 및 분석' })
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: '부동산 정보 및 문서 분석 요청',
+    description: '부동산 정보와 문서 ID를 받아서 분석을 수행하고 결과를 저장합니다.',
+  })
+  @ApiBody({
+    type: CreateEstateAnalysisDto,
+    description: '부동산 정보 및 분석할 문서 ID 목록',
+  })
   @ApiResponse({
-    status: 200,
-    description: '문서가 성공적으로 분석되었습니다.',
-    type: String,
+    status: 201,
+    description: '분석이 성공적으로 완료되었습니다.',
+    type: EstateAnalysisReport,
   })
   @ApiResponse({
     status: 400,
-    description: '잘못된 요청 또는 지원하지 않는 파일 형식입니다.',
+    description: '잘못된 요청 데이터입니다.',
   })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        },
-      },
-    },
+  @ApiResponse({
+    status: 401,
+    description: '인증이 필요합니다.',
   })
-  async analyzeDocument(
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB limit
-          new FileTypeValidator({
-            fileType: new RegExp('application/pdf|image/jpeg'),
-          }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-  ): Promise<string> {
-    if (!file) {
-      throw new CustomException(ErrorCode.FILE_NOT_FOUND);
-    }
-    return this.documentAnalyzerService.analyzeDocument(
-      file.buffer,
-      file.mimetype,
+  async analyzeEstate(
+    @Req() req: RequestWithUser,
+    @Body() createEstateAnalysisDto: CreateEstateAnalysisDto,
+  ): Promise<EstateAnalysisReport> {
+    return this.estateAnalysisReportService.analyzeEstateWithDocuments(
+      req.user.userId,
+      createEstateAnalysisDto,
     );
+  }
+
+  @Get(':estateId')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: '부동산 분석 결과 조회',
+    description:
+      '부동산 ID로 분석 결과를 조회합니다. 분석이 완료된 경우 결과를 반환하고, 아직 분석이 완료되지 않은 경우 빈 응답을 반환합니다.',
+  })
+  @ApiParam({
+    name: 'estateId',
+    description: '부동산 ID',
+    type: Number,
+    example: 1,
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      '분석 결과 조회 성공. 분석이 완료된 경우 결과 데이터를 반환하고, 아직 분석이 완료되지 않은 경우 모든 필드가 null인 빈 응답을 반환합니다.',
+    type: EstateAnalysisReportResponseDto,
+  })
+  @ApiResponse({
+    status: 401,
+    description: '인증이 필요합니다.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '해당 부동산을 찾을 수 없습니다.',
+  })
+  async getAnalysisResult(
+    @Param('estateId', ParseIntPipe) estateId: number,
+  ): Promise<EstateAnalysisReportResponseDto> {
+    const analysisReport =
+      await this.estateAnalysisReportService.findByEstateId(estateId);
+
+    if (!analysisReport) {
+      // 분석이 완료되지 않은 경우 빈 DTO 반환
+      return this.mapToEmptyResponseDto();
+    }
+
+    // 분석이 완료된 경우 결과를 DTO로 변환하여 반환
+    return this.mapToResponseDto(analysisReport);
+  }
+
+  /**
+   * EstateAnalysisReport 엔티티를 ResponseDto로 변환
+   */
+  private mapToResponseDto(
+    report: EstateAnalysisReport,
+  ): EstateAnalysisReportResponseDto {
+    return {
+      id: report.id,
+      estateId: report.estateId,
+      analyzedAt: report.analyzedAt,
+      safetyGrade: report.safetyGrade,
+      address: report.address,
+      buildingStructure: report.buildingStructure,
+      buildingUsage: report.buildingUsage,
+      totalFloors: report.totalFloors,
+      totalLandArea: report.totalLandArea,
+      exclusiveArea: report.exclusiveArea,
+      landRightRatio: report.landRightRatio,
+      hasSeparateRegistration: report.hasSeparateRegistration,
+      isIllegalConstruction: report.isIllegalConstruction,
+      ownershipStatus: report.ownershipStatus,
+      currentOwner: report.currentOwner,
+      transferDate: report.transferDate,
+      transferCause: report.transferCause,
+      pastOwnerChangeCount: report.pastOwnerChangeCount,
+      hasOwnershipRestriction: report.hasOwnershipRestriction,
+      rightsAnalysisSummary: report.rightsAnalysisSummary,
+      recommendedContractClauses: report.recommendedContractClauses,
+      isInsuranceEligible: report.isInsuranceEligible,
+      insuranceAnalysisReasons: report.insuranceAnalysisReasons,
+      recommendedInsuranceCompanies: report.recommendedInsuranceCompanies,
+    } as unknown as EstateAnalysisReportResponseDto;
+  }
+
+  /**
+   * 빈 ResponseDto 반환 (분석이 완료되지 않은 경우)
+   */
+  private mapToEmptyResponseDto(): EstateAnalysisReportResponseDto {
+    return {
+      id: null,
+      estateId: null,
+      analyzedAt: null,
+      safetyGrade: null,
+      address: null,
+      buildingStructure: null,
+      buildingUsage: null,
+      totalFloors: null,
+      totalLandArea: null,
+      exclusiveArea: null,
+      landRightRatio: null,
+      hasSeparateRegistration: null,
+      isIllegalConstruction: null,
+      ownershipStatus: null,
+      currentOwner: null,
+      transferDate: null,
+      transferCause: null,
+      pastOwnerChangeCount: null,
+      hasOwnershipRestriction: null,
+      rightsAnalysisSummary: null,
+      recommendedContractClauses: null,
+      isInsuranceEligible: null,
+      insuranceAnalysisReasons: null,
+      recommendedInsuranceCompanies: null,
+    } as unknown as EstateAnalysisReportResponseDto;
   }
 }

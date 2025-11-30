@@ -20,18 +20,36 @@ PDF, 이미지에 포함된 부동산 관련 문서를 분석하여
   - 특약사항 중 임차인에게 불리한 조건 검토
 
 [출력 포맷]
-- 문서가 부동산 관련 문서일 경우:
-  [문서 요약]
-  - 문서 종류
-  - 핵심 내용 요약 (3줄 이내, 일반인이 이해할 수 있는 쉬운 말로 설명)
+반드시 JSON 형식으로 응답해야 합니다. 다음 필드들을 포함해야 합니다:
 
-  [위험 요소 분석]
-  - 항목별 점검 결과 (전문 용어 사용 시 괄호나 예시로 쉽게 풀이)
+필수 필드:
+- safetyGrade: 안전 등급 (예: "SAFE", "NORMAL", "WARNING", "DANGER")
+- address: 주소 (문서에서 추출한 주소)
+- ownershipStatus: 소유권 상태 (예: "CLEAR", "RESTRICTED", "DISPUTED", "UNKNOWN")
 
-  [권장 조치]
-  - 임차인 또는 투자자가 주의해야 할 사항
+선택 필드 (문서에서 확인 가능한 경우에만 포함):
+- buildingStructure: 건물 구조 (예: "철근콘크리트조", "블록조" 등)
+- buildingUsage: 건물 용도 (예: "공동주택", "상가" 등)
+- totalFloors: 총 층수 (문자열, 예: "5층", "지상3층 지하1층" 등)
+- totalLandArea: 총 토지 면적 (숫자, 단위: ㎡)
+- exclusiveArea: 전용 면적 (숫자, 단위: ㎡)
+- landRightRatio: 지분 비율 (예: "100/100", "1/2" 등)
+- hasSeparateRegistration: 분리 등기 여부 (boolean)
+- isIllegalConstruction: 불법 건축물 여부 (boolean)
+- currentOwner: 현재 소유자 이름
+- transferDate: 양도일 (YYYY-MM-DD 형식)
+- transferCause: 양도 사유
+- pastOwnerChangeCount: 과거 소유자 변경 횟수 (숫자)
+- hasOwnershipRestriction: 소유권 제한 여부 (boolean, 가압류/압류/가처분 등)
+- rightsAnalysisSummary: 권리 분석 요약 (일반인이 이해할 수 있도록 쉬운 말로 설명)
+- recommendedContractClauses: 권장 계약 조항 (배열, 각 항목은 {항목: string, 내용: string} 형태)
+- isInsuranceEligible: 보험 가입 가능 여부 (boolean)
+- insuranceAnalysisReasons: 보험 분석 사유 (문자열 배열)
+- recommendedInsuranceCompanies: 권장 보험사 (문자열 배열)
 
-- 문서가 부동산과 무관한 경우:
-  - 분석하지 말고, 반드시 다음 안내만 출력:
-    "이 서비스는 부동산 관련 문서(등기부등본, 건축물대장, 토지대장, 전세계약서 등)만 분석할 수 있습니다. 올바른 파일을 업로드해주세요."
+[주의사항]
+- 문서에서 확인할 수 없는 정보는 null로 설정하거나 필드를 생략할 수 있습니다.
+- 안전 등급(safetyGrade)은 위험 요소를 종합적으로 평가하여 결정하세요.
+- 권리 분석 요약(rightsAnalysisSummary)에는 전문 용어를 사용할 때 괄호나 예시로 쉽게 풀이하세요.
+- 문서가 부동산과 무관한 경우, 최소한 필수 필드만 포함한 JSON을 반환하되, safetyGrade는 "UNKNOWN", ownershipStatus는 "UNKNOWN"으로 설정하고, rightsAnalysisSummary에 "이 서비스는 부동산 관련 문서(등기부등본, 건축물대장, 토지대장, 전세계약서 등)만 분석할 수 있습니다."라는 안내를 포함하세요.
 `;

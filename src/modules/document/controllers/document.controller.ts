@@ -27,12 +27,15 @@ import {
   ApiBody,
   ApiBearerAuth,
   ApiQuery,
+  ApiResponse,
 } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { UploadDocumentDto } from '../dto/req/upload-document.dto';
+import { DocumentResponseDto } from '../dto/res/document-response.dto';
 
 
-@ApiTags('Documents')
+@ApiTags('문서')
 @Controller()
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
@@ -41,7 +44,7 @@ export class DocumentController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file') as any)
-  @ApiOperation({ summary: 'Upload a document for later analysis' })
+  @ApiOperation({ summary: '문서 업로드 (추후 분석용)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -50,11 +53,7 @@ export class DocumentController {
         file: {
           type: 'string',
           format: 'binary',
-        },
-        docType: {
-          type: 'string',
-          description: '문서 타입',
-        },
+        }
       },
     },
   })
@@ -64,6 +63,11 @@ export class DocumentController {
     description: '문서 타입 (1: 등기부등본, 2: 토지대장)',
     required: false,
     enum: DocumentType,
+  })
+  @ApiResponse({
+    status: 201,
+    description: '문서 업로드 성공',
+    type: DocumentResponseDto,
   })
   async uploadDocument(
     @UploadedFile(
@@ -77,20 +81,10 @@ export class DocumentController {
       }),
     )
     file: Express.Multer.File,
-    @Query('docType') docType?: string,
-  ) {
-    const documentType: DocumentType = docType
-      ? (docType as DocumentType)
-      : DocumentType.REGISTRY;
-    
-    // 유효한 enum 값인지 검증
-    if (docType && !Object.values(DocumentType).includes(docType as DocumentType)) {
-      throw new Error(
-        `Invalid docType: ${docType}. Valid values are: ${Object.values(DocumentType).join(', ')}`,
-      );
-    }
-
-    return this.documentService.uploadAndCreateDocument(file, documentType);
+    @Query() uploadDocumentDto: UploadDocumentDto,
+  ): Promise<DocumentResponseDto> {
+    const document = await this.documentService.uploadAndCreateDocument(file, uploadDocumentDto.docType);
+    return document;
   }
 
   // @Get('documents/analyze/stream')

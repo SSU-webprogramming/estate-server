@@ -73,6 +73,51 @@ export class ChatGptService implements TextGeneratorPort {
     }
   }
 
+  async generateTextFromImages(
+    systemPrompt: string,
+    userPrompt: string,
+    files: FileWithMimeType[],
+  ): Promise<string> {
+    try {
+      const imageUrls = files.map((file) => {
+        const base64Image = file.buffer.toString('base64');
+        return `data:${file.mimeType};base64,${base64Image}`;
+      });
+
+      const userContent: ChatCompletionMessageParam['content'] = [
+        { type: 'text', text: userPrompt },
+        ...imageUrls.map((url) => ({
+          type: 'image_url' as const,
+          image_url: { url },
+        })),
+      ];
+
+      const response = await this.openai.chat.completions.create({
+        model: this.gptModelName,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: userContent,
+          },
+        ],
+        max_tokens: 2048,
+      });
+
+      const content = response.choices[0].message.content;
+      if (content === null) {
+        throw new Error('ChatGPT returned null content.');
+      }
+      return content;
+    } catch (error) {
+      console.error('Error generating text from images with ChatGPT:', error);
+      throw new CustomException(ErrorCode.GPT_API_REQUEST_FAILED);
+    }
+  }
+
   generateTextFromImageStream(
     systemPrompt: string,
     userPrompt: string,

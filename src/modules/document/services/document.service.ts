@@ -12,6 +12,7 @@ import {
   TextGeneratorPort,
 } from '../../estate-analysis-report/ports/text-generator.port';
 import { SYSTEM_PROMPT } from '../../estate-analysis-report/prompts/system.prompt';
+import { DocumentResponseDto } from '../dto/res/document-response.dto';
 
 interface DocumentData {
   base64: string;
@@ -40,7 +41,7 @@ export class DocumentService {
   async uploadAndCreateDocument(
     file: Express.Multer.File,
     docType: DocumentType = DocumentType.REGISTRY,
-  ): Promise<Document> {
+  ): Promise<DocumentResponseDto> {
     // S3 키 생성을 위한 UUID 생성
     const fileUuid = uuidV4();
     const key = `temp/${fileUuid}-${file.originalname}`;
@@ -59,8 +60,7 @@ export class DocumentService {
     });
 
     const savedDocument = await this.documentRepository.save(newDocument);
-
-    return savedDocument;
+    return new DocumentResponseDto(savedDocument);
   }
 
   /**
