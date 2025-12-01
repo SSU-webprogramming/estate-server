@@ -9,15 +9,15 @@ import {
 import { User } from '../entities/user.entity';
 import { UpdateUserDto } from '../dto/update-user.dto';
 
-export const ApiUserController = () => applyDecorators(ApiTags('»ç¿ëÀÚ'));
+export const ApiUserController = () => applyDecorators(ApiTags('ì‚¬ìš©ì'));
 
 export const ApiFindAllUsers = () =>
   applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: '¸ğµç »ç¿ëÀÚ Á¶È¸' }),
+    ApiOperation({ summary: 'ëª¨ë“  ì‚¬ìš©ì ì¡°íšŒ' }),
     ApiResponse({
       status: 200,
-      description: '¸ğµç »ç¿ëÀÚ¸¦ ¹İÈ¯ÇÕ´Ï´Ù.',
+      description: 'ëª¨ë“  ì‚¬ìš©ìë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.',
       type: [User],
     }),
   );
@@ -25,36 +25,36 @@ export const ApiFindAllUsers = () =>
 export const ApiFindOneUser = () =>
   applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: 'ID·Î »ç¿ëÀÚ Á¶È¸' }),
+    ApiOperation({ summary: 'IDë¡œ ì‚¬ìš©ì ì¡°íšŒ' }),
     ApiResponse({
       status: 200,
-      description: '´ÜÀÏ »ç¿ëÀÚ¸¦ ¹İÈ¯ÇÕ´Ï´Ù.',
+      description: 'ë‹¨ì¼ ì‚¬ìš©ìë¥¼ ë°˜í™˜í•©ë‹ˆë‹¤.',
       type: User,
     }),
-    ApiResponse({ status: 404, description: '»ç¿ëÀÚ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.' }),
+    ApiResponse({ status: 404, description: 'ì‚¬ìš©ìë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.' }),
   );
 
 export const ApiUpdateUser = () =>
   applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: 'ID·Î »ç¿ëÀÚ ¾÷µ¥ÀÌÆ®' }),
+    ApiOperation({ summary: 'IDë¡œ ì‚¬ìš©ì ì—…ë°ì´íŠ¸' }),
     ApiResponse({
       status: 200,
-      description: '»ç¿ëÀÚ°¡ ¼º°øÀûÀ¸·Î ¾÷µ¥ÀÌÆ®µÇ¾ú½À´Ï´Ù.',
+      description: 'ì‚¬ìš©ìê°€ ì„±ê³µì ìœ¼ë¡œ ì—…ë°ì´íŠ¸ë˜ì—ˆìŠµë‹ˆë‹¤.',
       type: User,
     }),
-    ApiResponse({ status: 404, description: '»ç¿ëÀÚ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.' }),
+    ApiResponse({ status: 404, description: 'ì‚¬ìš©ìë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.' }),
     ApiBody({ type: UpdateUserDto }),
   );
 
 export const ApiDeleteUser = () =>
   applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: 'ID·Î »ç¿ëÀÚ »èÁ¦' }),
+    ApiOperation({ summary: 'IDë¡œ ì‚¬ìš©ì ì‚­ì œ' }),
     ApiResponse({
       status: 204,
-      description: '»ç¿ëÀÚ°¡ ¼º°øÀûÀ¸·Î »èÁ¦µÇ¾ú½À´Ï´Ù.',
+      description: 'ì‚¬ìš©ìê°€ ì„±ê³µì ìœ¼ë¡œ ì‚­ì œë˜ì—ˆìŠµë‹ˆë‹¤.',
     }),
-    ApiResponse({ status: 404, description: '»ç¿ëÀÚ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.' }),
+    ApiResponse({ status: 404, description: 'ì‚¬ìš©ìë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.' }),
   );
 

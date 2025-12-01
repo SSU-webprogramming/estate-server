@@ -9,31 +9,31 @@ import {
 import { CreateEstateDto } from '../dto/create-estate.dto';
 import { EstateResponseDto } from '../dto/estate-response.dto';
 
-export const ApiEstateController = () => applyDecorators(ApiTags('ºÎµ¿»ê'));
+export const ApiEstateController = () => applyDecorators(ApiTags('ë¶€ë™ì‚°'));
 
 export const ApiCreateEstate = () =>
   applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
-      summary: 'ºÎµ¿»ê Á¤º¸ µî·Ï',
-      description: 'ÇöÀç ·Î±×ÀÎÇÑ »ç¿ëÀÚ¿Í ¿¬°üµÈ ºÎµ¿»ê Á¤º¸¸¦ µî·ÏÇÕ´Ï´Ù.',
+      summary: 'ë¶€ë™ì‚° ì •ë³´ ë“±ë¡',
+      description: 'í˜„ì¬ ë¡œê·¸ì¸í•œ ì‚¬ìš©ìì™€ ì—°ê´€ëœ ë¶€ë™ì‚° ì •ë³´ë¥¼ ë“±ë¡í•©ë‹ˆë‹¤.',
     }),
     ApiBody({
       type: CreateEstateDto,
-      description: 'µî·ÏÇÒ ºÎµ¿»ê Á¤º¸',
+      description: 'ë“±ë¡í•  ë¶€ë™ì‚° ì •ë³´',
     }),
     ApiResponse({
       status: 201,
-      description: 'ºÎµ¿»ê Á¤º¸°¡ ¼º°øÀûÀ¸·Î µî·ÏµÇ¾ú½À´Ï´Ù.',
+      description: 'ë¶€ë™ì‚° ì •ë³´ê°€ ì„±ê³µì ìœ¼ë¡œ ë“±ë¡ë˜ì—ˆìŠµë‹ˆë‹¤.',
       type: EstateResponseDto,
     }),
     ApiResponse({
       status: 400,
-      description: 'Àß¸øµÈ ¿äÃ» µ¥ÀÌÅÍÀÔ´Ï´Ù.',
+      description: 'ì˜ëª»ëœ ìš”ì²­ ë°ì´í„°ì…ë‹ˆë‹¤.',
     }),
     ApiResponse({
       status: 401,
-      description: 'ÀÎÁõÀÌ ÇÊ¿äÇÕ´Ï´Ù.',
+      description: 'ì¸ì¦ì´ í•„ìš”í•©ë‹ˆë‹¤.',
     }),
   );
 

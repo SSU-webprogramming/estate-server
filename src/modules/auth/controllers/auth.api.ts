@@ -1,29 +1,29 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
-export const ApiAuthController = () => applyDecorators(ApiTags('ÀÎÁõ'));
+export const ApiAuthController = () => applyDecorators(ApiTags('ì¸ì¦'));
 
 export const ApiKakaoLogin = () =>
   applyDecorators(
     ApiOperation({
-      summary: 'Ä«Ä«¿À ·Î±×ÀÎ',
-      description: 'Ä«Ä«¿À OAuth ·Î±×ÀÎÀ» ½ÃÀÛÇÕ´Ï´Ù.',
+      summary: 'ì¹´ì¹´ì˜¤ ë¡œê·¸ì¸',
+      description: 'ì¹´ì¹´ì˜¤ OAuth ë¡œê·¸ì¸ì„ ì‹œì‘í•©ë‹ˆë‹¤.',
     }),
   );
 
 export const ApiKakaoLoginCallback = () =>
   applyDecorators(
     ApiOperation({
-      summary: 'Ä«Ä«¿À ·Î±×ÀÎ Äİ¹é',
-      description: 'Ä«Ä«¿À OAuth ·Î±×ÀÎ Äİ¹éÀ» Ã³¸®ÇÏ°í ÅäÅ«À» ¹ß±ŞÇÕ´Ï´Ù.',
+      summary: 'ì¹´ì¹´ì˜¤ ë¡œê·¸ì¸ ì½œë°±',
+      description: 'ì¹´ì¹´ì˜¤ OAuth ë¡œê·¸ì¸ ì½œë°±ì„ ì²˜ë¦¬í•˜ê³  í† í°ì„ ë°œê¸‰í•©ë‹ˆë‹¤.',
     }),
   );
 
 export const ApiRefreshToken = () =>
   applyDecorators(
     ApiOperation({
-      summary: 'ÅäÅ« °»½Å',
-      description: '¸®ÇÁ·¹½Ã ÅäÅ«À» »ç¿ëÇÏ¿© »õ·Î¿î ¾×¼¼½º ÅäÅ«°ú ¸®ÇÁ·¹½Ã ÅäÅ«À» ¹ß±ŞÇÕ´Ï´Ù.',
+      summary: 'í† í° ê°±ì‹ ',
+      description: 'ë¦¬í”„ë ˆì‹œ í† í°ì„ ì‚¬ìš©í•˜ì—¬ ìƒˆë¡œìš´ ì•¡ì„¸ìŠ¤ í† í°ê³¼ ë¦¬í”„ë ˆì‹œ í† í°ì„ ë°œê¸‰í•©ë‹ˆë‹¤.',
     }),
   );
 
@@ -31,8 +31,8 @@ export const ApiLogout = () =>
   applyDecorators(
     ApiBearerAuth(),
     ApiOperation({
-      summary: '·Î±×¾Æ¿ô',
-      description: '»ç¿ëÀÚ¸¦ ·Î±×¾Æ¿ôÇÏ°í ¸®ÇÁ·¹½Ã ÅäÅ«À» ¹«È¿È­ÇÕ´Ï´Ù.',
+      summary: 'ë¡œê·¸ì•„ì›ƒ',
+      description: 'ì‚¬ìš©ìë¥¼ ë¡œê·¸ì•„ì›ƒí•˜ê³  ë¦¬í”„ë ˆì‹œ í† í°ì„ ë¬´íš¨í™”í•©ë‹ˆë‹¤.',
     }),
   );
 

@@ -11,12 +11,12 @@ import {
 import { DocumentType } from '../entities/document.entity';
 import { DocumentResponseDto } from '../dto/res/document-response.dto';
 
-export const ApiDocumentController = () => applyDecorators(ApiTags('¹®¼­'));
+export const ApiDocumentController = () => applyDecorators(ApiTags('ë¬¸ì„œ'));
 
 export const ApiUploadDocument = () =>
   applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: '¹®¼­ ¾÷·Îµå (ÃßÈÄ ºÐ¼®¿ë)' }),
+    ApiOperation({ summary: 'ë¬¸ì„œ ì—…ë¡œë“œ (ì¶”í›„ ë¶„ì„ìš©)' }),
     ApiConsumes('multipart/form-data'),
     ApiBody({
       schema: {
@@ -32,13 +32,13 @@ export const ApiUploadDocument = () =>
     ApiQuery({
       name: 'docType',
       type: String,
-      description: '¹®¼­ Å¸ÀÔ (1: µî±âºÎµîº», 2: ÅäÁö´ëÀå)',
+      description: 'ë¬¸ì„œ íƒ€ìž… (1: ë“±ê¸°ë¶€ë“±ë³¸, 2: í† ì§€ëŒ€ìž¥)',
       required: false,
       enum: DocumentType,
     }),
     ApiResponse({
       status: 201,
-      description: '¹®¼­ ¾÷·Îµå ¼º°ø',
+      description: 'ë¬¸ì„œ ì—…ë¡œë“œ ì„±ê³µ',
       type: DocumentResponseDto,
     }),
   );

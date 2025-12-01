@@ -14,7 +14,7 @@ const logFormat = printf((info) => {
     WinstonModule.forRoot({
       transports: [
         new transports.Console({
-          level: process.env.NODE_ENV === 'production' ? 'info' : 'silly',
+          level: 'info',
           format: combine(
             colorize(),
             timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
