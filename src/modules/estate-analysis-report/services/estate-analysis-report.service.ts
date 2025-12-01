@@ -9,6 +9,7 @@ import { EstateAnalysisReport } from '../entities/estate-analysis-report.entity'
 import { CreateEstateAnalysisDto } from '../dto/req/estate-analysis-req.dto';
 import { OcrPort } from '../../../common/ports/ocr.port';
 import { S3Port } from '../../../common/ports/s3.port';
+import { isEmpty } from '../../../common/utils/string.util';
 import { AnalysisResultStatus } from '../entities/analysis-result-status.enum';
 
 @Injectable()
@@ -74,16 +75,8 @@ export class EstateAnalysisReportService {
     }
     await this.documentRepository.save(documents);
 
-
-    
     // 4. OCR 수행 및 extractedText 저장
-    const documentData = await this.prepareDocumentData(documents);
-    const ocrText = await this.extractTextWithOcr(documentData);
-    // OCR 결과를 각 문서에 저장
-    for (const doc of documents) {
-      doc.extractedText = ocrText;
-    }
-    await this.documentRepository.save(documents);
+    const { ocrText, documentData } = await this.processOcrAndExtractText(documents);
 
 
     // 5. 사용되지 않은 Document 삭제 (임시파일)
@@ -192,6 +185,85 @@ export class EstateAnalysisReportService {
     console.log('OCR Text extracted:', ocrText.substring(0, 200) + '...');
 
     return ocrText;
+  }
+
+  /**
+   * OCR 수행 및 extractedText 저장
+   * 이미 extractedText가 있는 문서는 OCR을 건너뛰고, 없는 문서만 OCR을 수행합니다.
+   * @param documents 문서 배열
+   * @returns OCR 텍스트와 모든 문서 데이터
+   */
+  private async processOcrAndExtractText(
+    documents: Document[],
+  ): Promise<{
+    ocrText: string;
+    documentData: Array<{ base64: string; buffer: Buffer; mimeType: string; name: string }>;
+  }> {
+    // 문서를 extractedText 유무에 따라 분류
+    const { withText, withoutText } = this.separateDocumentsByExtractedText(documents);
+
+    // 기존 extractedText가 있는 문서들의 텍스트 수집
+    const existingTexts = withText
+      .map((doc) => doc.extractedText)
+      .filter((text): text is string => !isEmpty(text));
+
+    // extractedText가 없는 문서들에 대해서만 OCR 수행
+    let newOcrText = '';
+    if (withoutText.length > 0) {
+      newOcrText = await this.performOcrForDocuments(withoutText);
+    }
+
+    // 모든 텍스트를 합침
+    const ocrText = this.combineOcrTexts([...existingTexts, newOcrText].filter(Boolean));
+
+    // AI 분석을 위한 모든 문서 데이터 준비
+    const documentData = await this.prepareDocumentData(documents);
+
+    return { ocrText, documentData };
+  }
+
+  /**
+   * 문서를 extractedText 유무에 따라 분류
+   */
+  private separateDocumentsByExtractedText(documents: Document[]): {
+    withText: Document[];
+    withoutText: Document[];
+  } {
+    const withText: Document[] = [];
+    const withoutText: Document[] = [];
+
+    for (const doc of documents) {
+      if (!isEmpty(doc.extractedText)) {
+        withText.push(doc);
+      } else {
+        withoutText.push(doc);
+      }
+    }
+
+    return { withText, withoutText };
+  }
+
+  /**
+   * 문서들에 대해 OCR을 수행하고 결과를 저장
+   */
+  private async performOcrForDocuments(documents: Document[]): Promise<string> {
+    const documentDataForOcr = await this.prepareDocumentData(documents);
+    const ocrText = await this.extractTextWithOcr(documentDataForOcr);
+
+    // OCR 결과를 문서들에 저장
+    documents.forEach((doc) => {
+      doc.extractedText = ocrText;
+    });
+    await this.documentRepository.save(documents);
+
+    return ocrText;
+  }
+
+  /**
+   * 여러 OCR 텍스트를 하나로 합침
+   */
+  private combineOcrTexts(texts: string[]): string {
+    return texts.filter(Boolean).join('\n\n');
   }
 
   /**
