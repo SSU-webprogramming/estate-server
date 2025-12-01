@@ -5,9 +5,16 @@ import type { RequestWithUser } from '../interfaces/request-with-user.interface'
 import { KakaoAuthGuard } from '../guards/kakao-auth.guard';
 import { RefreshTokenDto } from '../dto/refresh-token.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { ApiBearerAuth } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import {
+  ApiAuthController,
+  ApiKakaoLogin,
+  ApiKakaoLoginCallback,
+  ApiRefreshToken,
+  ApiLogout,
+} from './auth.api';
 
+@ApiAuthController()
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -17,12 +24,14 @@ export class AuthController {
 
   @Get('kakao')
   @UseGuards(KakaoAuthGuard)
+  @ApiKakaoLogin()
   kakaoLogin() {
     // This endpoint will trigger the Kakao login flow
   }
 
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)
+  @ApiKakaoLoginCallback()
   async kakaoLoginCallback(
     @Req() req: RequestWithUser,
     @Res() res: Response,
@@ -48,6 +57,7 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @ApiRefreshToken()
   async refresh(@Body() refreshTokenDto: RefreshTokenDto
   ): Promise<{ access_token: string; refresh_token: string }> {
     return await this.authService.refreshTokens(refreshTokenDto);
@@ -55,7 +65,7 @@ export class AuthController {
 
   @Delete('logout')
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @ApiLogout()
   async logout(@Req() req: RequestWithUser): Promise<{ message: string }> {
     await this.authService.logout(req.user.userId);
     return { message: 'Logged out successfully' };

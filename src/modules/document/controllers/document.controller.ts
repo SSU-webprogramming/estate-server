@@ -1,6 +1,5 @@
 import {
   Controller,
-  Get,
   Post,
   UseInterceptors,
   UploadedFile,
@@ -8,67 +7,27 @@ import {
   MaxFileSizeValidator,
   FileTypeValidator,
   UseGuards,
-  Req,
-  Sse,
-  MessageEvent,
-  Header,
   Query,
-  ParseArrayPipe,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
-import { DocumentType } from '../entities/document.entity';
-import type { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiConsumes,
-  ApiBody,
-  ApiBearerAuth,
-  ApiQuery,
-  ApiResponse,
-} from '@nestjs/swagger';
-import { Observable } from 'rxjs';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { UploadDocumentDto } from '../dto/req/upload-document.dto';
 import { DocumentResponseDto } from '../dto/res/document-response.dto';
+import {
+  ApiDocumentController,
+  ApiUploadDocument,
+} from './document.api';
 
-
-@ApiTags('문서')
+@ApiDocumentController()
 @Controller()
 export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Post("documents")
   @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file') as any)
-  @ApiOperation({ summary: '문서 업로드 (추후 분석용)' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        file: {
-          type: 'string',
-          format: 'binary',
-        }
-      },
-    },
-  })
-  @ApiQuery({
-    name: 'docType',
-    type: String,
-    description: '문서 타입 (1: 등기부등본, 2: 토지대장)',
-    required: false,
-    enum: DocumentType,
-  })
-  @ApiResponse({
-    status: 201,
-    description: '문서 업로드 성공',
-    type: DocumentResponseDto,
-  })
+  @ApiUploadDocument()
   async uploadDocument(
     @UploadedFile(
       new ParseFilePipe({

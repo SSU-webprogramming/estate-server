@@ -10,21 +10,18 @@ import {
 import { EstateService } from '../services/estate.service';
 import { CreateEstateDto } from '../dto/create-estate.dto';
 import { EstateResponseDto } from '../dto/estate-response.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import type { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
+import {
+  ApiEstateController,
+  ApiCreateEstate,
+} from './estate.api';
 
 /**
  * 부동산 컨트롤러
  * 부동산 관련 API 엔드포인트를 제공합니다.
  */
-@ApiTags('부동산')
+@ApiEstateController()
 @Controller('estates')
 export class EstateController {
   constructor(private readonly estateService: EstateService) {}
