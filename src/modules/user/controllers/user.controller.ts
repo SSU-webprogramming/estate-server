@@ -9,7 +9,8 @@ import {
 } from '@nestjs/common';
 import { UserService } from '@/modules/user/services/user.service';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
-import { User } from '@/modules/user/entities/user.entity';
+import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
+import { UserMapper } from '@/modules/user/mapper/user.mapper';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import {
   ApiUserController,
@@ -27,25 +28,28 @@ export class UserController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiFindAllUsers()
-  findAll(): Promise<User[]> {
-    return this.userService.findAll();
+  async findAll(): Promise<UserResponseDto[]> {
+    const users = await this.userService.findAll();
+    return UserMapper.toResponseDtoList(users);
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiFindOneUser()
-  findOne(@Param('id') id: string): Promise<User> {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<UserResponseDto> {
+    const user = await this.userService.findOne(+id);
+    return UserMapper.toResponseDto(user);
   }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
   @ApiUpdateUser()
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ): Promise<User> {
-    return this.userService.update(+id, updateUserDto);
+  ): Promise<UserResponseDto> {
+    const user = await this.userService.update(+id, updateUserDto);
+    return UserMapper.toResponseDto(user);
   }
 
   @Delete(':id')

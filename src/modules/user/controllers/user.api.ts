@@ -6,7 +6,7 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { User } from '@/modules/user/entities/user.entity';
+import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
 
 export const ApiUserController = () => applyDecorators(ApiTags('사용자'));
@@ -18,7 +18,7 @@ export const ApiFindAllUsers = () =>
     ApiResponse({
       status: 200,
       description: '모든 사용자를 반환합니다.',
-      type: [User],
+      type: [UserResponseDto],
     }),
   );
 
@@ -29,7 +29,7 @@ export const ApiFindOneUser = () =>
     ApiResponse({
       status: 200,
       description: '단일 사용자를 반환합니다.',
-      type: User,
+      type: UserResponseDto,
     }),
     ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' }),
   );
@@ -41,7 +41,7 @@ export const ApiUpdateUser = () =>
     ApiResponse({
       status: 200,
       description: '사용자가 성공적으로 업데이트되었습니다.',
-      type: User,
+      type: UserResponseDto,
     }),
     ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' }),
     ApiBody({ type: UpdateUserDto }),

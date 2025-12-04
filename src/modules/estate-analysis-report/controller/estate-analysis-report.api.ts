@@ -8,7 +8,6 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
-import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
 import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
 
 export const ApiEstateAnalysisReportController = () =>
@@ -28,7 +27,7 @@ export const ApiAnalyzeEstate = () =>
     ApiResponse({
       status: 201,
       description: '분석이 성공적으로 완료되었습니다.',
-      type: EstateAnalysisReport,
+      type: EstateAnalysisReportResponseDto,
     }),
     ApiResponse({
       status: 400,

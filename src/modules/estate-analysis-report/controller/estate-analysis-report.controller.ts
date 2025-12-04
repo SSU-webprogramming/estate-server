@@ -14,7 +14,6 @@ import { EstateAnalysisReportService } from '@/modules/estate-analysis-report/se
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import type { RequestWithUser } from '@/modules/auth/interfaces/request-with-user.interface';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
-import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
 import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
 import {
   ApiEstateAnalysisReportController,
@@ -39,7 +38,7 @@ export class EstateAnalysisReportController {
   async analyzeEstate(
     @Req() req: RequestWithUser,
     @Body() createEstateAnalysisDto: CreateEstateAnalysisDto,
-  ): Promise<EstateAnalysisReport> {
+  ): Promise<EstateAnalysisReportResponseDto> {
     const analysisReport =
       await this.estateAnalysisReportService.analyzeEstateWithDocuments(
         req.user.userId,
@@ -53,7 +52,7 @@ export class EstateAnalysisReportController {
       );
     }
 
-    return analysisReport;
+    return EstateAnalysisReportMapper.toResponseDto(analysisReport);
   }
 
   @Get(':estateId')

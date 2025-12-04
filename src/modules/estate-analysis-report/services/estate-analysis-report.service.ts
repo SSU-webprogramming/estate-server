@@ -91,11 +91,7 @@ export class EstateAnalysisReportService {
       SYSTEM_PROMPT,
       userPrompt,
       fileBuffers
-    );
-
-    // 여기까지 됨
-    console.log('analysisResult:\n\n', analysisResult);
-    
+    );    
     // 7. AI 분석 결과 파싱
     let parsedAnalysis: any = {};
     try {
