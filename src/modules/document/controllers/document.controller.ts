@@ -12,8 +12,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '../services/document.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { UploadDocumentDto } from '../dto/req/upload-document.dto';
-import { DocumentResponseDto } from '../dto/res/document-response.dto';
+import { UploadDocumentDto } from '../dto/request/upload-document.dto';
+import { DocumentResponseDto } from '../dto/response/document-response.dto';
 import {
   ApiDocumentController,
   ApiUploadDocument,

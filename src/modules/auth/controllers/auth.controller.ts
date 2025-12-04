@@ -3,7 +3,7 @@ import type { Response } from 'express';
 import { AuthService } from '../services/auth.service';
 import type { RequestWithUser } from '../interfaces/request-with-user.interface';
 import { KakaoAuthGuard } from '../guards/kakao-auth.guard';
-import { RefreshTokenDto } from '../dto/refresh-token.dto';
+import { RefreshTokenDto } from '../dto/request/refresh-token.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
 import {

@@ -9,7 +9,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { DocumentType } from '../../../common/enums/document-type.enum';
-import { DocumentResponseDto } from '../dto/res/document-response.dto';
+import { DocumentResponseDto } from '../dto/response/document-response.dto';
 
 export const ApiDocumentController = () => applyDecorators(ApiTags('문서'));
 

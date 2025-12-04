@@ -8,7 +8,7 @@ import { RedisService } from '../../redis/redis.service';
 import { ConfigService } from '@nestjs/config';
 import { CustomException } from '../../../common/errors/custom-exception';
 import { ErrorCode } from '../../../common/errors/error';
-import { RefreshTokenDto } from '../dto/refresh-token.dto';
+import { RefreshTokenDto } from '../dto/request/refresh-token.dto';
 
 @Injectable()
 export class AuthService {

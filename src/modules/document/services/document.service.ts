@@ -13,7 +13,7 @@ import {
   TextGeneratorPort,
 } from '../../estate-analysis-report/ports/text-generator.port';
 import { SYSTEM_PROMPT } from '../../estate-analysis-report/prompts/system.prompt';
-import { DocumentResponseDto } from '../dto/res/document-response.dto';
+import { DocumentResponseDto } from '../dto/response/document-response.dto';
 
 interface DocumentData {
   base64: string;
