@@ -1,10 +1,10 @@
 import { Controller, Get, UseGuards, Req, Res, Post, Body, Delete } from '@nestjs/common';
 import type { Response } from 'express';
-import { AuthService } from '../services/auth.service';
-import type { RequestWithUser } from '../interfaces/request-with-user.interface';
-import { KakaoAuthGuard } from '../guards/kakao-auth.guard';
-import { RefreshTokenDto } from '../dto/request/refresh-token.dto';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { AuthService } from '@/modules/auth/services/auth.service';
+import type { RequestWithUser } from '@/modules/auth/interfaces/request-with-user.interface';
+import { KakaoAuthGuard } from '@/modules/auth/guards/kakao-auth.guard';
+import { RefreshTokenDto } from '@/modules/auth/dto/request/refresh-token.dto';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
 import {
   ApiAuthController,

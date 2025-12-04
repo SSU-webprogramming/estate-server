@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, IsNull } from 'typeorm';
-import { TextGeneratorPort, FileWithMimeType } from '../ports/text-generator.port';
-import { SYSTEM_PROMPT } from '../prompts/system.prompt';
-import { Estate } from '../../estate/entities/estate.entity';
-import { Document } from '../../document/entities/document.entity';
-import { EstateAnalysisReport } from '../entities/estate-analysis-report.entity';
-import { CreateEstateAnalysisDto } from '../dto/req/estate-analysis-req.dto';
-import { OcrPort } from '../../../common/ports/ocr.port';
-import { S3Port } from '../../../common/ports/s3.port';
-import { isEmpty } from '../../../common/utils/string.util';
-import { AnalysisResultStatus } from '../entities/analysis-result-status.enum';
+import { TextGeneratorPort, FileWithMimeType } from '@/modules/estate-analysis-report/ports/text-generator.port';
+import { SYSTEM_PROMPT } from '@/modules/estate-analysis-report/prompts/system.prompt';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { Document } from '@/modules/document/entities/document.entity';
+import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
+import { OcrPort } from '@/common/ports/ocr.port';
+import { S3Port } from '@/common/ports/s3.port';
+import { isEmpty } from '@/common/utils/string.util';
+import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
+import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
 
 @Injectable()
 export class EstateAnalysisReportService {

@@ -8,8 +8,8 @@ import {
   ApiQuery,
   ApiResponse,
 } from '@nestjs/swagger';
-import { DocumentType } from '../../../common/enums/document-type.enum';
-import { DocumentResponseDto } from '../dto/response/document-response.dto';
+import { DocumentType } from '@/common/enums/document-type.enum';
+import { DocumentResponseDto } from '@/modules/document/dto/response/document-response.dto';
 
 export const ApiDocumentController = () => applyDecorators(ApiTags('문서'));
 
@@ -30,9 +30,9 @@ export const ApiUploadDocument = () =>
       },
     }),
     ApiQuery({
-      name: 'docType',
+      name: 'documentType',
       type: String,
-      description: '문서 타입 (1: 등기부등본, 2: 토지대장)',
+      description: '문서 유형 (1: 등기부등본, 2: 토지대장)',
       required: false,
       enum: DocumentType,
     }),

@@ -8,8 +8,8 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError, TypeORMError } from 'typeorm';
-import { CustomException } from '../errors/custom-exception';
-import { ErrorCode } from '../errors/error';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 

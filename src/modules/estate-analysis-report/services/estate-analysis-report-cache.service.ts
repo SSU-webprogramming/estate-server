@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { RedisService } from '../../redis/redis.service';
-import { EstateAnalysisReportResponseDto } from '../dto/res/estate-analysis-report-response.dto';
+import { RedisService } from '@/modules/redis/redis.service';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
 
 @Injectable()
 export class EstateAnalysisReportCacheService {

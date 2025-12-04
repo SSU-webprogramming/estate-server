@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { OcrService } from './services/ocr.service';
 import { ConfigModule } from '@nestjs/config';
-import clovaConfig from '../../config/clova.config';
-import { OcrPort } from '../../common/ports/ocr.port';
+import clovaConfig from '@/config/clova.config';
+import { OcrPort } from '@/common/ports/ocr.port';
 
 @Module({
   imports: [

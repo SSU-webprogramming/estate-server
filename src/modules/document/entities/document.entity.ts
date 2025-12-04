@@ -6,8 +6,8 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { Estate } from '../../estate/entities/estate.entity';
-import { DocumentType } from '../../../common/enums/document-type.enum';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { DocumentType } from '@/common/enums/document-type.enum';
 
 /**
  * 문서 엔티티

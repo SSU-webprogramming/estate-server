@@ -5,8 +5,8 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
-import { Estate } from '../../estate/entities/estate.entity';
-import { AnalysisResultStatus } from './analysis-result-status.enum';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
 
 /**
  * 부동산 분석 리포트 엔티티

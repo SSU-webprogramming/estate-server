@@ -7,9 +7,9 @@ import {
   ApiBearerAuth,
   ApiParam,
 } from '@nestjs/swagger';
-import { CreateEstateAnalysisDto } from '../dto/req/estate-analysis-req.dto';
-import { EstateAnalysisReport } from '../entities/estate-analysis-report.entity';
-import { EstateAnalysisReportResponseDto } from '../dto/res/estate-analysis-report-response.dto';
+import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
+import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
 
 export const ApiEstateAnalysisReportController = () =>
   applyDecorators(ApiTags('분석'));

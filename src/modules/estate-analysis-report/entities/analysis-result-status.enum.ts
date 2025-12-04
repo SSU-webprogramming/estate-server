@@ -1,1 +1,1 @@
-export * from '../../../common/enums/analysis-result-status.enum';
+export * from '@/common/enums/analysis-result-status.enum';

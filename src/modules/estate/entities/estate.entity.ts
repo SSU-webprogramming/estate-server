@@ -9,10 +9,10 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
-import { User } from '../../user/entities/user.entity';
-import { EstateAnalysisReport } from '../../estate-analysis-report/entities/estate-analysis-report.entity';
-import { Document } from '../../document/entities/document.entity';
-import { ContractType } from '../../../common/enums/contract-type.enum';
+import { User } from '@/modules/user/entities/user.entity';
+import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
+import { Document } from '@/modules/document/entities/document.entity';
+import { ContractType } from '@/common/enums/contract-type.enum';
 
 /**
  * 부동산 엔티티

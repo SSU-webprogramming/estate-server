@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import FormData from 'form-data';
 import { v4 as uuidv4 } from 'uuid';
-import { OcrPort } from '../../../common/ports/ocr.port';
+import { OcrPort } from '@/common/ports/ocr.port';
 
 @Injectable()
 export class OcrService implements OcrPort{

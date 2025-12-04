@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { S3Service } from './services/s3.service';
-import { S3Port } from '../../common/ports/s3.port';
+import { S3Port } from '@/common/ports/s3.port';
 
 @Module({
   providers: [

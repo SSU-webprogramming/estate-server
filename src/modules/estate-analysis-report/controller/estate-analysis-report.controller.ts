@@ -10,19 +10,19 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { EstateAnalysisReportService } from '../services/estate-analysis-report.service';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import type { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
-import { CreateEstateAnalysisDto } from '../dto/req/estate-analysis-req.dto';
-import { EstateAnalysisReport } from '../entities/estate-analysis-report.entity';
-import { EstateAnalysisReportResponseDto } from '../dto/res/estate-analysis-report-response.dto';
+import { EstateAnalysisReportService } from '@/modules/estate-analysis-report/services/estate-analysis-report.service';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import type { RequestWithUser } from '@/modules/auth/interfaces/request-with-user.interface';
+import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
+import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
 import {
   ApiEstateAnalysisReportController,
   ApiAnalyzeEstate,
   ApiGetAnalysisResult,
 } from './estate-analysis-report.api';
-import { EstateAnalysisReportCacheService } from '../services/estate-analysis-report-cache.service';
-import { EstateAnalysisReportMapper } from '../mapper/estate-analysis-report.mapper';
+import { EstateAnalysisReportCacheService } from '@/modules/estate-analysis-report/services/estate-analysis-report-cache.service';
+import { EstateAnalysisReportMapper } from '@/modules/estate-analysis-report/mapper/estate-analysis-report.mapper';
 
 @ApiEstateAnalysisReportController()
 @Controller('estate-analysis')

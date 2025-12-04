@@ -1,5 +1,5 @@
-import { EstateAnalysisReport } from '../entities/estate-analysis-report.entity';
-import { EstateAnalysisReportResponseDto } from '../dto/res/estate-analysis-report-response.dto';
+import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
 
 /**
  * EstateAnalysisReport 엔티티 <-> DTO 매핑 전담 클래스

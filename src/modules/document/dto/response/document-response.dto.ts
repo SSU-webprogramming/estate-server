@@ -10,19 +10,19 @@ export class DocumentResponseDto {
     description: '문서 ID',
     example: 1,
   })
-  docId: number;
+  documentId: number;
 
   @ApiProperty({
-    description: '문서 타입 (1: 등기부등본, 2: 토지대장)',
+    description: '문서 유형 (1: 등기부등본, 2: 토지대장)',
     enum: DocumentType,
     example: DocumentType.REGISTRY,
   })
-  docType: DocumentType;
+  documentType: DocumentType;
 
 
   constructor(document: Document) {
-    this.docId = document.docId;
-    this.docType = document.docType;
+    this.documentId = document.docId;
+    this.documentType = document.docType;
   }
 }
 

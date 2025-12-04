@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
 import { ConfigService } from '@nestjs/config';
-import { CustomException } from 'src/common/errors/custom-exception';
+import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
-import { AuthService } from '../services/auth.service';
-import { ProviderType } from '../../../common/enums/provider-type.enum';
+import { AuthService } from '@/modules/auth/services/auth.service';
+import { ProviderType } from '@/common/enums/provider-type.enum';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {

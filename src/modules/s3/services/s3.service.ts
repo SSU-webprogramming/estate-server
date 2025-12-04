@@ -9,7 +9,7 @@ import {
 } from '@aws-sdk/client-s3';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { S3Port } from '../../../common/ports/s3.port';
+import { S3Port } from '@/common/ports/s3.port';
 import { Readable } from 'stream';
 
 @Injectable()

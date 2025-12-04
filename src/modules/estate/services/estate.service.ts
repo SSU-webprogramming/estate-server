@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { Estate } from '../entities/estate.entity';
-import { CreateEstateDto } from '../dto/request/create-estate.dto';
-import { Document } from '../../document/entities/document.entity';
-import { S3Port } from '../../../common/ports/s3.port';
-import { EstateMapper } from '../mapper/estate.mapper';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
+import { Document } from '@/modules/document/entities/document.entity';
+import { S3Port } from '@/common/ports/s3.port';
+import { EstateMapper } from '@/modules/estate/mapper/estate.mapper';
 
 @Injectable()
 export class EstateService {

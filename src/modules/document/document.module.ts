@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Document } from './entities/document.entity';
-import { Estate } from '../estate/entities/estate.entity';
-import { DocumentService } from './services/document.service';
-import { DocumentController } from './controllers/document.controller';
-import { DocumentCleanupService } from './services/document-cleanup.service';
-import { S3Module } from '../s3/s3.module';
-import { AiProviderModule } from '../ai-provider/ai-provider.module';
-import { OcrModule } from '../ocr/ocr.module';
+import { Document } from '@/modules/document/entities/document.entity';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { DocumentService } from '@/modules/document/services/document.service';
+import { DocumentController } from '@/modules/document/controllers/document.controller';
+import { DocumentCleanupService } from '@/modules/document/services/document-cleanup.service';
+import { S3Module } from '@/modules/s3/s3.module';
+import { AiProviderModule } from '@/modules/ai-provider/ai-provider.module';
+import { OcrModule } from '@/modules/ocr/ocr.module';
 
 @Module({
   imports: [

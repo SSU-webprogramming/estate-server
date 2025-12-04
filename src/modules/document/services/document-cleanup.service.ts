@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { Document } from '../entities/document.entity';
-import { S3Port } from '../../../common/ports/s3.port';
+import { Document } from '@/modules/document/entities/document.entity';
+import { S3Port } from '@/common/ports/s3.port';
 
 /**
  * 문서 정리 배치 작업 서비스

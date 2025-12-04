@@ -10,10 +10,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { DocumentService } from '../services/document.service';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { UploadDocumentDto } from '../dto/request/upload-document.dto';
-import { DocumentResponseDto } from '../dto/response/document-response.dto';
+import { DocumentService } from '@/modules/document/services/document.service';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { UploadDocumentDto } from '@/modules/document/dto/request/upload-document.dto';
+import { DocumentResponseDto } from '@/modules/document/dto/response/document-response.dto';
 import {
   ApiDocumentController,
   ApiUploadDocument,
@@ -42,7 +42,10 @@ export class DocumentController {
     file: Express.Multer.File,
     @Query() uploadDocumentDto: UploadDocumentDto,
   ): Promise<DocumentResponseDto> {
-    const document = await this.documentService.uploadAndCreateDocument(file, uploadDocumentDto.docType);
+    const document = await this.documentService.uploadAndCreateDocument(
+      file,
+      uploadDocumentDto.documentType,
+    );
     return document;
   }
 

@@ -3,14 +3,14 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/entities/user.entity';
-import { AuthService } from './services/auth.service';
-import { AuthController } from './controllers/auth.controller';
-import { KakaoStrategy } from './strategies/kakao.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { RedisModule } from '../redis/redis.module';
-import { KakaoAuthGuard } from './guards/kakao-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { User } from '@/modules/user/entities/user.entity';
+import { AuthService } from '@/modules/auth/services/auth.service';
+import { AuthController } from '@/modules/auth/controllers/auth.controller';
+import { KakaoStrategy } from '@/modules/auth/strategies/kakao.strategy';
+import { JwtStrategy } from '@/modules/auth/strategies/jwt.strategy';
+import { RedisModule } from '@/modules/redis/redis.module';
+import { KakaoAuthGuard } from '@/modules/auth/guards/kakao-auth.guard';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),

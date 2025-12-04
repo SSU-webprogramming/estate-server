@@ -6,8 +6,8 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
-import { Estate } from '../../estate/entities/estate.entity';
-import { ProviderType } from '../../../common/enums/provider-type.enum';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { ProviderType } from '@/common/enums/provider-type.enum';
 
 /**
  * 사용자 엔티티

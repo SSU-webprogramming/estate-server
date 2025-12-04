@@ -66,13 +66,13 @@ export class AuthService {
 
   async refreshTokens(refreshTokenDto: RefreshTokenDto): Promise<{ access_token: string; refresh_token: string }> {
     // Refresh token 검증
-    const payload = this.jwtService.verify(refreshTokenDto.refresh_token, {
+    const payload = this.jwtService.verify(refreshTokenDto.refreshToken, {
       secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
     });
 
     // Redis에서 저장된 refresh token과 비교
     const storedToken = await this.redisService.get(`refresh_token:${payload.sub}`);
-    if (storedToken !== refreshTokenDto.refresh_token) {
+    if (storedToken !== refreshTokenDto.refreshToken) {
       throw new CustomException(ErrorCode.INVALID_REFRESH_TOKEN)
     }
 

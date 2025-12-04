@@ -3,10 +3,10 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class RefreshTokenDto {
   @ApiProperty({
-    description: 'Refresh token',
+    description: '리프레시 토큰',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   @IsString()
   @IsNotEmpty()
-  refresh_token: string;
+  refreshToken: string;
 }

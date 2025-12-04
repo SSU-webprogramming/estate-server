@@ -7,14 +7,14 @@ import { DocumentType } from 'src/common/enums/document-type.enum';
  */
 export class UploadDocumentDto {
   @ApiProperty({
-    name: 'docType',
-    description: '문서 타입 (1: 등기부등본, 2: 토지대장)',
+    name: 'documentType',
+    description: '문서 유형 (1: 등기부등본, 2: 토지대장)',
     enum: DocumentType,
     example: DocumentType.REGISTRY,
     required: false,
   })
   @IsOptional()
   @IsEnum(DocumentType)
-  docType?: DocumentType;
+  documentType?: DocumentType;
 }
 

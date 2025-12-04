@@ -1,6 +1,6 @@
-import { Estate } from '../entities/estate.entity';
-import { CreateEstateDto } from '../dto/request/create-estate.dto';
-import { EstateResponseDto } from '../dto/response/estate-response.dto';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
+import { EstateResponseDto } from '@/modules/estate/dto/response/estate-response.dto';
 
 /**
  * Estate 엔티티 <-> DTO 매핑 전담 클래스

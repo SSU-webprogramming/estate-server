@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
-import { User } from '../../user/entities/user.entity';
+import { User } from '@/modules/user/entities/user.entity';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
