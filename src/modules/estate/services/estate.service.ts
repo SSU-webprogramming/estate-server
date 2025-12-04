@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Estate } from '../entities/estate.entity';
-import { CreateEstateDto } from '../dto/create-estate.dto';
+import { CreateEstateDto } from '../dto/request/create-estate.dto';
 import { Document } from '../../document/entities/document.entity';
 import { S3Port } from '../../../common/ports/s3.port';
+import { EstateMapper } from '../mapper/estate.mapper';
 
 @Injectable()
 export class EstateService {
@@ -26,15 +27,9 @@ export class EstateService {
     userId: number,
     createEstateDto: CreateEstateDto,
   ): Promise<Estate> {
-    const estate = this.estateRepository.create({
-      userId,
-      address: createEstateDto.address ?? null,
-      addressDetail: createEstateDto.addressDetail ?? null,
-      contractType: createEstateDto.contractType ?? null,
-      deposit: createEstateDto.deposit ?? 0,
-      monthlyRent: createEstateDto.monthlyRent ?? 0,
-      kbMarketPrice: createEstateDto.kbMarketPrice ?? 0
-    });
+    const estate = this.estateRepository.create(
+      EstateMapper.fromCreateDto(userId, createEstateDto),
+    );
     const savedEstate = await this.estateRepository.save(estate);
 
     // documentIds가 제공된 경우 문서들을 estate에 연결

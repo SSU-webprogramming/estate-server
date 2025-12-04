@@ -8,6 +8,8 @@ import { Estate } from '../estate/entities/estate.entity';
 import { Document } from '../document/entities/document.entity';
 import { OcrModule } from '../ocr/ocr.module';
 import { S3Module } from '../s3/s3.module';
+import { RedisModule } from '../redis/redis.module';
+import { EstateAnalysisReportCacheService } from './services/estate-analysis-report-cache.service';
 
 @Module({
   imports: [
@@ -15,9 +17,10 @@ import { S3Module } from '../s3/s3.module';
     AiProviderModule,
     OcrModule,
     S3Module,
+    RedisModule.register(),
   ],
   controllers: [EstateAnalysisReportController],
-  providers: [EstateAnalysisReportService],
+  providers: [EstateAnalysisReportService, EstateAnalysisReportCacheService],
   exports: [EstateAnalysisReportService],
 })
 export class EstateAnalysisReportModule {}

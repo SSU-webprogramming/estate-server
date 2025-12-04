@@ -12,7 +12,7 @@ import {
 import { User } from '../../user/entities/user.entity';
 import { EstateAnalysisReport } from '../../estate-analysis-report/entities/estate-analysis-report.entity';
 import { Document } from '../../document/entities/document.entity';
-import { ContractType } from './contract-type.enum';
+import { ContractType } from '../../../common/enums/contract-type.enum';
 
 /**
  * 부동산 엔티티

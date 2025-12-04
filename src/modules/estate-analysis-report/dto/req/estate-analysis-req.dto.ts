@@ -9,7 +9,7 @@ import {
   IsInt,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ContractType } from '../../../estate/entities/contract-type.enum';
+import { ContractType } from '../../../../common/enums/contract-type.enum';
 
 /**
  * 부동산 분석 요청 DTO

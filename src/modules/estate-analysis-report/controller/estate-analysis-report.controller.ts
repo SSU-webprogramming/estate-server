@@ -21,12 +21,15 @@ import {
   ApiAnalyzeEstate,
   ApiGetAnalysisResult,
 } from './estate-analysis-report.api';
+import { EstateAnalysisReportCacheService } from '../services/estate-analysis-report-cache.service';
+import { EstateAnalysisReportMapper } from '../mapper/estate-analysis-report.mapper';
 
 @ApiEstateAnalysisReportController()
 @Controller('estate-analysis')
 export class EstateAnalysisReportController {
   constructor(
     private readonly estateAnalysisReportService: EstateAnalysisReportService,
+    private readonly estateAnalysisReportCacheService: EstateAnalysisReportCacheService,
   ) {}
 
   @Post()
@@ -37,10 +40,20 @@ export class EstateAnalysisReportController {
     @Req() req: RequestWithUser,
     @Body() createEstateAnalysisDto: CreateEstateAnalysisDto,
   ): Promise<EstateAnalysisReport> {
-    return this.estateAnalysisReportService.analyzeEstateWithDocuments(
-      req.user.userId,
-      createEstateAnalysisDto,
-    );
+    const analysisReport =
+      await this.estateAnalysisReportService.analyzeEstateWithDocuments(
+        req.user.userId,
+        createEstateAnalysisDto,
+      );
+
+    // 새 분석이 생성되었으므로 해당 부동산 ID 캐시 무효화
+    if (analysisReport.estateId) {
+      await this.estateAnalysisReportCacheService.invalidate(
+        analysisReport.estateId,
+      );
+    }
+
+    return analysisReport;
   }
 
   @Get(':estateId')
@@ -50,93 +63,30 @@ export class EstateAnalysisReportController {
   async getAnalysisResult(
     @Param('estateId', ParseIntPipe) estateId: number,
   ): Promise<EstateAnalysisReportResponseDto> {
+    // 1. 캐시 조회
+    const cached =
+      await this.estateAnalysisReportCacheService.get(estateId);
+    if (cached) {
+      return cached;
+    }
+
+    // 2. DB 조회
     const analysisReport =
       await this.estateAnalysisReportService.findByEstateId(estateId);
 
     if (!analysisReport) {
       // 분석이 완료되지 않은 경우 빈 DTO 반환
-      return this.mapToEmptyResponseDto();
+      return EstateAnalysisReportMapper.emptyResponse();
     }
 
     // 분석이 완료된 경우 결과를 DTO로 변환하여 반환
-    return this.mapToResponseDto(analysisReport);
+    const responseDto =
+      EstateAnalysisReportMapper.toResponseDto(analysisReport);
+
+    // 3. 캐시에 저장
+    await this.estateAnalysisReportCacheService.set(estateId, responseDto);
+
+    return responseDto;
   }
 
-  /**
-   * EstateAnalysisReport 엔티티를 ResponseDto로 변환
-   */
-  private mapToResponseDto(
-    report: EstateAnalysisReport,
-  ): EstateAnalysisReportResponseDto {
-    return {
-      id: report.id,
-      estateId: report.estateId,
-      analyzedAt: report.analyzedAt,
-      safetyScore: report.safetyScore,
-      address: report.address,
-      buildingStructure: report.buildingStructure,
-      buildingUsage: report.buildingUsage,
-      totalFloors: report.totalFloors,
-      totalLandArea: report.totalLandArea,
-      exclusiveArea: report.exclusiveArea,
-      landRightRatio: report.landRightRatio,
-      hasSeparateRegistration: report.hasSeparateRegistration,
-      isIllegalConstruction: report.isIllegalConstruction,
-      ownershipStatus: report.ownershipStatus,
-      currentOwner: report.currentOwner,
-      transferDate: report.transferDate,
-      transferCause: report.transferCause,
-      pastOwnerChangeCount: report.pastOwnerChangeCount,
-      hasOwnershipRestriction: report.hasOwnershipRestriction,
-      titleSectionAnalysisSummary: report.titleSectionAnalysisSummary,
-      titleSectionAnalysisResult: report.titleSectionAnalysisResult,
-      ownershipSectionAnalysisSummary: report.ownershipSectionAnalysisSummary,
-      ownershipSectionAnalysisResult: report.ownershipSectionAnalysisResult,
-      rightsSectionAnalysisSummary: report.rightsSectionAnalysisSummary,
-      rightsSectionAnalysisResult: report.rightsSectionAnalysisResult,
-      rightsAnalysisSummary: report.rightsAnalysisSummary,
-      recommendedContractClauses: report.recommendedContractClauses,
-      isInsuranceEligible: report.isInsuranceEligible,
-      insuranceAnalysisReasons: report.insuranceAnalysisReasons,
-      recommendedInsuranceCompanies: report.recommendedInsuranceCompanies,
-    } as unknown as EstateAnalysisReportResponseDto;
-  }
-
-  /**
-   * 빈 ResponseDto 반환 (분석이 완료되지 않은 경우)
-   */
-  private mapToEmptyResponseDto(): EstateAnalysisReportResponseDto {
-    return {
-      id: null,
-      estateId: null,
-      analyzedAt: null,
-      safetyScore: null,
-      address: null,
-      buildingStructure: null,
-      buildingUsage: null,
-      totalFloors: null,
-      totalLandArea: null,
-      exclusiveArea: null,
-      landRightRatio: null,
-      hasSeparateRegistration: null,
-      isIllegalConstruction: null,
-      ownershipStatus: null,
-      currentOwner: null,
-      transferDate: null,
-      transferCause: null,
-      pastOwnerChangeCount: null,
-      hasOwnershipRestriction: null,
-      titleSectionAnalysisSummary: null,
-      titleSectionAnalysisResult: null,
-      ownershipSectionAnalysisSummary: null,
-      ownershipSectionAnalysisResult: null,
-      rightsSectionAnalysisSummary: null,
-      rightsSectionAnalysisResult: null,
-      rightsAnalysisSummary: null,
-      recommendedContractClauses: null,
-      isInsuranceEligible: null,
-      insuranceAnalysisReasons: null,
-      recommendedInsuranceCompanies: null,
-    } as unknown as EstateAnalysisReportResponseDto;
-  }
 }
