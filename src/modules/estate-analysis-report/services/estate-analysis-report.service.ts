@@ -333,16 +333,16 @@ export class EstateAnalysisReportService {
     
     // enum 값으로 직접 매칭
     if (upperStatus === 'SAFE') {
-      return AnalysisResultStatus.안전;
+      return AnalysisResultStatus.SAFE;
     }
     if (upperStatus === 'CAUTION') {
-      return AnalysisResultStatus.주의;
+      return AnalysisResultStatus.CAUTION;
     }
     if (upperStatus === 'DANGER') {
-      return AnalysisResultStatus.위험;
+      return AnalysisResultStatus.DANGER;
     }
     if (upperStatus === 'UNKNOWN') {
-      return AnalysisResultStatus.확인불가;
+      return AnalysisResultStatus.UNKNOWN;
     }
     
     return null;

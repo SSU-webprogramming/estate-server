@@ -6,11 +6,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-
-enum Gender {
-  MALE = 'male',
-  FEMALE = 'female',
-}
+import { Gender } from '../../../common/enums/gender.enum';
 
 export class CreateUserDto {
   @ApiProperty({ description: '사용자 이름', minLength: 3 })

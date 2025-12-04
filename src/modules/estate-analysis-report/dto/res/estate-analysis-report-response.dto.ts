@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AnalysisResultStatus } from '../../entities/analysis-result-status.enum';
+import { AnalysisResultStatus } from '../../../../common/enums/analysis-result-status.enum';
 
 /**
  * 부동산 분석 리포트 응답 DTO
@@ -148,7 +148,7 @@ export class EstateAnalysisReportResponseDto {
   @ApiProperty({
     description: '표제부 분석 결과',
     enum: AnalysisResultStatus,
-    example: AnalysisResultStatus.안전,
+    example: AnalysisResultStatus.SAFE,
     nullable: true,
   })
   titleSectionAnalysisResult: AnalysisResultStatus | null;
@@ -163,7 +163,7 @@ export class EstateAnalysisReportResponseDto {
   @ApiProperty({
     description: '갑구(소유권) 분석 결과',
     enum: AnalysisResultStatus,
-    example: AnalysisResultStatus.주의,
+    example: AnalysisResultStatus.CAUTION,
     nullable: true,
   })
   ownershipSectionAnalysisResult: AnalysisResultStatus | null;
@@ -178,7 +178,7 @@ export class EstateAnalysisReportResponseDto {
   @ApiProperty({
     description: '을구(소유권 외 권리) 분석 결과',
     enum: AnalysisResultStatus,
-    example: AnalysisResultStatus.위험,
+    example: AnalysisResultStatus.DANGER,
     nullable: true,
   })
   rightsSectionAnalysisResult: AnalysisResultStatus | null;

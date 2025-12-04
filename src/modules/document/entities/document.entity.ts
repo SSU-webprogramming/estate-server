@@ -7,16 +7,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Estate } from '../../estate/entities/estate.entity';
-
-/**
- * 문서 타입
- */
-export enum DocumentType {
-  /** 등기부등본 */
-  REGISTRY = '1',
-  /** 토지대장 */
-  LAND_REGISTER = '2',
-}
+import { DocumentType } from '../../../common/enums/document-type.enum';
 
 /**
  * 문서 엔티티

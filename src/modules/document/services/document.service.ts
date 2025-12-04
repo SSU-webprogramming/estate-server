@@ -1,7 +1,8 @@
 import { Injectable, MessageEvent } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { Document, DocumentType } from '../entities/document.entity';
+import { Document } from '../entities/document.entity';
+import { DocumentType } from '../../../common/enums/document-type.enum';
 import { Estate } from '../../estate/entities/estate.entity';
 import { S3Port } from '../../../common/ports/s3.port';
 import { OcrPort } from '../../../common/ports/ocr.port';

@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { CustomException } from 'src/common/errors/custom-exception';
 import { ErrorCode } from 'src/common/errors/error';
 import { AuthService } from '../services/auth.service';
-import { ProviderType } from '../../user/entities/user.entity';
+import { ProviderType } from '../../../common/enums/provider-type.enum';
 
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {

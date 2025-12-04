@@ -8,8 +8,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { EstateService } from '../services/estate.service';
-import { CreateEstateDto } from '../dto/create-estate.dto';
-import { EstateResponseDto } from '../dto/estate-response.dto';
+import { CreateEstateDto } from '../dto/request/create-estate.dto';
+import { EstateResponseDto } from '../dto/response/estate-response.dto';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import type { RequestWithUser } from '../../auth/interfaces/request-with-user.interface';
 import {

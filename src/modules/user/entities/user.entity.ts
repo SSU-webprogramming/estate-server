@@ -7,14 +7,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Estate } from '../../estate/entities/estate.entity';
-
-/**
- * OAuth 제공자 타입
- */
-export enum ProviderType {
-  /** 카카오 */
-  KAKAO = '1',
-}
+import { ProviderType } from '../../../common/enums/provider-type.enum';
 
 /**
  * 사용자 엔티티

@@ -6,8 +6,8 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { CreateEstateDto } from '../dto/create-estate.dto';
-import { EstateResponseDto } from '../dto/estate-response.dto';
+import { CreateEstateDto } from '../dto/request/create-estate.dto';
+import { EstateResponseDto } from '../dto/response/estate-response.dto';
 
 export const ApiEstateController = () => applyDecorators(ApiTags('부동산'));
 
