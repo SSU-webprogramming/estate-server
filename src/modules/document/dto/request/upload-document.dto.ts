@@ -1,6 +1,6 @@
 import { IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { DocumentType } from '../../../../common/enums/document-type.enum';
+import { DocumentType } from 'src/common/enums/document-type.enum';
 
 /**
  * 문서 업로드 요청 DTO

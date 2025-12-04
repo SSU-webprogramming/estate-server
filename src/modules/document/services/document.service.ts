@@ -1,19 +1,19 @@
 import { Injectable, MessageEvent } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
-import { Document } from '../entities/document.entity';
-import { DocumentType } from '../../../common/enums/document-type.enum';
-import { Estate } from '../../estate/entities/estate.entity';
-import { S3Port } from '../../../common/ports/s3.port';
-import { OcrPort } from '../../../common/ports/ocr.port';
+import { Document } from '@/modules/document/entities/document.entity';
+import { DocumentType } from '@/common/enums/document-type.enum';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { S3Port } from '@/common/ports/s3.port';
+import { OcrPort } from '@/common/ports/ocr.port';
 import { v4 as uuidV4 } from 'uuid';
 import { Observable, Subject } from 'rxjs';
 import {
   FileWithMimeType,
   TextGeneratorPort,
-} from '../../estate-analysis-report/ports/text-generator.port';
-import { SYSTEM_PROMPT } from '../../estate-analysis-report/prompts/system.prompt';
-import { DocumentResponseDto } from '../dto/response/document-response.dto';
+} from '@/modules/estate-analysis-report/ports/text-generator.port';
+import { SYSTEM_PROMPT } from '@/modules/estate-analysis-report/prompts/system.prompt';
+import { DocumentResponseDto } from '@/modules/document/dto/response/document-response.dto';
 
 interface DocumentData {
   base64: string;

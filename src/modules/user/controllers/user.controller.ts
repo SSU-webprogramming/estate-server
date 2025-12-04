@@ -7,17 +7,17 @@ import {
   Delete,
   UseGuards,
 } from '@nestjs/common';
-import { UserService } from '../services/user.service';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { User } from '../entities/user.entity';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { UserService } from '@/modules/user/services/user.service';
+import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
+import { User } from '@/modules/user/entities/user.entity';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import {
   ApiUserController,
   ApiFindAllUsers,
   ApiFindOneUser,
   ApiUpdateUser,
   ApiDeleteUser,
-} from './user.api';
+} from '@/modules/user/controllers/user.api';
 
 @ApiUserController()
 @Controller('users')

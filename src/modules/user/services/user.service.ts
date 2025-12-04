@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from '../dto/request/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { User } from '../entities/user.entity';
-import { ProviderType } from '../../../common/enums/provider-type.enum';
-import { CustomException } from '../../../common/errors/custom-exception';
-import { ErrorCode } from '../../../common/errors/error';
+import { CreateUserDto } from '@/modules/user/dto/request/create-user.dto';
+import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
+import { User } from '@/modules/user/entities/user.entity';
+import { ProviderType } from '@/common/enums/provider-type.enum';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 
 @Injectable()
 export class UserService {

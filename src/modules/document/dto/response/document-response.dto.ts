@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DocumentType } from '../../../../common/enums/document-type.enum';
-import { Document } from '../../entities/document.entity';
+import { DocumentType } from '@/common/enums/document-type.enum';
+import { Document } from '@/modules/document/entities/document.entity';
 
 /**
  * 문서 응답 DTO

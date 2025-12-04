@@ -1,9 +1,9 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { User } from '../modules/user/entities/user.entity';
-import { Document } from '../modules/document/entities/document.entity';
-import { Estate } from '../modules/estate/entities/estate.entity';
-import { EstateAnalysisReport } from '../modules/estate-analysis-report/entities/estate-analysis-report.entity';
+import { User } from '@/modules/user/entities/user.entity';
+import { Document } from '@/modules/document/entities/document.entity';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
 
 export const getTypeOrmConfig = async (
   configService: ConfigService,

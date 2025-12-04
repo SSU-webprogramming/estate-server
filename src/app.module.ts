@@ -10,22 +10,22 @@ import { APP_FILTER } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
 
 // Common Modules
-import { LoggerModule } from './common/logger/logger.module';
-import { GlobalExceptionFilter } from './common/filters/http-exception.filter';
-import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { LoggerModule } from '@/common/logger/logger.module';
+import { GlobalExceptionFilter } from '@/common/filters/http-exception.filter';
+import { LoggerMiddleware } from '@/common/middleware/logger.middleware';
 
 // Feature Modules
-import { UserModule } from './modules/user/user.module';
-import { EstateAnalysisReportModule } from './modules/estate-analysis-report/estate-analysis-report.module';
-import { AuthModule } from './modules/auth/auth.module';
-import { HealthModule } from './modules/health/health.module';
-import { DocumentModule } from './modules/document/document.module';
-import { EstateModule } from './modules/estate/estate.module';
-import { RedisModule } from './modules/redis/redis.module';
+import { UserModule } from '@/modules/user/user.module';
+import { EstateAnalysisReportModule } from '@/modules/estate-analysis-report/estate-analysis-report.module';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { HealthModule } from '@/modules/health/health.module';
+import { DocumentModule } from '@/modules/document/document.module';
+import { EstateModule } from '@/modules/estate/estate.module';
+import { RedisModule } from '@/modules/redis/redis.module';
 
 // Config
-import { getTypeOrmConfig } from './config/typeorm.config';
-import redisConfig from './config/redis.config';
+import { getTypeOrmConfig } from '@/config/typeorm.config';
+import redisConfig from '@/config/redis.config';
 
 @Module({
   imports: [

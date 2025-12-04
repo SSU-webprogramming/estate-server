@@ -6,8 +6,8 @@ import {
   ApiBody,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { User } from '../entities/user.entity';
-import { UpdateUserDto } from '../dto/update-user.dto';
+import { User } from '@/modules/user/entities/user.entity';
+import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
 
 export const ApiUserController = () => applyDecorators(ApiTags('사용자'));
 

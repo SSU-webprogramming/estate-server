@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { AnalysisResultStatus } from '../../../../common/enums/analysis-result-status.enum';
+import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
 
 /**
  * 부동산 분석 리포트 응답 DTO
