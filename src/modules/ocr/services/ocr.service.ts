@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
+import axiosRetry from 'axios-retry';
 import FormData from 'form-data';
 import { v4 as uuidv4 } from 'uuid';
 import { OcrPort } from '@/common/ports/ocr.port';
@@ -10,9 +11,12 @@ export class OcrService implements OcrPort{
   private readonly apiKey: string;
   private readonly apiGateway: string;
 
+  private readonly client = axios.create();
+
   constructor(private readonly configService: ConfigService) {
     this.apiKey = this.configService.get<string>('clova.apiKey') || "";
     this.apiGateway = this.configService.get<string>('clova.apiGateway') || "";
+    axiosRetry(this.client, { retries: 3, retryDelay: axiosRetry.exponentialDelay });
   }
 
   async extractTextFromBase64Images(
@@ -42,7 +46,7 @@ export class OcrService implements OcrPort{
       });
 
       try {
-        const response = await axios.post(this.apiGateway, message, {
+        const response = await this.client.post(this.apiGateway, message, {
           headers: {
             'Content-Type': 'application/json',
             'X-OCR-SECRET': this.apiKey,
@@ -51,8 +55,8 @@ export class OcrService implements OcrPort{
 
         // 응답에서 텍스트 추출
         const text = response.data.images
-        .map((image) =>
-          image.fields.map((field) => field.inferText).join(' '),
+        .map((image: any) =>
+          image.fields.map((field: any) => field.inferText).join(' '),
         )
         .join('\n');
 
