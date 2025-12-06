@@ -6,6 +6,11 @@ import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto'
 import { EstateMapper } from '@/modules/estate/mapper/estate.mapper';
 import { EstateResponseDto } from '../dto/response/estate-response.dto';
 import { DocumentService } from '@/modules/document/services/document.service';
+import { GetEstateListDto } from '../dto/request/get-estate-list.dto';
+import {
+  PaginationResponseDto,
+  PaginationMetaDto,
+} from '@/common/dto/pagination-response.dto';
 
 @Injectable()
 export class EstateService {
@@ -16,10 +21,10 @@ export class EstateService {
   ) {}
 
   /**
-   * ¸Å¹°À» »ı¼ºÇÕ´Ï´Ù.
-   * @param userId »ç¿ëÀÚ ID
-   * @param createEstateDto ¸Å¹° »ı¼º DTO
-   * @returns »ı¼ºµÈ ¸Å¹° ¿£Æ¼Æ¼
+   * ë§¤ë¬¼ì„ ìƒì„±í•©ë‹ˆë‹¤.
+   * @param userId ì‚¬ìš©ì ID
+   * @param createEstateDto ë§¤ë¬¼ ìƒì„± DTO
+   * @returns ìƒì„±ëœ ë§¤ë¬¼ ì—”í‹°í‹°
    */
   async create(
     userId: number,
@@ -30,7 +35,7 @@ export class EstateService {
     );
     const savedEstate = await this.estateRepository.save(estate);
 
-    // documentIds°¡ ÀÖ´Â °æ¿ì ¹®¼­¸¦ estate¿¡ ¿¬°á
+    // documentIdsê°€ ìˆëŠ” ê²½ìš° ë¬¸ì„œë¥¼ estateì— ì—°ê²°
     if (createEstateDto.documentIds && createEstateDto.documentIds.length > 0) {
       await this.documentService.attachDocumentsToEstate(
         createEstateDto.documentIds,
@@ -39,6 +44,38 @@ export class EstateService {
     }
 
     return EstateMapper.toResponseDto(savedEstate);
+  }
+
+  /**
+   * ë¶€ë™ì‚° ëª©ë¡ì„ í˜ì´ì§•í•˜ì—¬ ì¡°íšŒí•©ë‹ˆë‹¤.
+   * @param userId ì‚¬ìš©ì ID
+   * @param getEstateListDto í˜ì´ì§• ìš”ì²­ DTO
+   * @returns í˜ì´ì§•ëœ ë¶€ë™ì‚° ëª©ë¡
+   */
+  async findAllWithPagination(
+    userId: number,
+    getEstateListDto: GetEstateListDto,
+  ): Promise<PaginationResponseDto<EstateResponseDto>> {
+    const [estates, total] = await this.estateRepository.findAndCount({
+      where: { userId },
+      skip: getEstateListDto.skip,
+      take: getEstateListDto.limit,
+      relations: ['user', 'documents', 'analysisResult'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    const estateDtos = estates.map((estate) =>
+      EstateMapper.toResponseDto(estate),
+    );
+    const meta = new PaginationMetaDto(
+      getEstateListDto.page,
+      getEstateListDto.limit,
+      total,
+    );
+
+    return new PaginationResponseDto(estateDtos, meta);
   }
 
   async findAll(): Promise<Estate[]> {

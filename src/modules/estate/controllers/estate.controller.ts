@@ -6,14 +6,22 @@ import {
   Req,
   HttpCode,
   HttpStatus,
+  Get,
+  Query,
 } from '@nestjs/common';
 import { EstateService } from '@/modules/estate/services/estate.service';
 import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
 import { EstateResponseDto } from '@/modules/estate/dto/response/estate-response.dto';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '@/modules/auth/guards/roles.guard';
+import { Roles } from '@/modules/auth/decorators/roles.decorator';
+import { UserRole } from '@/common/enums/user-role.enum';
+import { GetEstateListDto } from '@/modules/estate/dto/request/get-estate-list.dto';
+import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
 import {
   ApiEstateController,
   ApiCreateEstate,
+  ApiGetEstateList,
 } from '@/modules/estate/swagger/estate.api';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
@@ -40,5 +48,16 @@ export class EstateController {
       createEstateDto,
     );
     return estateResponse;
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.USER)
+  @ApiGetEstateList()
+  async findAll(
+    @GetUser() user: User,
+    @Query() getEstateListDto: GetEstateListDto,
+  ): Promise<PaginationResponseDto<EstateResponseDto>> {
+    return this.estateService.findAllWithPagination(user.userId, getEstateListDto);
   }
 }
