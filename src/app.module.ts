@@ -28,6 +28,8 @@ import { TermModule } from '@/modules/term/term.module';
 // Config
 import { getTypeOrmConfig } from '@/config/typeorm.config';
 import redisConfig from '@/config/redis.config';
+import { HttpClientModule } from '@/common/http/http-client.module';
+import { CacheModule } from '@/common/cache/cache.module';
 
 @Module({
   imports: [
@@ -36,12 +38,20 @@ import redisConfig from '@/config/redis.config';
       load: [redisConfig],
     }),
     ScheduleModule.forRoot(),
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100,
-    }]),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: 60000,
+          limit: 100,
+        },
+      ],
+    }),
     LoggerModule, // Winston log
     RedisModule.register(),
+    HttpClientModule,
+    CacheModule,
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

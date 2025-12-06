@@ -10,8 +10,8 @@ export class RedisModule {
       provide: 'REDIS_CLIENT',
       useFactory: (configService: ConfigService) => {
         return new Redis({
-          host: configService.get<string>('REDIS_HOST'),
-          port: configService.get<number>('REDIS_PORT'),
+          host: configService.get<string>('redis.host'),
+          port: configService.get<number>('redis.port'),
         });
       },
       inject: [ConfigService],
