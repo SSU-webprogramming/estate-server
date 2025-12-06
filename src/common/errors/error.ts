@@ -27,6 +27,7 @@ export enum ErrorCode {
   TOKEN_NOT_FOUND = 'AUTH001',
   KAKAO_VAL_NOT_FOUND = 'AUTH002',
   INVALID_REFRESH_TOKEN = 'AUTH003',
+  ACCESS_DENIED = 'AUTH004',
 }
 
 export const ErrorDictionary: Record<
@@ -102,5 +103,9 @@ export const ErrorDictionary: Record<
   [ErrorCode.INVALID_REFRESH_TOKEN]: {
     status: HttpStatus.BAD_REQUEST,
     message: '올바르지 않은 리프레시 토큰입니다.',
+  },
+  [ErrorCode.ACCESS_DENIED]: {
+    status: HttpStatus.FORBIDDEN,
+    message: '접근 권한이 없습니다.',
   },
 };

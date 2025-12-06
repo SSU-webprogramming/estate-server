@@ -18,7 +18,12 @@ import {
   ApiFindOneUser,
   ApiUpdateUser,
   ApiDeleteUser,
+  ApiDeleteUsers,
 } from '@/modules/user/swagger/user.api';
+import { Roles } from '@/modules/auth/decorators/roles.decorator';
+import { RolesGuard } from '@/modules/auth/guards/roles.guard';
+import { UserRole } from '@/common/enums/user-role.enum';
+import { DeleteUsersDto } from '@/modules/user/dto/request/delete-users.dto';
 
 @ApiUserController()
 @Controller('users')
@@ -57,5 +62,13 @@ export class UserController {
   @ApiDeleteUser()
   remove(@Param('id') id: string): Promise<void> {
     return this.userService.remove(+id);
+  }
+
+  @Delete()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiDeleteUsers()
+  deleteUsers(@Body() deleteUsersDto: DeleteUsersDto): Promise<void> {
+    return this.userService.deleteUsers(deleteUsersDto.userIds);
   }
 }

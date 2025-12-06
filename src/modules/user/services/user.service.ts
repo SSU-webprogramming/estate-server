@@ -50,4 +50,9 @@ export class UserService {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
   }
+
+  async deleteUsers(userIds: number[]): Promise<void> {
+    if (userIds.length === 0) return;
+    await this.userRepository.delete(userIds);
+  }
 }

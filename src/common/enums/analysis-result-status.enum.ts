@@ -8,5 +8,3 @@ export enum AnalysisResultStatus {
   /** Unknown */
   UNKNOWN = 'UNKNOWN',
 }
-
-

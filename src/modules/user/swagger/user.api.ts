@@ -56,5 +56,28 @@ export const ApiDeleteUser = () =>
       description: '사용자가 성공적으로 삭제되었습니다.',
     }),
     ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' }),
+    ApiResponse({ status: 404, description: '사용자를 찾을 수 없습니다.' }),
+  );
+
+export const ApiDeleteUsers = () =>
+  applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({ summary: '사용자 목록 삭제 (Admin only)' }),
+    ApiResponse({
+      status: 200,
+      description: '사용자들이 성공적으로 삭제되었습니다.',
+    }),
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          userIds: {
+            type: 'array',
+            items: { type: 'number' },
+            example: [1, 2, 3],
+          },
+        },
+      },
+    }),
   );
 
