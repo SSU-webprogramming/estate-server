@@ -6,6 +6,7 @@ import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto'
 import { Document } from '@/modules/document/entities/document.entity';
 import { S3Port } from '@/common/ports/s3.port';
 import { EstateMapper } from '@/modules/estate/mapper/estate.mapper';
+import { EstateResponseDto } from '../dto/response/estate-response.dto';
 
 @Injectable()
 export class EstateService {
@@ -26,7 +27,7 @@ export class EstateService {
   async create(
     userId: number,
     createEstateDto: CreateEstateDto,
-  ): Promise<Estate> {
+  ): Promise<EstateResponseDto> {
     const estate = this.estateRepository.create(
       EstateMapper.fromCreateDto(userId, createEstateDto),
     );
@@ -37,7 +38,7 @@ export class EstateService {
       await this.linkDocumentsToEstate(savedEstate.estateId, createEstateDto.documentIds);
     }
 
-    return savedEstate;
+    return EstateMapper.toResponseDto(savedEstate);
   }
 
   /**

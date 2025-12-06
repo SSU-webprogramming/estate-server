@@ -18,7 +18,7 @@ import {
   ApiFindOneUser,
   ApiUpdateUser,
   ApiDeleteUser,
-} from '@/modules/user/controllers/user.api';
+} from '@/modules/user/swagger/user.api';
 
 @ApiUserController()
 @Controller('users')

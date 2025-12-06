@@ -12,7 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DocumentService } from '@/modules/document/services/document.service';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { UploadDocumentDto } from '@/modules/document/dto/request/upload-document.dto';
+import { UploadDocumentDto } from '@/modules/document/dto/request/document-request.dto';
 import { DocumentResponseDto } from '@/modules/document/dto/response/document-response.dto';
 import {
   ApiDocumentController,
