@@ -18,5 +18,6 @@ import { OcrModule } from '@/modules/ocr/ocr.module';
   ],
   controllers: [DocumentController],
   providers: [DocumentService, DocumentCleanupService],
+  exports: [DocumentService],
 })
 export class DocumentModule {}
