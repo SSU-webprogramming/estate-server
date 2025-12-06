@@ -1,11 +1,12 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { TermResponseDto } from '@/modules/term/dto/response/term-response.dto';
 
-export const ApiTermController = () => applyDecorators(ApiTags('Terms'));
+export const ApiTermController = () => applyDecorators(ApiTags('약관'));
 
 export const ApiGetTerms = () =>
   applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({ summary: '모든 약관 목록 조회' }),
     ApiResponse({
       status: 200,
@@ -16,6 +17,7 @@ export const ApiGetTerms = () =>
 
 export const ApiCreateTerm = () =>
   applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({ summary: '약관 생성' }),
     ApiResponse({
       status: 201,
@@ -26,6 +28,7 @@ export const ApiCreateTerm = () =>
 
 export const ApiUpdateTerm = () =>
   applyDecorators(
+    ApiBearerAuth(),
     ApiOperation({ summary: '약관 수정' }),
     ApiResponse({
       status: 200,
