@@ -58,7 +58,8 @@ export class UserController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiDeleteUser()
   remove(@Param('id') id: string): Promise<void> {
     return this.userService.remove(+id);
