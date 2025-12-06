@@ -24,7 +24,6 @@ import {
   ApiGetDocument,
   ApiGetDocuments,
 } from '../swagger/document.api';
-import { DocumentMapper } from '@/modules/document/mappers/document.mapper';
 import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/user/entities/user.entity';
 

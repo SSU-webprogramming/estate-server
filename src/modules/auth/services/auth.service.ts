@@ -105,4 +105,9 @@ export class AuthService {
     // 이전 refresh token 삭제
     await this.redisService.del(`refresh_token:${user.userId}`);
   }
+
+  getFrontendRedirectUrl(tokens: { access_token: string; refresh_token: string }): string {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+    return `${frontendUrl}/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`;
+  }
 }

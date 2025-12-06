@@ -11,6 +11,9 @@ import { S3Port } from '@/common/ports/s3.port';
 import { isEmpty } from '@/common/utils/string.util';
 import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
+import { EstateAnalysisReportResponseDto } from '../dto/res/estate-analysis-report-response.dto';
+import { EstateAnalysisReportMapper } from '../mapper/estate-analysis-report.mapper';
+import { EstateAnalysisReportCacheService } from './estate-analysis-report-cache.service';
 
 @Injectable()
 export class EstateAnalysisReportService {
@@ -24,6 +27,7 @@ export class EstateAnalysisReportService {
     private readonly textGeneratorPort: TextGeneratorPort,
     private readonly ocrPort: OcrPort,
     private readonly s3Port: S3Port,
+    private readonly estateAnalysisReportCacheService: EstateAnalysisReportCacheService,
   ) {}
 
   async analyzeEsate(fileBuffer: Buffer, mimeType: string): Promise<string> {
@@ -46,7 +50,7 @@ export class EstateAnalysisReportService {
   async analyzeEstateWithDocuments(
     userId: number,
     createEstateAnalysisDto: CreateEstateAnalysisDto,
-  ): Promise<EstateAnalysisReport> {
+  ): Promise<EstateAnalysisReportResponseDto> {
     // 1. Estate 엔티티 생성 및 저장
     const estate = this.estateRepository.create({
       userId,
@@ -137,7 +141,13 @@ export class EstateAnalysisReportService {
       recommendedInsuranceCompanies: parsedAnalysis.recommendedInsuranceCompanies || null,
     });
     console.log('analysisReport', analysisReport);
-    return await this.analysisReportRepository.save(analysisReport);
+    const savedReport = await this.analysisReportRepository.save(analysisReport);
+
+    if (savedReport.estateId) {
+      await this.estateAnalysisReportCacheService.invalidate(savedReport.estateId);
+    }
+
+    return EstateAnalysisReportMapper.toResponseDto(savedReport);
   }
 
   /**
@@ -313,6 +323,24 @@ export class EstateAnalysisReportService {
     return await this.analysisReportRepository.findOne({
       where: { estateId },
     });
+  }
+
+  async getAnalysisResult(estateId: number): Promise<EstateAnalysisReportResponseDto> {
+    const cached = await this.estateAnalysisReportCacheService.get(estateId);
+    if (cached) {
+      return cached;
+    }
+
+    const analysisReport = await this.findByEstateId(estateId);
+
+    if (!analysisReport) {
+      return EstateAnalysisReportMapper.emptyResponse();
+    }
+
+    const responseDto = EstateAnalysisReportMapper.toResponseDto(analysisReport);
+    await this.estateAnalysisReportCacheService.set(estateId, responseDto);
+
+    return responseDto;
   }
 
   /**

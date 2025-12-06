@@ -47,8 +47,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiFindOneUser()
   async findOne(@Param('id') id: string): Promise<UserResponseDto> {
-    const user = await this.userService.findOne(+id);
-    return UserMapper.toResponseDto(user);
+    return this.userService.findOne(+id);
   }
 
   @Put(':id')
@@ -58,8 +57,7 @@ export class UserController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserResponseDto> {
-    const user = await this.userService.update(+id, updateUserDto);
-    return UserMapper.toResponseDto(user);
+    return this.userService.update(+id, updateUserDto);
   }
 
   @Delete(':id')

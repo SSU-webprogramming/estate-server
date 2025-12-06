@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from '@/modules/user/dto/request/create-user.dto';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
 import { User } from '@/modules/user/entities/user.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
-import { GetUserListDto } from '../dto/request/get-user-list.dto';
+import { GetUserListDto } from '@/modules/user/dto/request/get-user-list.dto';
 import {
   PaginationResponseDto,
   PaginationMetaDto,
 } from '@/common/dto/pagination-response.dto';
-import { UserResponseDto } from '../dto/response/user-response.dto';
-import { UserMapper } from '../mapper/user.mapper';
+import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
+import { UserMapper } from '@/modules/user/mapper/user.mapper';
 import { Like } from 'typeorm';
 
 @Injectable()
@@ -57,12 +56,12 @@ export class UserService {
     return new PaginationResponseDto(userDtos, meta);
   }
 
-  async findOne(userId: number): Promise<User> {
+  async findOne(userId: number): Promise<UserResponseDto> {
     const user = await this.userRepository.findOne({ where: { userId } });
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
-    return user;
+    return UserMapper.toResponseDto(user);
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -76,10 +75,14 @@ export class UserService {
     return this.userRepository.findOne({ where: { providerType, providerId } });
   }
 
-  async update(userId: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.findOne(userId);
+  async update(userId: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+    const user = await this.userRepository.findOne({ where: { userId } });
+    if (!user) {
+      throw new CustomException(ErrorCode.USER_NOT_FOUND);
+    }
     Object.assign(user, updateUserDto);
-    return this.userRepository.save(user);
+    const savedUser = await this.userRepository.save(user);
+    return UserMapper.toResponseDto(savedUser);
   }
 
   async remove(userId: number): Promise<void> {
