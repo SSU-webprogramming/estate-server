@@ -19,7 +19,7 @@ import {
   ApiEstateAnalysisReportController,
   ApiAnalyzeEstate,
   ApiGetAnalysisResult,
-} from './estate-analysis-report.api';
+} from '../swagger/estate-analysis-report.api';
 import { EstateAnalysisReportCacheService } from '@/modules/estate-analysis-report/services/estate-analysis-report-cache.service';
 import { EstateAnalysisReportMapper } from '@/modules/estate-analysis-report/mapper/estate-analysis-report.mapper';
 

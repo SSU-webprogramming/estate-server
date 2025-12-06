@@ -17,7 +17,7 @@ import { DocumentResponseDto } from '@/modules/document/dto/response/document-re
 import {
   ApiDocumentController,
   ApiUploadDocument,
-} from './document.api';
+} from '../swagger/document.api';
 
 @ApiDocumentController()
 @Controller()

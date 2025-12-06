@@ -15,7 +15,7 @@ import type { RequestWithUser } from '@/modules/auth/interfaces/request-with-use
 import {
   ApiEstateController,
   ApiCreateEstate,
-} from './estate.api';
+} from '../swagger/estate.api';
 
 /**
  * 부동산 컨트롤러

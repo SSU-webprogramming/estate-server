@@ -12,7 +12,7 @@ import {
   ApiKakaoLoginCallback,
   ApiRefreshToken,
   ApiLogout,
-} from './auth.api';
+} from '../swagger/auth.api';
 
 @ApiAuthController()
 @Controller('auth')
