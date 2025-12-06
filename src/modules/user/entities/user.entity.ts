@@ -101,4 +101,13 @@ export class User {
   /** 사용자가 업로드한 문서 목록 */
   @OneToMany(() => Document, (document) => document.user)
   documents: Document[];
+
+  /** 약관 동의 내역 (JSON) */
+  @Column({
+    name: 'agreed_terms',
+    type: 'json',
+    nullable: true,
+    comment: '약관 동의 내역 (key: term_id, value: boolean)',
+  })
+  agreedTerms: Record<string, boolean> | null;
 }

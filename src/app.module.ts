@@ -22,6 +22,7 @@ import { HealthModule } from '@/modules/health/health.module';
 import { DocumentModule } from '@/modules/document/document.module';
 import { EstateModule } from '@/modules/estate/estate.module';
 import { RedisModule } from '@/modules/redis/redis.module';
+import { TermModule } from '@/modules/term/term.module';
 
 // Config
 import { getTypeOrmConfig } from '@/config/typeorm.config';
@@ -49,6 +50,7 @@ import redisConfig from '@/config/redis.config';
     AuthModule,
     DocumentModule,
     EstateModule,
+    TermModule,
   ],
   providers: [
     {
