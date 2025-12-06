@@ -13,6 +13,8 @@ import {
   ApiRefreshToken,
   ApiLogout,
 } from '../swagger/auth.api';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+import { User } from '@/modules/user/entities/user.entity';
 
 @ApiAuthController()
 @Controller('auth')
@@ -66,8 +68,8 @@ export class AuthController {
   @Delete('logout')
   @UseGuards(JwtAuthGuard)
   @ApiLogout()
-  async logout(@Req() req: RequestWithUser): Promise<{ message: string }> {
-    await this.authService.logout(req.user.userId);
+  async logout(@GetUser() user: User): Promise<{ message: string }> {
+    await this.authService.logout(user.userId);
     return { message: 'Logged out successfully' };
   }
 }

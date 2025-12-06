@@ -6,13 +6,11 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
-  Req,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
 import { EstateAnalysisReportService } from '@/modules/estate-analysis-report/services/estate-analysis-report.service';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import type { RequestWithUser } from '@/modules/auth/interfaces/request-with-user.interface';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
 import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
 import {
@@ -22,6 +20,8 @@ import {
 } from '../swagger/estate-analysis-report.api';
 import { EstateAnalysisReportCacheService } from '@/modules/estate-analysis-report/services/estate-analysis-report-cache.service';
 import { EstateAnalysisReportMapper } from '@/modules/estate-analysis-report/mapper/estate-analysis-report.mapper';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+import { User } from '@/modules/user/entities/user.entity';
 
 @ApiEstateAnalysisReportController()
 @Controller('estate-analysis')
@@ -36,12 +36,12 @@ export class EstateAnalysisReportController {
   @HttpCode(HttpStatus.CREATED)
   @ApiAnalyzeEstate()
   async analyzeEstate(
-    @Req() req: RequestWithUser,
+    @GetUser() user: User,
     @Body() createEstateAnalysisDto: CreateEstateAnalysisDto,
   ): Promise<EstateAnalysisReportResponseDto> {
     const analysisReport =
       await this.estateAnalysisReportService.analyzeEstateWithDocuments(
-        req.user.userId,
+        user.userId,
         createEstateAnalysisDto,
       );
 
