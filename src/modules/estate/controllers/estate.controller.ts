@@ -52,7 +52,6 @@ export class EstateController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.USER)
   @ApiGetEstateList()
   async findAll(
     @GetUser() user: User,

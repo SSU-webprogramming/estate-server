@@ -5,20 +5,50 @@ import {
   ApiResponse,
   ApiBody,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
+import { DeleteUsersDto } from '@/modules/user/dto/request/delete-users.dto';
+import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
 
 export const ApiUserController = () => applyDecorators(ApiTags('사용자'));
 
 export const ApiFindAllUsers = () =>
   applyDecorators(
     ApiBearerAuth(),
-    ApiOperation({ summary: '모든 사용자 조회' }),
+    ApiOperation({
+      summary: '모든 사용자 조회',
+      description: '모든 사용자의 정보를 페이징하여 조회합니다.',
+    }),
+    ApiQuery({
+      name: 'page',
+      required: false,
+      description: '페이지 번호 (기본값: 1)',
+      type: Number,
+    }),
+    ApiQuery({
+      name: 'limit',
+      required: false,
+      description: '페이지당 항목 수 (기본값: 10)',
+      type: Number,
+    }),
+    ApiQuery({
+      name: 'name',
+      required: false,
+      description: '이름 검색',
+      type: String,
+    }),
+    ApiQuery({
+      name: 'email',
+      required: false,
+      description: '이메일 검색',
+      type: String,
+    }),
     ApiResponse({
       status: 200,
-      description: '모든 사용자를 반환합니다.',
-      type: [UserResponseDto],
+      description: '모든 사용자 정보 조회 성공',
+      type: PaginationResponseDto,
     }),
   );
 

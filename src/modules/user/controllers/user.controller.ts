@@ -6,6 +6,7 @@ import {
   Put,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from '@/modules/user/services/user.service';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
@@ -24,6 +25,8 @@ import { Roles } from '@/modules/auth/decorators/roles.decorator';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
 import { UserRole } from '@/common/enums/user-role.enum';
 import { DeleteUsersDto } from '@/modules/user/dto/request/delete-users.dto';
+import { GetUserListDto } from '@/modules/user/dto/request/get-user-list.dto';
+import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
 
 @ApiUserController()
 @Controller('users')
@@ -31,11 +34,13 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiFindAllUsers()
-  async findAll(): Promise<UserResponseDto[]> {
-    const users = await this.userService.findAll();
-    return UserMapper.toResponseDtoList(users);
+  async findAll(
+    @Query() getUserListDto: GetUserListDto,
+  ): Promise<PaginationResponseDto<UserResponseDto>> {
+    return this.userService.findAllWithPagination(getUserListDto);
   }
 
   @Get(':id')
@@ -59,7 +64,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.USER)
   @ApiDeleteUser()
   remove(@Param('id') id: string): Promise<void> {
     return this.userService.remove(+id);

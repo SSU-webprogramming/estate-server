@@ -7,6 +7,14 @@ import { User } from '@/modules/user/entities/user.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
+import { GetUserListDto } from '../dto/request/get-user-list.dto';
+import {
+  PaginationResponseDto,
+  PaginationMetaDto,
+} from '@/common/dto/pagination-response.dto';
+import { UserResponseDto } from '../dto/response/user-response.dto';
+import { UserMapper } from '../mapper/user.mapper';
+import { Like } from 'typeorm';
 
 @Injectable()
 export class UserService {
@@ -17,6 +25,36 @@ export class UserService {
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
+  }
+
+  async findAllWithPagination(
+    getUserListDto: GetUserListDto,
+  ): Promise<PaginationResponseDto<UserResponseDto>> {
+    const where: any = {};
+    if (getUserListDto.name) {
+      where.username = Like(`%${getUserListDto.name}%`);
+    }
+    if (getUserListDto.email) {
+      where.email = Like(`%${getUserListDto.email}%`);
+    }
+
+    const [users, total] = await this.userRepository.findAndCount({
+      where,
+      skip: getUserListDto.skip,
+      take: getUserListDto.limit,
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    const userDtos = UserMapper.toResponseDtoList(users);
+    const meta = new PaginationMetaDto(
+      getUserListDto.page,
+      getUserListDto.limit,
+      total,
+    );
+
+    return new PaginationResponseDto(userDtos, meta);
   }
 
   async findOne(userId: number): Promise<User> {
