@@ -11,6 +11,8 @@ import {
   PaginationResponseDto,
   PaginationMetaDto,
 } from '@/common/dto/pagination-response.dto';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 
 @Injectable()
 export class EstateService {
@@ -113,6 +115,23 @@ export class EstateService {
     if (result.affected === 0) {
       throw new Error(`Estate with id ${estateId} not found`);
     }
+  }
+
+  /**
+   * 매물을 삭제합니다.
+   * @param userId 사용자 ID
+   * @param estateId 매물 ID
+   */
+  async deleteEstate(userId: number, estateId: number): Promise<void> {
+    const estate = await this.estateRepository.findOne({
+      where: { estateId, userId },
+    });
+
+    if (!estate) {
+      throw new CustomException(ErrorCode.ESTATE_NOT_FOUND);
+    }
+
+    await this.estateRepository.softDelete(estateId);
   }
 }
 

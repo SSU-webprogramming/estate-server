@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
   OneToOne,
   OneToMany,
@@ -117,6 +118,15 @@ export class Estate {
     comment: '수정 일시'
   })
   updatedAt: Date;
+
+  /** 삭제 일시 */
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp',
+    nullable: true,
+    comment: '삭제 일시',
+  })
+  deletedAt: Date | null;
 
   /** 부동산 분석 결과 */
   @OneToOne(() => EstateAnalysisReport, (analysisResult) => analysisResult.estate)

@@ -8,6 +8,9 @@ import {
   HttpStatus,
   Get,
   Query,
+  Delete,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { EstateService } from '@/modules/estate/services/estate.service';
 import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
@@ -22,6 +25,7 @@ import {
   ApiEstateController,
   ApiCreateEstate,
   ApiGetEstateList,
+  ApiDeleteEstate,
 } from '@/modules/estate/swagger/estate.api';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
@@ -58,5 +62,16 @@ export class EstateController {
     @Query() getEstateListDto: GetEstateListDto,
   ): Promise<PaginationResponseDto<EstateResponseDto>> {
     return this.estateService.findAllWithPagination(user.userId, getEstateListDto);
+  }
+
+  @Delete(':estateId')
+  @UseGuards(JwtAuthGuard)
+  @ApiDeleteEstate()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async remove(
+    @GetUser() user: User,
+    @Param('estateId', ParseIntPipe) estateId: number,
+  ): Promise<void> {
+    await this.estateService.deleteEstate(user.userId, estateId);
   }
 }

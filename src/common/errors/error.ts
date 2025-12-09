@@ -4,6 +4,7 @@ export enum ErrorCode {
   // Common
   INTERNAL_SERVER_ERROR = 'E001',
   INVALID_INPUT_VALUE = 'E002',
+  ESTATE_NOT_FOUND = 'E003',
 
   // User
   USER_NOT_FOUND = 'U001',
@@ -43,6 +44,10 @@ export const ErrorDictionary: Record<
   [ErrorCode.INVALID_INPUT_VALUE]: {
     status: HttpStatus.BAD_REQUEST,
     message: '입력값이 올바르지 않습니다.',
+  },
+  [ErrorCode.ESTATE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '매물을 찾을 수 없습니다.',
   },
   [ErrorCode.USER_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,

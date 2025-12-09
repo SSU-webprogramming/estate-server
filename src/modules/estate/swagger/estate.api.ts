@@ -73,3 +73,24 @@ export const ApiGetEstateList = () =>
     }),
   );
 
+export const ApiDeleteEstate = () =>
+  applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({
+      summary: '부동산 삭제',
+      description: '부동산을 삭제합니다 (Soft Delete).',
+    }),
+    ApiResponse({
+      status: 204,
+      description: '삭제 성공',
+    }),
+    ApiResponse({
+      status: 403,
+      description: '권한 없음',
+    }),
+    ApiResponse({
+      status: 404,
+      description: '매물 없음',
+    }),
+  );
+
