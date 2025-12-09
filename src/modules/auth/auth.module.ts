@@ -11,6 +11,8 @@ import { JwtStrategy } from '@/modules/auth/strategies/jwt.strategy';
 import { RedisModule } from '@/modules/redis/redis.module';
 import { KakaoAuthGuard } from '@/modules/auth/guards/kakao-auth.guard';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '@/modules/auth/guards/roles.guard';
+import { TermModule } from '@/modules/term/term.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
@@ -24,9 +26,10 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    TermModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, KakaoStrategy, JwtStrategy, KakaoAuthGuard, JwtAuthGuard],
-  exports: [KakaoAuthGuard, JwtAuthGuard]
+  providers: [AuthService, KakaoStrategy, JwtStrategy, KakaoAuthGuard, JwtAuthGuard, RolesGuard],
+  exports: [KakaoAuthGuard, JwtAuthGuard, RolesGuard]
 })
 export class AuthModule {}

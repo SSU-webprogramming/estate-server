@@ -6,29 +6,34 @@ import {
   Param,
   ParseIntPipe,
   UseGuards,
-  Req,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  Query,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { EstateAnalysisReportService } from '@/modules/estate-analysis-report/services/estate-analysis-report.service';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import type { RequestWithUser } from '@/modules/auth/interfaces/request-with-user.interface';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
+import { SearchEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/search-estate-analysis.dto';
 import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
+import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
 import {
   ApiEstateAnalysisReportController,
   ApiAnalyzeEstate,
   ApiGetAnalysisResult,
-} from './estate-analysis-report.api';
-import { EstateAnalysisReportCacheService } from '@/modules/estate-analysis-report/services/estate-analysis-report-cache.service';
+  ApiSearchEstateAnalysis,
+} from '../swagger/estate-analysis-report.api';
 import { EstateAnalysisReportMapper } from '@/modules/estate-analysis-report/mapper/estate-analysis-report.mapper';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+import { User } from '@/modules/user/entities/user.entity';
 
 @ApiEstateAnalysisReportController()
 @Controller('estate-analysis')
 export class EstateAnalysisReportController {
   constructor(
     private readonly estateAnalysisReportService: EstateAnalysisReportService,
-    private readonly estateAnalysisReportCacheService: EstateAnalysisReportCacheService,
   ) {}
 
   @Post()
@@ -36,23 +41,13 @@ export class EstateAnalysisReportController {
   @HttpCode(HttpStatus.CREATED)
   @ApiAnalyzeEstate()
   async analyzeEstate(
-    @Req() req: RequestWithUser,
+    @GetUser() user: User,
     @Body() createEstateAnalysisDto: CreateEstateAnalysisDto,
   ): Promise<EstateAnalysisReportResponseDto> {
-    const analysisReport =
-      await this.estateAnalysisReportService.analyzeEstateWithDocuments(
-        req.user.userId,
-        createEstateAnalysisDto,
-      );
-
-    // 새 분석이 생성되었으므로 해당 부동산 ID 캐시 무효화
-    if (analysisReport.estateId) {
-      await this.estateAnalysisReportCacheService.invalidate(
-        analysisReport.estateId,
-      );
-    }
-
-    return EstateAnalysisReportMapper.toResponseDto(analysisReport);
+    return this.estateAnalysisReportService.analyzeEstateWithDocuments(
+      user.userId,
+      createEstateAnalysisDto,
+    );
   }
 
   @Get(':estateId')
@@ -62,30 +57,19 @@ export class EstateAnalysisReportController {
   async getAnalysisResult(
     @Param('estateId', ParseIntPipe) estateId: number,
   ): Promise<EstateAnalysisReportResponseDto> {
-    // 1. 캐시 조회
-    const cached =
-      await this.estateAnalysisReportCacheService.get(estateId);
-    if (cached) {
-      return cached;
-    }
-
-    // 2. DB 조회
-    const analysisReport =
-      await this.estateAnalysisReportService.findByEstateId(estateId);
-
-    if (!analysisReport) {
-      // 분석이 완료되지 않은 경우 빈 DTO 반환
-      return EstateAnalysisReportMapper.emptyResponse();
-    }
-
-    // 분석이 완료된 경우 결과를 DTO로 변환하여 반환
-    const responseDto =
-      EstateAnalysisReportMapper.toResponseDto(analysisReport);
-
-    // 3. 캐시에 저장
-    await this.estateAnalysisReportCacheService.set(estateId, responseDto);
-
-    return responseDto;
+    return this.estateAnalysisReportService.getAnalysisResult(estateId);
   }
 
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(1200)
+  @ApiSearchEstateAnalysis()
+  async findAll(
+    @GetUser() user: User,
+    @Query() query: SearchEstateAnalysisDto,
+  ): Promise<PaginationResponseDto<EstateAnalysisReportResponseDto>> {
+    return this.estateAnalysisReportService.findAll(user.userId, query);
+  }
 }

@@ -4,9 +4,11 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
 import { Estate } from '@/modules/estate/entities/estate.entity';
+import { Document } from '@/modules/document/entities/document.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 
 /**
@@ -96,4 +98,26 @@ export class User {
   /** 사용자가 소유한 부동산 목록 */
   @OneToMany(() => Estate, (estate) => estate.user)
   estates: Estate[];
+
+  /** 사용자가 업로드한 문서 목록 */
+  @OneToMany(() => Document, (document) => document.user)
+  documents: Document[];
+
+  /** 약관 동의 내역 (JSON) */
+  @Column({
+    name: 'agreed_terms',
+    type: 'json',
+    nullable: true,
+    comment: '약관 동의 내역 (key: term_id, value: boolean)',
+  })
+  agreedTerms: Record<string, boolean> | null;
+
+  /** 삭제 일시 */
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp',
+    nullable: true,
+    comment: '삭제 일시',
+  })
+  deletedAt: Date | null;
 }

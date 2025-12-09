@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 
 // Common Modules
 import { LoggerModule } from '@/common/logger/logger.module';
@@ -22,10 +23,13 @@ import { HealthModule } from '@/modules/health/health.module';
 import { DocumentModule } from '@/modules/document/document.module';
 import { EstateModule } from '@/modules/estate/estate.module';
 import { RedisModule } from '@/modules/redis/redis.module';
+import { TermModule } from '@/modules/term/term.module';
 
 // Config
 import { getTypeOrmConfig } from '@/config/typeorm.config';
 import redisConfig from '@/config/redis.config';
+import { HttpClientModule } from '@/common/http/http-client.module';
+import { CacheModule } from '@/common/cache/cache.module';
 
 @Module({
   imports: [
@@ -34,8 +38,20 @@ import redisConfig from '@/config/redis.config';
       load: [redisConfig],
     }),
     ScheduleModule.forRoot(),
+    ThrottlerModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: 60000,
+          limit: 100,
+        },
+      ],
+    }),
     LoggerModule, // Winston log
     RedisModule.register(),
+    HttpClientModule,
+    CacheModule,
 
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -49,11 +65,16 @@ import redisConfig from '@/config/redis.config';
     AuthModule,
     DocumentModule,
     EstateModule,
+    TermModule,
   ],
   providers: [
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
     },
   ],
 })

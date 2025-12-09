@@ -3,10 +3,12 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { Estate } from '@/modules/estate/entities/estate.entity';
+import { User } from '@/modules/user/entities/user.entity';
 import { DocumentType } from '@/common/enums/document-type.enum';
 
 /**
@@ -39,6 +41,23 @@ export class Document {
   })
   @JoinColumn({ name: 'estate_id' })
   estate: Estate | null;
+
+  /** 업로더 사용자 ID (FK) */
+  @Column({
+    name: 'user_id',
+    type: 'bigint',
+    nullable: true,
+    comment: '업로더 사용자 ID (FK)'
+  })
+  userId: number | null;
+
+  /** 업로더 사용자 정보 */
+  @ManyToOne(() => User, (user) => user.documents, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'user_id' })
+  user: User | null;
 
   /** 문서 타입 (1: 등기부등본, 2: 토지대장) */
   @Column({
@@ -114,4 +133,13 @@ export class Document {
     comment: '업로드 일시'
   })
   uploadedAt: Date;
+
+  /** 삭제 일시 */
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp',
+    nullable: true,
+    comment: '삭제 일시',
+  })
+  deletedAt: Date | null;
 }

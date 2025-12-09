@@ -10,16 +10,27 @@ export class LoggerMiddleware implements NestMiddleware {
   ) {}
 
   use(req: Request, res: Response, next: NextFunction) {
-    const { ip, method, originalUrl } = req;
+    const { ip, method, originalUrl, body, headers } = req;
+    const userAgent = headers['user-agent'] || '';
     const startTime = Date.now();
 
     res.on('finish', () => {
       const { statusCode } = res;
       const duration = Date.now() - startTime;
 
+      // Body masking (remove sensitive fields)
+      const maskedBody = { ...body };
+      const sensitiveFields = ['password', 'token', 'secret', 'refreshToken'];
+      sensitiveFields.forEach((field) => {
+        if (maskedBody[field]) maskedBody[field] = '***';
+      });
+
       this.logger.info(
-        `[${method}] ${originalUrl} ${statusCode} - ${duration}ms - ${ip}`,
-        { context: 'HTTP' },
+        `[${method}] ${originalUrl} ${statusCode} - ${duration}ms - ${ip} - ${userAgent}`,
+        { 
+          context: 'HTTP',
+          body: JSON.stringify(maskedBody), // Log masked body
+        },
       );
     });
 

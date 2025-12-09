@@ -9,6 +9,9 @@ import { RedisService } from '@/modules/redis/redis.service';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
 import { RefreshTokenDto } from '@/modules/auth/dto/request/refresh-token.dto';
+import { RegisterDto } from '@/modules/auth/dto/request/register.dto';
+import { KakaoRegisterInfo } from '@/modules/auth/interfaces/request-with-user.interface';
+import { TermService } from '@/modules/term/term.service';
 
 @Injectable()
 export class AuthService {
@@ -18,28 +21,95 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
     private readonly configService: ConfigService,
+    private readonly termService: TermService,
   ) {}
 
-  async validateAndSaveUser(
+  async validateUser(
     providerType: ProviderType,
     providerId: string,
     username: string,
     email: string,
-  ): Promise<User> {
+  ): Promise<User | KakaoRegisterInfo> {
     let user = await this.userRepository.findOne({
       where: { providerType, providerId },
     });
 
-    if (!user) {
+    if (user) {
+      return user;
+    }
+
+    user = await this.userRepository.findOne({
+      where: { email },
+    });
+    
+    return {
+      providerType,
+      providerId,
+      username,
+      email,
+    };
+  }
+
+  async generateRegisterToken(info: KakaoRegisterInfo): Promise<string> {
+    return this.jwtService.signAsync(info, {
+      secret: this.configService.get<string>('JWT_REGISTER_SECRET'),
+      expiresIn: '30m',
+    });
+  }
+
+  async register(dto: RegisterDto) {
+    let payload: KakaoRegisterInfo;
+    try {
+      payload = await this.jwtService.verifyAsync(dto.registerToken, {
+        secret: this.configService.get<string>('JWT_REGISTER_SECRET'),
+      });
+    } catch (e) {
+      throw new CustomException(ErrorCode.INVALID_TOKEN);
+    }
+
+    // 필수 약관 동의 확인
+    const terms = await this.termService.findAll();
+    const requiredTermIds = terms
+      .filter((term) => term.isRequired)
+      .map((term) => Number(term.id));
+
+    const agreedTermIds = Object.entries(dto.agreedTerms)
+      .filter(([_, isAgreed]) => isAgreed)
+      .map(([termId]) => Number(termId));
+
+    const hasAllRequiredTerms = requiredTermIds.every((id) =>
+      agreedTermIds.includes(id),
+    );
+
+    if (!hasAllRequiredTerms) {
+      throw new CustomException(ErrorCode.TERMS_NOT_AGREED);
+    }
+
+    // 사용자 생성
+    // 사용자 생성
+    let user = await this.userRepository.findOne({
+      where: { email: payload.email },
+    });
+
+    if (user) {
+      // 이미 존재하는 이메일이면 업데이트
+      user.providerType = payload.providerType;
+      user.providerId = payload.providerId;
+      user.agreedTerms = dto.agreedTerms;
+    } else {
+      // 신규 생성
       user = this.userRepository.create({
-        providerType,
-        providerId,
-        username,
-        email,
+        providerType: payload.providerType,
+        providerId: payload.providerId,
+        username: payload.username,
+        email: payload.email,
+        agreedTerms: dto.agreedTerms,
       });
     }
 
-    return this.userRepository.save(user);
+    console.log(user);
+    const savedUser = await this.userRepository.save(user);
+    return this.login(savedUser);
   }
 
   async login(user: User) {
@@ -104,5 +174,27 @@ export class AuthService {
 
     // 이전 refresh token 삭제
     await this.redisService.del(`refresh_token:${user.userId}`);
+  }
+
+  getFrontendRedirectUrl(tokens: { access_token: string; refresh_token: string }): string {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+    return `${frontendUrl}/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`;
+  }
+
+  async handleKakaoLogin(user: User | KakaoRegisterInfo): Promise<string> {
+    if ('userId' in user) {
+      // 기존 회원: 로그인 처리
+      const tokens = await this.login(user as User);
+      return this.getFrontendRedirectUrl(tokens);
+    } else {
+      // 신규 회원: 회원가입 페이지로 리다이렉트
+      const registerToken = await this.generateRegisterToken(
+        user as KakaoRegisterInfo,
+      );
+      const frontendUrl =
+        this.configService.get<string>('FRONTEND_URL') ||
+        'http://localhost:3001';
+      return `${frontendUrl}/signup?register_token=${registerToken}`;
+    }
   }
 }

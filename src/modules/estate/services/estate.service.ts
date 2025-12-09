@@ -1,96 +1,83 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
-import { Document } from '@/modules/document/entities/document.entity';
-import { S3Port } from '@/common/ports/s3.port';
 import { EstateMapper } from '@/modules/estate/mapper/estate.mapper';
+import { EstateResponseDto } from '../dto/response/estate-response.dto';
+import { DocumentService } from '@/modules/document/services/document.service';
+import { GetEstateListDto } from '../dto/request/get-estate-list.dto';
+import {
+  PaginationResponseDto,
+  PaginationMetaDto,
+} from '@/common/dto/pagination-response.dto';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 
 @Injectable()
 export class EstateService {
   constructor(
     @InjectRepository(Estate)
     private readonly estateRepository: Repository<Estate>,
-    @InjectRepository(Document)
-    private readonly documentRepository: Repository<Document>,
-    private readonly s3Port: S3Port,
+    private readonly documentService: DocumentService,
   ) {}
 
   /**
-   * ºÎµ¿»ê Á¤º¸¸¦ »ı¼ºÇÕ´Ï´Ù.
-   * @param userId »ç¿ëÀÚ ID
-   * @param createEstateDto ºÎµ¿»ê »ı¼º DTO
-   * @returns »ı¼ºµÈ ºÎµ¿»ê ¿£Æ¼Æ¼
+   * ë§¤ë¬¼ì„ ìƒì„±í•©ë‹ˆë‹¤.
+   * @param userId ì‚¬ìš©ì ID
+   * @param createEstateDto ë§¤ë¬¼ ìƒì„± DTO
+   * @returns ìƒì„±ëœ ë§¤ë¬¼ ì—”í‹°í‹°
    */
   async create(
     userId: number,
     createEstateDto: CreateEstateDto,
-  ): Promise<Estate> {
+  ): Promise<EstateResponseDto> {
     const estate = this.estateRepository.create(
       EstateMapper.fromCreateDto(userId, createEstateDto),
     );
     const savedEstate = await this.estateRepository.save(estate);
 
-    // documentIds°¡ Á¦°øµÈ °æ¿ì ¹®¼­µéÀ» estate¿¡ ¿¬°á
+    // documentIdsê°€ ìˆëŠ” ê²½ìš° ë¬¸ì„œë¥¼ estateì— ì—°ê²°
     if (createEstateDto.documentIds && createEstateDto.documentIds.length > 0) {
-      await this.linkDocumentsToEstate(savedEstate.estateId, createEstateDto.documentIds);
+      await this.documentService.attachDocumentsToEstate(
+        createEstateDto.documentIds,
+        savedEstate.estateId,
+      );
     }
 
-    return savedEstate;
+    return EstateMapper.toResponseDto(savedEstate);
   }
 
   /**
-   * ¹®¼­µéÀ» estate¿¡ ¿¬°áÇÕ´Ï´Ù.
-   * @param estateId ºÎµ¿»ê ID
-   * @param documentIds ¿¬°áÇÒ ¹®¼­ ID ¸ñ·Ï
+   * ë¶€ë™ì‚° ëª©ë¡ì„ í˜ì´ì§•í•˜ì—¬ ì¡°íšŒí•©ë‹ˆë‹¤.
+   * @param userId ì‚¬ìš©ì ID
+   * @param getEstateListDto í˜ì´ì§• ìš”ì²­ DTO
+   * @returns í˜ì´ì§•ëœ ë¶€ë™ì‚° ëª©ë¡
    */
-  private async linkDocumentsToEstate(
-    estateId: number,
-    documentIds: number[],
-  ): Promise<void> {
-    const documents = await this.documentRepository.find({
-      where: { docId: In(documentIds) },
+  async findAllWithPagination(
+    userId: number,
+    getEstateListDto: GetEstateListDto,
+  ): Promise<PaginationResponseDto<EstateResponseDto>> {
+    const [estates, total] = await this.estateRepository.findAndCount({
+      where: { userId },
+      skip: getEstateListDto.skip,
+      take: getEstateListDto.limit,
+      relations: ['user', 'documents', 'analysisResult'],
+      order: {
+        createdAt: 'DESC',
+      },
     });
 
-    if (documents.length === 0) {
-      return;
-    }
+    const estateDtos = estates.map((estate) =>
+      EstateMapper.toResponseDto(estate),
+    );
+    const meta = new PaginationMetaDto(
+      getEstateListDto.page,
+      getEstateListDto.limit,
+      total,
+    );
 
-    const estate = await this.estateRepository.findOne({
-      where: { estateId },
-    });
-
-    if (!estate) {
-      throw new Error(`Estate with id ${estateId} not found`);
-    }
-
-    // ¹®¼­µéÀÇ estateId¿Í estate °ü°è ¾÷µ¥ÀÌÆ® ¹× S3 ÆÄÀÏ ÀÌµ¿
-    for (const document of documents) {
-      document.estateId = estateId;
-      document.estate = estate;
-      
-      // S3 Å°¸¦ temp¿¡¼­ estateId·Î º¯°æÇÏ°í ÆÄÀÏ ÀÌµ¿
-      if (document.s3Key.startsWith('temp/')) {
-        const fileName = document.s3Key.split('/').pop();
-        const newKey = `${estateId}/${fileName}`;
-        
-        // S3¿¡¼­ ÆÄÀÏ º¹»ç
-        await this.s3Port.copy(document.s3Key, newKey);
-        
-        // ±âÁ¸ ÆÄÀÏ »èÁ¦
-        try {
-          await this.s3Port.delete(document.s3Key);
-        } catch (error) {
-          console.error(`Failed to delete old S3 file ${document.s3Key}:`, error);
-          // »èÁ¦ ½ÇÆĞÇØµµ °è¼Ó ÁøÇà
-        }
-        
-        document.s3Key = newKey;
-      }
-    }
-
-    await this.documentRepository.save(documents);
+    return new PaginationResponseDto(estateDtos, meta);
   }
 
   async findAll(): Promise<Estate[]> {
@@ -128,6 +115,23 @@ export class EstateService {
     if (result.affected === 0) {
       throw new Error(`Estate with id ${estateId} not found`);
     }
+  }
+
+  /**
+   * ë§¤ë¬¼ì„ ì‚­ì œí•©ë‹ˆë‹¤.
+   * @param userId ì‚¬ìš©ì ID
+   * @param estateId ë§¤ë¬¼ ID
+   */
+  async deleteEstate(userId: number, estateId: number): Promise<void> {
+    const estate = await this.estateRepository.findOne({
+      where: { estateId, userId },
+    });
+
+    if (!estate) {
+      throw new CustomException(ErrorCode.ESTATE_NOT_FOUND);
+    }
+
+    await this.estateRepository.softDelete(estateId);
   }
 }
 

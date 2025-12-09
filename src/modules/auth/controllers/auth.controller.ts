@@ -12,7 +12,12 @@ import {
   ApiKakaoLoginCallback,
   ApiRefreshToken,
   ApiLogout,
-} from './auth.api';
+} from '../swagger/auth.api';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+import { User } from '@/modules/user/entities/user.entity';
+import { RegisterDto } from '@/modules/auth/dto/request/register.dto';
+import { KakaoRegisterInfo } from '@/modules/auth/interfaces/request-with-user.interface';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiAuthController()
 @Controller('auth')
@@ -36,24 +41,16 @@ export class AuthController {
     @Req() req: RequestWithUser,
     @Res() res: Response,
   ) {
-    try {
-      const { user } = req;
-      const tokens = await this.authService.login(user);
+    const { user } = req;
+    const redirectUrl = await this.authService.handleKakaoLogin(user);
+    return res.redirect(redirectUrl);
+  }
 
-      // 프론트엔드 콜백 URL로 리다이렉트 (토큰을 쿼리 파라미터로 전달)
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
-      const redirectUrl = `${frontendUrl}/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`;
-
-      return res.redirect(redirectUrl);
-    } catch (error) {
-      console.error('카카오 로그인 콜백 오류:', error);
-
-      // 에러 발생 시 프론트엔드 콜백으로 에러 전달
-      const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
-      const errorUrl = `${frontendUrl}/callback?error=login_failed&error_description=${encodeURIComponent('로그인 처리 중 오류가 발생했습니다.')}`;
-
-      return res.redirect(errorUrl);
-    }
+  @Post('register')
+  @ApiOperation({ summary: '회원가입 (약관 동의 포함)' })
+  @ApiResponse({ status: 201, description: '회원가입 성공 및 토큰 발급' })
+  async register(@Body() registerDto: RegisterDto) {
+    return await this.authService.register(registerDto);
   }
 
   @Post('refresh')
@@ -66,8 +63,8 @@ export class AuthController {
   @Delete('logout')
   @UseGuards(JwtAuthGuard)
   @ApiLogout()
-  async logout(@Req() req: RequestWithUser): Promise<{ message: string }> {
-    await this.authService.logout(req.user.userId);
+  async logout(@GetUser() user: User): Promise<{ message: string }> {
+    await this.authService.logout(user.userId);
     return { message: 'Logged out successfully' };
   }
 }

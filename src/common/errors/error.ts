@@ -4,6 +4,7 @@ export enum ErrorCode {
   // Common
   INTERNAL_SERVER_ERROR = 'E001',
   INVALID_INPUT_VALUE = 'E002',
+  ESTATE_NOT_FOUND = 'E003',
 
   // User
   USER_NOT_FOUND = 'U001',
@@ -27,6 +28,9 @@ export enum ErrorCode {
   TOKEN_NOT_FOUND = 'AUTH001',
   KAKAO_VAL_NOT_FOUND = 'AUTH002',
   INVALID_REFRESH_TOKEN = 'AUTH003',
+  ACCESS_DENIED = 'AUTH004',
+  INVALID_TOKEN = 'AUTH005',
+  TERMS_NOT_AGREED = 'AUTH006',
 }
 
 export const ErrorDictionary: Record<
@@ -40,6 +44,10 @@ export const ErrorDictionary: Record<
   [ErrorCode.INVALID_INPUT_VALUE]: {
     status: HttpStatus.BAD_REQUEST,
     message: '입력값이 올바르지 않습니다.',
+  },
+  [ErrorCode.ESTATE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '매물을 찾을 수 없습니다.',
   },
   [ErrorCode.USER_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
@@ -102,5 +110,17 @@ export const ErrorDictionary: Record<
   [ErrorCode.INVALID_REFRESH_TOKEN]: {
     status: HttpStatus.BAD_REQUEST,
     message: '올바르지 않은 리프레시 토큰입니다.',
+  },
+  [ErrorCode.ACCESS_DENIED]: {
+    status: HttpStatus.FORBIDDEN,
+    message: '접근 권한이 없습니다.',
+  },
+  [ErrorCode.INVALID_TOKEN]: {
+    status: HttpStatus.UNAUTHORIZED,
+    message: '유효하지 않은 토큰입니다.',
+  },
+  [ErrorCode.TERMS_NOT_AGREED]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '필수 약관에 동의해야 합니다.',
   },
 };

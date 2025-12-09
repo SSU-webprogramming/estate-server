@@ -1,8 +1,6 @@
 export enum DocumentType {
-  /** µî±âºÎµîº» */
+  /** ë“±ê¸°ë¶€ë“±ë³¸ */
   REGISTRY = '1',
-  /** ÅäÁö´ëÀå */
+  /** í† ì§€ëŒ€ìž¥ */
   LAND_REGISTER = '2',
 }
-
-
