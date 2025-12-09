@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
 import { User } from '@/modules/user/entities/user.entity';
 import { Estate } from '@/modules/estate/entities/estate.entity';
@@ -121,6 +121,28 @@ export class UserService {
 
   async deleteUsers(userIds: number[]): Promise<void> {
     if (userIds.length === 0) return;
-    await this.userRepository.delete(userIds);
+
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. 연관된 문서 Soft Delete
+      await queryRunner.manager.softDelete(Document, { userId: In(userIds) });
+
+      // 2. 연관된 부동산 Soft Delete
+      await queryRunner.manager.softDelete(Estate, { userId: In(userIds) });
+
+      // 3. 사용자 Soft Delete
+      await queryRunner.manager.softDelete(User, { userId: In(userIds) });
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
