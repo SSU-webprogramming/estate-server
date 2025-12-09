@@ -115,3 +115,20 @@ export const ApiGetAnalysisResult = () =>
       description: '해당 부동산을 찾을 수 없습니다.',
     }),
   );
+
+import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
+
+export const ApiSearchEstateAnalysis = () =>
+  applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({ summary: '부동산 분석 리포트 목록 검색' }),
+    ApiResponse({
+      status: 200,
+      description: '분석 리포트 목록 조회 성공',
+      type: PaginationResponseDto,
+    }),
+    ApiResponse({
+      status: 401,
+      description: '인증이 필요합니다.',
+    }),
+  );

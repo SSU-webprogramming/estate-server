@@ -14,6 +14,9 @@ import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/re
 import { EstateAnalysisReportResponseDto } from '../dto/res/estate-analysis-report-response.dto';
 import { EstateAnalysisReportMapper } from '../mapper/estate-analysis-report.mapper';
 import { EstateAnalysisReportCacheService } from './estate-analysis-report-cache.service';
+import { SearchEstateAnalysisDto } from '../dto/req/search-estate-analysis.dto';
+import { SafetyScoreSearchType } from '../dto/req/safety-score-search-type.enum';
+import { PaginationResponseDto, PaginationMetaDto } from '@/common/dto/pagination-response.dto';
 
 @Injectable()
 export class EstateAnalysisReportService {
@@ -341,6 +344,49 @@ export class EstateAnalysisReportService {
     await this.estateAnalysisReportCacheService.set(estateId, responseDto);
 
     return responseDto;
+  }
+
+  /**
+   * 분석 리포트 목록 검색
+   * @param query 검색 조건 (안전 점수, 주소)
+   * @returns 분석 리포트 목록
+   */
+  async findAll(userId: number, query: SearchEstateAnalysisDto): Promise<PaginationResponseDto<EstateAnalysisReportResponseDto>> {
+    const qb = this.analysisReportRepository.createQueryBuilder('report');
+
+    // Join with Estate to filter by userId
+    qb.innerJoin('report.estate', 'estate');
+    qb.where('estate.userId = :userId', { userId });
+
+    if (query.address) {
+      qb.andWhere('report.address LIKE :address', { address: `%${query.address}%` });
+    }
+
+    if (query.safetyScore) {
+      if (query.safetyScore === SafetyScoreSearchType.SAFE) {
+        qb.andWhere('report.safetyScore >= :minScore', { minScore: 80 });
+      } else if (query.safetyScore === SafetyScoreSearchType.CAUTION) {
+        qb.andWhere('report.safetyScore >= :minScore AND report.safetyScore < :maxScore', {
+          minScore: 60,
+          maxScore: 80,
+        });
+      } else if (query.safetyScore === SafetyScoreSearchType.DANGER) {
+        qb.andWhere('report.safetyScore < :maxScore', { maxScore: 60 });
+      }
+    }
+
+    // 기본 정렬: 최신순
+    qb.orderBy('report.analyzedAt', 'DESC');
+
+    // Pagination
+    qb.skip(query.skip).take(query.limit);
+
+    const [reports, total] = await qb.getManyAndCount();
+
+    const data = reports.map((report) => EstateAnalysisReportMapper.toResponseDto(report));
+    const meta = new PaginationMetaDto(query.page, query.limit, total);
+
+    return new PaginationResponseDto(data, meta);
   }
 
   /**
