@@ -41,13 +41,12 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     if (!id) {
       return done(new Error('Kakao profile did not return a user ID.'), null);
     }
-    const user = await this.authService.validateAndSaveUser(
+    const user = await this.authService.validateUser(
       ProviderType.KAKAO,
       id.toString(),
       username,
       email,
     );
-
     done(null, user);
   }
 }

@@ -24,7 +24,6 @@ export class TermController {
 
   @Get()
   @ApiGetTerms()
-  @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll(): Promise<TermResponseDto[]> {
     return this.termService.findAll();
   }

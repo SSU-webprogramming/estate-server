@@ -28,6 +28,8 @@ export enum ErrorCode {
   KAKAO_VAL_NOT_FOUND = 'AUTH002',
   INVALID_REFRESH_TOKEN = 'AUTH003',
   ACCESS_DENIED = 'AUTH004',
+  INVALID_TOKEN = 'AUTH005',
+  TERMS_NOT_AGREED = 'AUTH006',
 }
 
 export const ErrorDictionary: Record<
@@ -107,5 +109,13 @@ export const ErrorDictionary: Record<
   [ErrorCode.ACCESS_DENIED]: {
     status: HttpStatus.FORBIDDEN,
     message: '접근 권한이 없습니다.',
+  },
+  [ErrorCode.INVALID_TOKEN]: {
+    status: HttpStatus.UNAUTHORIZED,
+    message: '유효하지 않은 토큰입니다.',
+  },
+  [ErrorCode.TERMS_NOT_AGREED]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '필수 약관에 동의해야 합니다.',
   },
 };

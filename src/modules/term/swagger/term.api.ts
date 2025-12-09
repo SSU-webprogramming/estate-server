@@ -6,7 +6,6 @@ export const ApiTermController = () => applyDecorators(ApiTags('약관'));
 
 export const ApiGetTerms = () =>
   applyDecorators(
-    ApiBearerAuth(),
     ApiOperation({ summary: '모든 약관 목록 조회' }),
     ApiResponse({
       status: 200,

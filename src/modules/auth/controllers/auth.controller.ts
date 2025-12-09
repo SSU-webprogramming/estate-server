@@ -15,6 +15,9 @@ import {
 } from '../swagger/auth.api';
 import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/user/entities/user.entity';
+import { RegisterDto } from '@/modules/auth/dto/request/register.dto';
+import { KakaoRegisterInfo } from '@/modules/auth/interfaces/request-with-user.interface';
+import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiAuthController()
 @Controller('auth')
@@ -39,10 +42,15 @@ export class AuthController {
     @Res() res: Response,
   ) {
     const { user } = req;
-    const tokens = await this.authService.login(user);
-    const redirectUrl = this.authService.getFrontendRedirectUrl(tokens);
-
+    const redirectUrl = await this.authService.handleKakaoLogin(user);
     return res.redirect(redirectUrl);
+  }
+
+  @Post('register')
+  @ApiOperation({ summary: '회원가입 (약관 동의 포함)' })
+  @ApiResponse({ status: 201, description: '회원가입 성공 및 토큰 발급' })
+  async register(@Body() registerDto: RegisterDto) {
+    return await this.authService.register(registerDto);
   }
 
   @Post('refresh')
