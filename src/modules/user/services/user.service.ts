@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
 import { User } from '@/modules/user/entities/user.entity';
+import { Estate } from '@/modules/estate/entities/estate.entity';
+import { Document } from '@/modules/document/entities/document.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
@@ -20,6 +22,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly dataSource: DataSource,
   ) {}
 
   async findAll(): Promise<User[]> {
@@ -86,9 +89,33 @@ export class UserService {
   }
 
   async remove(userId: number): Promise<void> {
-    const result = await this.userRepository.delete(userId);
-    if (result.affected === 0) {
-      throw new CustomException(ErrorCode.USER_NOT_FOUND);
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 1. 사용자 존재 여부 확인
+      const user = await queryRunner.manager.findOne(User, { where: { userId } });
+      if (!user) {
+        throw new CustomException(ErrorCode.USER_NOT_FOUND);
+      }
+
+      // 2. 연관된 문서 Soft Delete
+      await queryRunner.manager.softDelete(Document, { userId });
+
+      // 3. 연관된 부동산 Soft Delete
+      await queryRunner.manager.softDelete(Estate, { userId });
+
+      // 4. 사용자 Soft Delete
+      await queryRunner.manager.softDelete(User, { userId });
+
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
     }
   }
 

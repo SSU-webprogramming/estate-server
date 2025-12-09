@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   OneToMany,
 } from 'typeorm';
 import { Estate } from '@/modules/estate/entities/estate.entity';
@@ -110,4 +111,13 @@ export class User {
     comment: '약관 동의 내역 (key: term_id, value: boolean)',
   })
   agreedTerms: Record<string, boolean> | null;
+
+  /** 삭제 일시 */
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp',
+    nullable: true,
+    comment: '삭제 일시',
+  })
+  deletedAt: Date | null;
 }

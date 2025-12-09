@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
@@ -132,4 +133,13 @@ export class Document {
     comment: '업로드 일시'
   })
   uploadedAt: Date;
+
+  /** 삭제 일시 */
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'timestamp',
+    nullable: true,
+    comment: '삭제 일시',
+  })
+  deletedAt: Date | null;
 }
