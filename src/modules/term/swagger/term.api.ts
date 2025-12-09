@@ -15,6 +15,17 @@ export const ApiGetTerms = () =>
     }),
   );
 
+export const ApiGetAgreedTerms = () =>
+  applyDecorators(
+    ApiBearerAuth(),
+    ApiOperation({ summary: '회원이 동의한 약관 목록 조회' }),
+    ApiResponse({
+      status: 200,
+      description: '회원이 동의한 약관 목록 조회 성공',
+      type: [TermResponseDto],
+    }),
+  );
+
 export const ApiCreateTerm = () =>
   applyDecorators(
     ApiBearerAuth(),

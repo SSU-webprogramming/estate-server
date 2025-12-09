@@ -8,10 +8,13 @@ import {
   ApiGetTerms,
   ApiCreateTerm,
   ApiUpdateTerm,
+  ApiGetAgreedTerms,
 } from './swagger/term.api';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { GetUser } from '../auth/decorators/get-user.decorator';
+import { User } from '../user/entities/user.entity';
 import { UserRole } from '@/common/enums/user-role.enum';
 
 @ApiTermController()
@@ -24,6 +27,13 @@ export class TermController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll(): Promise<TermResponseDto[]> {
     return this.termService.findAll();
+  }
+
+  @Get('agreed')
+  @ApiGetAgreedTerms()
+  @UseGuards(JwtAuthGuard)
+  async findAgreedTerms(@GetUser() user: User): Promise<TermResponseDto[]> {
+    return this.termService.findAgreedTerms(user);
   }
 
   @Post()

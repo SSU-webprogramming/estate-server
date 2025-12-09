@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
+import { User } from '@/modules/user/entities/user.entity';
 import { Term } from './entities/term.entity';
 import { CreateTermDto } from './dto/request/create-term.dto';
 import { UpdateTermDto } from './dto/request/update-term.dto';
@@ -25,6 +26,38 @@ export class TermService {
         createdAt: 'ASC',
       },
     });
+    return TermMapper.toResponseDtoList(terms);
+  }
+
+  /**
+   * 회원이 동의한 약관 목록 조회
+   * 정렬: 필수 > 선택, 생성일 내림차순
+   */
+  async findAgreedTerms(user: User): Promise<TermResponseDto[]> {
+    const agreedTermsMap = user.agreedTerms;
+
+    if (!agreedTermsMap) {
+      return [];
+    }
+
+    const agreedTermIds = Object.entries(agreedTermsMap)
+      .filter(([_, isAgreed]) => isAgreed)
+      .map(([termId]) => Number(termId));
+
+    if (agreedTermIds.length === 0) {
+      return [];
+    }
+
+    const terms = await this.termRepository.find({
+      where: {
+        id: In(agreedTermIds),
+      },
+      order: {
+        isRequired: 'DESC',
+        createdAt: 'DESC',
+      },
+    });
+
     return TermMapper.toResponseDtoList(terms);
   }
 
