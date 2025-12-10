@@ -9,6 +9,12 @@ export enum ErrorCode {
   // User
   USER_NOT_FOUND = 'U001',
 
+  // Term
+  TERM_NOT_FOUND = 'T001',
+
+  // S3
+  S3_CONFIG_ERROR = 'S001',
+
   // Database
   DATABASE_ERROR = 'D001',
   QUERY_FAILED = 'D002',
@@ -31,6 +37,9 @@ export enum ErrorCode {
   ACCESS_DENIED = 'AUTH004',
   INVALID_TOKEN = 'AUTH005',
   TERMS_NOT_AGREED = 'AUTH006',
+  INVALID_TERM_ID_FORMAT = 'AUTH007',
+  INVALID_AGREEMENT_VALUE = 'AUTH008',
+  TERMS_ALREADY_AGREED = 'AUTH009',
 }
 
 export const ErrorDictionary: Record<
@@ -52,6 +61,14 @@ export const ErrorDictionary: Record<
   [ErrorCode.USER_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '사용자를 찾을 수 없습니다.',
+  },
+  [ErrorCode.TERM_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '약관을 찾을 수 없습니다.',
+  },
+  [ErrorCode.S3_CONFIG_ERROR]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: 'S3 설정이 올바르지 않습니다. .env 파일을 확인하세요.',
   },
   [ErrorCode.DATABASE_ERROR]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
@@ -122,5 +139,17 @@ export const ErrorDictionary: Record<
   [ErrorCode.TERMS_NOT_AGREED]: {
     status: HttpStatus.BAD_REQUEST,
     message: '필수 약관에 동의해야 합니다.',
+  },
+  [ErrorCode.INVALID_TERM_ID_FORMAT]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '약관 ID 형식이 올바르지 않습니다.',
+  },
+  [ErrorCode.INVALID_AGREEMENT_VALUE]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '약관 동의 값이 올바르지 않습니다.',
+  },
+  [ErrorCode.TERMS_ALREADY_AGREED]: {
+    status: HttpStatus.CONFLICT,
+    message: '이미 약관 동의가 완료된 사용자입니다.',
   },
 };

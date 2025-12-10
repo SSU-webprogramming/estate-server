@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
 import { EstateMapper } from '@/modules/estate/mapper/estate.mapper';
@@ -13,12 +11,12 @@ import {
 } from '@/common/dto/pagination-response.dto';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
+import { EstateRepository } from '@/modules/estate/repositories/estate.repository';
 
 @Injectable()
 export class EstateService {
   constructor(
-    @InjectRepository(Estate)
-    private readonly estateRepository: Repository<Estate>,
+    private readonly estateRepository: EstateRepository,
     private readonly documentService: DocumentService,
   ) {}
 
@@ -32,9 +30,8 @@ export class EstateService {
     userId: number,
     createEstateDto: CreateEstateDto,
   ): Promise<EstateResponseDto> {
-    const estate = this.estateRepository.create(
-      EstateMapper.fromCreateDto(userId, createEstateDto),
-    );
+    const estateData = EstateMapper.fromCreateDto(userId, createEstateDto);
+    const estate = this.estateRepository.create(estateData);
     const savedEstate = await this.estateRepository.save(estate);
 
     // documentIds가 있는 경우 문서를 estate에 연결
@@ -58,15 +55,10 @@ export class EstateService {
     userId: number,
     getEstateListDto: GetEstateListDto,
   ): Promise<PaginationResponseDto<EstateResponseDto>> {
-    const [estates, total] = await this.estateRepository.findAndCount({
-      where: { userId },
-      skip: getEstateListDto.skip,
-      take: getEstateListDto.limit,
-      relations: ['user', 'documents', 'analysisResult'],
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    const [estates, total] = await this.estateRepository.findAllWithPagination(
+      userId,
+      getEstateListDto,
+    );
 
     const estateDtos = estates.map((estate) =>
       EstateMapper.toResponseDto(estate),
@@ -81,27 +73,19 @@ export class EstateService {
   }
 
   async findAll(): Promise<Estate[]> {
-    return this.estateRepository.find({
-      relations: ['user', 'documents', 'analysisResult'],
-    });
+    return this.estateRepository.findAll();
   }
 
   async findOne(estateId: number): Promise<Estate> {
-    const estate = await this.estateRepository.findOne({
-      where: { estateId },
-      relations: ['user', 'documents', 'analysisResult'],
-    });
+    const estate = await this.estateRepository.findOne(estateId);
     if (!estate) {
-      throw new Error(`Estate with id ${estateId} not found`);
+      throw new CustomException(ErrorCode.ESTATE_NOT_FOUND);
     }
     return estate;
   }
 
   async findByUserId(userId: number): Promise<Estate[]> {
-    return this.estateRepository.find({
-      where: { userId },
-      relations: ['documents', 'analysisResult'],
-    });
+    return this.estateRepository.findByUserId(userId);
   }
 
   async update(estateId: number, updateData: Partial<Estate>): Promise<Estate> {
@@ -113,7 +97,7 @@ export class EstateService {
   async remove(estateId: number): Promise<void> {
     const result = await this.estateRepository.delete(estateId);
     if (result.affected === 0) {
-      throw new Error(`Estate with id ${estateId} not found`);
+      throw new CustomException(ErrorCode.ESTATE_NOT_FOUND);
     }
   }
 
@@ -123,9 +107,10 @@ export class EstateService {
    * @param estateId 매물 ID
    */
   async deleteEstate(userId: number, estateId: number): Promise<void> {
-    const estate = await this.estateRepository.findOne({
-      where: { estateId, userId },
-    });
+    const estate = await this.estateRepository.findOneByUserIdAndEstateId(
+      userId,
+      estateId,
+    );
 
     if (!estate) {
       throw new CustomException(ErrorCode.ESTATE_NOT_FOUND);

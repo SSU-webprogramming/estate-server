@@ -77,35 +77,4 @@ export class DocumentController {
     const response = await this.documentService.getDocument(documentId);
     return response;
   }
-
-  // @Get('documents/analyze/stream')
-  // @Sse()
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
-  // @Header('Content-Type', 'text/event-stream')
-  // @Header('Cache-Control', 'no-cache, no-transform')
-  // @Header('Connection', 'keep-alive')
-  // @Header('X-Accel-Buffering', 'no')
-  // @ApiOperation({
-  //   summary: 'Analyze selected estate documents and stream results',
-  // })
-  // @ApiQuery({
-  //   name: 'estateId',
-  //   type: Number,
-  //   description: '부동산 ID',
-  //   required: true,
-  // })
-  // @ApiQuery({
-  //   name: 'documentIds',
-  //   type: [Number],
-  //   description: '분석할 문서 ID 목록 (쉼표로 구분)',
-  //   required: false,
-  // })
-  // analyzeDocumentsStream(
-  //   @Query('estateId', ParseIntPipe) estateId: number,
-  //   @Query('documentIds', new ParseArrayPipe({ items: Number, optional: true }))
-  //   documentIds?: number[],
-  // ): Observable<MessageEvent> {
-  //   return this.documentService.analyzeEstateDocuments(estateId, documentIds);
-  // }
 }

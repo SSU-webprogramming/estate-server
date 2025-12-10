@@ -4,6 +4,7 @@ import { Estate } from './entities/estate.entity';
 import { EstateService } from './services/estate.service';
 import { EstateController } from './controllers/estate.controller';
 import { DocumentModule } from '@/modules/document/document.module';
+import { EstateRepository } from './repositories/estate.repository';
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { DocumentModule } from '@/modules/document/document.module';
     DocumentModule,
   ],
   controllers: [EstateController],
-  providers: [EstateService],
+  providers: [EstateService, EstateRepository],
   exports: [EstateService],
 })
 export class EstateModule {}

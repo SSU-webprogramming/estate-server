@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from '@/modules/redis/redis.service';
-import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/response/estate-analysis-report-response.dto';
 
 @Injectable()
 export class EstateAnalysisReportCacheService {
-  private readonly ttlSeconds = 300; // TODO: È¯°æ º¯¼ö·Î ÃßÃâ °¡´É
+  private readonly ttlSeconds = 300; // TODO: í™˜ê²½ ë³€ìˆ˜ë¡œ ì¶”ì¶œ ê°€ëŠ¥
 
   constructor(private readonly redisService: RedisService) {}
 
@@ -43,5 +43,3 @@ export class EstateAnalysisReportCacheService {
     return `estate-analysis:${estateId}`;
   }
 }
-
-

@@ -1,18 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { User } from '@/modules/user/entities/user.entity';
 import { Term } from './entities/term.entity';
 import { CreateTermDto } from './dto/request/create-term.dto';
 import { UpdateTermDto } from './dto/request/update-term.dto';
 import { TermResponseDto } from './dto/response/term-response.dto';
 import { TermMapper } from './mapper/term.mapper';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
+import { TermRepository } from './repositories/term.repository';
 
 @Injectable()
 export class TermService {
   constructor(
-    @InjectRepository(Term)
-    private readonly termRepository: Repository<Term>,
+    private readonly termRepository: TermRepository,
   ) {}
 
   /**
@@ -20,12 +20,7 @@ export class TermService {
    * 정렬: 필수 > 선택, 생성일 순
    */
   async findAll(): Promise<TermResponseDto[]> {
-    const terms = await this.termRepository.find({
-      order: {
-        isRequired: 'DESC',
-        createdAt: 'ASC',
-      },
-    });
+    const terms = await this.termRepository.findAll();
     return TermMapper.toResponseDtoList(terms);
   }
 
@@ -48,15 +43,7 @@ export class TermService {
       return [];
     }
 
-    const terms = await this.termRepository.find({
-      where: {
-        id: In(agreedTermIds),
-      },
-      order: {
-        isRequired: 'DESC',
-        createdAt: 'DESC',
-      },
-    });
+    const terms = await this.termRepository.findByIds(agreedTermIds);
 
     return TermMapper.toResponseDtoList(terms);
   }
@@ -65,7 +52,8 @@ export class TermService {
    * 약관 생성
    */
   async create(dto: CreateTermDto): Promise<TermResponseDto> {
-    const term = this.termRepository.create(TermMapper.fromCreateDto(dto));
+    const termData = TermMapper.fromCreateDto(dto);
+    const term = this.termRepository.create(termData);
     const savedTerm = await this.termRepository.save(term);
     return TermMapper.toResponseDto(savedTerm);
   }
@@ -74,9 +62,9 @@ export class TermService {
    * 약관 수정
    */
   async update(id: number, dto: UpdateTermDto): Promise<TermResponseDto> {
-    const term = await this.termRepository.findOne({ where: { id } });
+    const term = await this.termRepository.findOne(id);
     if (!term) {
-      throw new NotFoundException(`Term with ID ${id} not found`);
+      throw new CustomException(ErrorCode.TERM_NOT_FOUND);
     }
 
     const updateData = TermMapper.fromUpdateDto(dto);

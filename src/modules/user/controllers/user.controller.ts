@@ -5,8 +5,11 @@ import {
   Param,
   Put,
   Delete,
+  Post,
   UseGuards,
   Query,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { UserService } from '@/modules/user/services/user.service';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
@@ -20,6 +23,7 @@ import {
   ApiUpdateUser,
   ApiDeleteUser,
   ApiDeleteUsers,
+  ApiAgreeTerms,
 } from '@/modules/user/swagger/user.api';
 import { Roles } from '@/modules/auth/decorators/roles.decorator';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
@@ -27,11 +31,30 @@ import { UserRole } from '@/common/enums/user-role.enum';
 import { DeleteUsersDto } from '@/modules/user/dto/request/delete-users.dto';
 import { GetUserListDto } from '@/modules/user/dto/request/get-user-list.dto';
 import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
+import { AgreeTermsRequestDto } from '@/modules/user/dto/request/agree-term.dto';
+import { AgreeTermsResponseDto } from '@/modules/user/dto/response/agree-terms-response.dto';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+import { User } from '@/modules/user/entities/user.entity';
 
 @ApiUserController()
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Post('agreed-terms')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiAgreeTerms()
+  async agreeTerms(
+    @Body() agreeTermsRequestDto: AgreeTermsRequestDto,
+    @GetUser() user: User,
+  ): Promise<AgreeTermsResponseDto> {
+    const savedUser = await this.userService.agreeTerms(
+      agreeTermsRequestDto,
+      user.userId,
+    );
+    return new AgreeTermsResponseDto(savedUser.agreedTerms || {});
+  }
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
