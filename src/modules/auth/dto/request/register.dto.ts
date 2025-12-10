@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
   @ApiProperty({
-    description: '회원가입 토큰 (Kakao 로그인 시 발급받은 토큰)',
+    description: '회원가입 토큰 (Kakao 로그인 후 발급받은 토큰)',
     example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
   })
   @IsString()

@@ -16,6 +16,8 @@ import {
 import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
 import { UserMapper } from '@/modules/user/mapper/user.mapper';
 import { Like } from 'typeorm';
+import { AgreeTermsRequestDto } from '@/modules/user/dto/request/agree-term.dto';
+import { TermsValidator } from '@/modules/user/validators/terms-validator';
 
 @Injectable()
 export class UserService {
@@ -23,6 +25,7 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly termsValidator: TermsValidator,
   ) {}
 
   async findAll(): Promise<User[]> {
@@ -143,6 +146,39 @@ export class UserService {
       throw err;
     } finally {
       await queryRunner.release();
+    }
+  }
+
+  /**
+   * 사용자의 약관 동의를 저장
+   * @param dto 약관 동의 요청 DTO
+   * @param userId 사용자 ID
+   * @returns 저장된 사용자 정보
+   */
+  async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<User> {
+    // 약관 형식 검증
+    this.termsValidator.validateTermsFormat(dto.agreedTerms);
+
+    // 사용자 조회
+    const user = await this.userRepository.findOneBy({ userId });
+    if (!user) {
+      throw new CustomException(ErrorCode.USER_NOT_FOUND);
+    }
+
+    // 이미 약관에 동의했는지 확인
+    this.termsValidator.validateNotAlreadyAgreed(user.agreedTerms);
+
+    // 필수 약관 동의 확인
+    await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
+
+    // 약관 동의 정보 저장
+    try {
+      user.agreedTerms = dto.agreedTerms;
+      const savedUser = await this.userRepository.save(user);
+      return savedUser;
+    } catch (error) {
+      // 데이터베이스 오류 처리
+      throw new CustomException(ErrorCode.DATABASE_ERROR);
     }
   }
 }

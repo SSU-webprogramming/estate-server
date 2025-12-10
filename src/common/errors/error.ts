@@ -31,6 +31,9 @@ export enum ErrorCode {
   ACCESS_DENIED = 'AUTH004',
   INVALID_TOKEN = 'AUTH005',
   TERMS_NOT_AGREED = 'AUTH006',
+  INVALID_TERM_ID_FORMAT = 'AUTH007',
+  INVALID_AGREEMENT_VALUE = 'AUTH008',
+  TERMS_ALREADY_AGREED = 'AUTH009',
 }
 
 export const ErrorDictionary: Record<
@@ -122,5 +125,17 @@ export const ErrorDictionary: Record<
   [ErrorCode.TERMS_NOT_AGREED]: {
     status: HttpStatus.BAD_REQUEST,
     message: '필수 약관에 동의해야 합니다.',
+  },
+  [ErrorCode.INVALID_TERM_ID_FORMAT]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '약관 ID 형식이 올바르지 않습니다.',
+  },
+  [ErrorCode.INVALID_AGREEMENT_VALUE]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '약관 동의 값이 올바르지 않습니다.',
+  },
+  [ErrorCode.TERMS_ALREADY_AGREED]: {
+    status: HttpStatus.CONFLICT,
+    message: '이미 약관 동의가 완료된 사용자입니다.',
   },
 };
