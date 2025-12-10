@@ -1,12 +1,12 @@
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
-import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/response/estate-analysis-report-response.dto';
 
 /**
- * EstateAnalysisReport ¿£Æ¼Æ¼ <-> DTO ¸ÅÇÎ Àü´ã Å¬·¡½º
+ * EstateAnalysisReport ì—”í‹°í‹° <-> DTO ë§¤í•‘ ì „ë‹´ í´ë˜ìŠ¤
  */
 export class EstateAnalysisReportMapper {
   /**
-   * ¿£Æ¼Æ¼ -> ÀÀ´ä DTO
+   * ì—”í‹°í‹° -> ì‘ë‹µ DTO
    */
   static toResponseDto(
     report: EstateAnalysisReport,
@@ -50,7 +50,7 @@ export class EstateAnalysisReportMapper {
   }
 
   /**
-   * ºĞ¼®ÀÌ ¾ÆÁ÷ ¿Ï·áµÇÁö ¾ÊÀº °æ¿ì¿¡ »ç¿ëÇÏ´Â ºó ÀÀ´ä DTO
+   * ë¶„ì„ì´ ì•„ì§ ì™„ë£Œë˜ì§€ ì•Šì€ ê²½ìš°ì— ì‚¬ìš©í•˜ëŠ” ë¹ˆ ì‘ë‹µ DTO
    */
   static emptyResponse(): EstateAnalysisReportResponseDto {
     const dto = new EstateAnalysisReportResponseDto();
@@ -89,5 +89,3 @@ export class EstateAnalysisReportMapper {
     return dto;
   }
 }
-
-

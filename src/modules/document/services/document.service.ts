@@ -1,6 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Injectable } from '@nestjs/common';
 import { Document } from '@/modules/document/entities/document.entity';
 import { DocumentType } from '@/common/enums/document-type.enum';
 import { S3Port } from '@/common/ports/s3.port';
@@ -8,13 +6,14 @@ import { v4 as uuidV4 } from 'uuid';
 import { DocumentResponseDto } from '@/modules/document/dto/response/document-response.dto';
 import { DocumentInfoResponseDto } from '@/modules/document/dto/response/document-info-response.dto';
 import { DocumentMapper } from '../mappers/document.mapper';
-
+import { DocumentRepository } from '@/modules/document/repositories/document.repository';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 
 @Injectable()
 export class DocumentService {
   constructor(
-    @InjectRepository(Document)
-    private readonly documentRepository: Repository<Document>,
+    private readonly documentRepository: DocumentRepository,
     private readonly s3Port: S3Port
   ) {}
 
@@ -57,12 +56,10 @@ export class DocumentService {
    * @param documentId 문서 ID
    */
   async getDocument(documentId: number): Promise<DocumentInfoResponseDto> {
-    const document = await this.documentRepository.findOne({
-      where: { docId: documentId },
-    });
+    const document = await this.documentRepository.findOne(documentId);
 
     if (!document) {
-      throw new NotFoundException(`Document with ID ${documentId} not found`);
+      throw new CustomException(ErrorCode.FILE_NOT_FOUND);
     }
 
     return DocumentMapper.toInfoDto(document);
@@ -73,10 +70,7 @@ export class DocumentService {
    * @param userId 사용자 ID
    */
   async getUserDocuments(userId: number): Promise<DocumentInfoResponseDto[]> {
-    const documents = await this.documentRepository.find({
-      where: { userId },
-      order: { uploadedAt: 'DESC' },
-    });
+    const documents = await this.documentRepository.findByUserId(userId);
 
     return documents.map((doc) => DocumentMapper.toInfoDto(doc));
   }
@@ -94,9 +88,7 @@ export class DocumentService {
       return;
     }
 
-    const documents = await this.documentRepository.find({
-      where: { docId: In(documentIds) },
-    });
+    const documents = await this.documentRepository.findByIds(documentIds);
 
     if (documents.length === 0) {
       return;

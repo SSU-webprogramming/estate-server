@@ -11,6 +11,8 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Port } from '@/common/ports/s3.port';
 import { Readable } from 'stream';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 
 @Injectable()
 export class S3Service implements S3Port {
@@ -33,7 +35,7 @@ export class S3Service implements S3Port {
       !secretAccessKey ||
       !bucketName
     ) {
-      throw new Error('Missing AWS S3 configuration in .env file');
+      throw new CustomException(ErrorCode.S3_CONFIG_ERROR);
     }
 
     const s3Config: S3ClientConfig = {

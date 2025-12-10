@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
 import { ConfigService } from '@nestjs/config';
 import { CustomException } from '@/common/errors/custom-exception';
-import { ErrorCode } from 'src/common/errors/error';
+import { ErrorCode } from '@/common/errors/error';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 

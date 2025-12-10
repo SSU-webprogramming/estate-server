@@ -9,6 +9,12 @@ export enum ErrorCode {
   // User
   USER_NOT_FOUND = 'U001',
 
+  // Term
+  TERM_NOT_FOUND = 'T001',
+
+  // S3
+  S3_CONFIG_ERROR = 'S001',
+
   // Database
   DATABASE_ERROR = 'D001',
   QUERY_FAILED = 'D002',
@@ -55,6 +61,14 @@ export const ErrorDictionary: Record<
   [ErrorCode.USER_NOT_FOUND]: {
     status: HttpStatus.NOT_FOUND,
     message: '사용자를 찾을 수 없습니다.',
+  },
+  [ErrorCode.TERM_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: '약관을 찾을 수 없습니다.',
+  },
+  [ErrorCode.S3_CONFIG_ERROR]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: 'S3 설정이 올바르지 않습니다. .env 파일을 확인하세요.',
   },
   [ErrorCode.DATABASE_ERROR]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,

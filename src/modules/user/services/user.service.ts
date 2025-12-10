@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, In } from 'typeorm';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
 import { User } from '@/modules/user/entities/user.entity';
-import { Estate } from '@/modules/estate/entities/estate.entity';
-import { Document } from '@/modules/document/entities/document.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
@@ -15,42 +11,25 @@ import {
 } from '@/common/dto/pagination-response.dto';
 import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
 import { UserMapper } from '@/modules/user/mapper/user.mapper';
-import { Like } from 'typeorm';
 import { AgreeTermsRequestDto } from '@/modules/user/dto/request/agree-term.dto';
 import { TermsValidator } from '@/modules/user/validators/terms-validator';
+import { UserRepository } from '@/modules/user/repositories/user.repository';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    private readonly dataSource: DataSource,
+    private readonly userRepository: UserRepository,
     private readonly termsValidator: TermsValidator,
   ) {}
 
   async findAll(): Promise<User[]> {
-    return this.userRepository.find();
+    return this.userRepository.findAll();
   }
 
   async findAllWithPagination(
     getUserListDto: GetUserListDto,
   ): Promise<PaginationResponseDto<UserResponseDto>> {
-    const where: any = {};
-    if (getUserListDto.name) {
-      where.username = Like(`%${getUserListDto.name}%`);
-    }
-    if (getUserListDto.email) {
-      where.email = Like(`%${getUserListDto.email}%`);
-    }
-
-    const [users, total] = await this.userRepository.findAndCount({
-      where,
-      skip: getUserListDto.skip,
-      take: getUserListDto.limit,
-      order: {
-        createdAt: 'DESC',
-      },
-    });
+    const [users, total] = await this.userRepository.findAllWithPagination(getUserListDto);
 
     const userDtos = UserMapper.toResponseDtoList(users);
     const meta = new PaginationMetaDto(
@@ -63,7 +42,7 @@ export class UserService {
   }
 
   async findOne(userId: number): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOne({ where: { userId } });
+    const user = await this.userRepository.findOne(userId);
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
@@ -71,18 +50,18 @@ export class UserService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userRepository.findOne({ where: { email } });
+    return this.userRepository.findByEmail(email);
   }
 
   async findByProvider(
     providerType: ProviderType,
     providerId: string,
   ): Promise<User | null> {
-    return this.userRepository.findOne({ where: { providerType, providerId } });
+    return this.userRepository.findByProvider(providerType, providerId);
   }
 
   async update(userId: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOne({ where: { userId } });
+    const user = await this.userRepository.findOne(userId);
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
@@ -92,92 +71,46 @@ export class UserService {
   }
 
   async remove(userId: number): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      // 1. »ç¿ëÀÚ Á¸Àç ¿©ºÎ È®ÀÎ
-      const user = await queryRunner.manager.findOne(User, { where: { userId } });
-      if (!user) {
-        throw new CustomException(ErrorCode.USER_NOT_FOUND);
-      }
-
-      // 2. ¿¬°üµÈ ¹®¼­ Soft Delete
-      await queryRunner.manager.softDelete(Document, { userId });
-
-      // 3. ¿¬°üµÈ ºÎµ¿»ê Soft Delete
-      await queryRunner.manager.softDelete(Estate, { userId });
-
-      // 4. »ç¿ëÀÚ Soft Delete
-      await queryRunner.manager.softDelete(User, { userId });
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
+    const user = await this.userRepository.findOne(userId);
+    if (!user) {
+      throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
+    await this.userRepository.remove(userId);
   }
 
   async deleteUsers(userIds: number[]): Promise<void> {
-    if (userIds.length === 0) return;
-
-    const queryRunner = this.dataSource.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      // 1. ¿¬°üµÈ ¹®¼­ Soft Delete
-      await queryRunner.manager.softDelete(Document, { userId: In(userIds) });
-
-      // 2. ¿¬°üµÈ ºÎµ¿»ê Soft Delete
-      await queryRunner.manager.softDelete(Estate, { userId: In(userIds) });
-
-      // 3. »ç¿ëÀÚ Soft Delete
-      await queryRunner.manager.softDelete(User, { userId: In(userIds) });
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    await this.userRepository.deleteUsers(userIds);
   }
 
   /**
-   * »ç¿ëÀÚÀÇ ¾à°ü µ¿ÀÇ¸¦ ÀúÀå
-   * @param dto ¾à°ü µ¿ÀÇ ¿äÃ» DTO
-   * @param userId »ç¿ëÀÚ ID
-   * @returns ÀúÀåµÈ »ç¿ëÀÚ Á¤º¸
+   * ì‚¬ìš©ìì˜ ì•½ê´€ ë™ì˜ë¥¼ ì €ì¥
+   * @param dto ì•½ê´€ ë™ì˜ ìš”ì²­ DTO
+   * @param userId ì‚¬ìš©ì ID
+   * @returns ì €ì¥ëœ ì‚¬ìš©ì ì •ë³´
    */
   async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<User> {
-    // ¾à°ü Çü½Ä °ËÁõ
+    // ì•½ê´€ í˜•ì‹ ê²€ì¦
     this.termsValidator.validateTermsFormat(dto.agreedTerms);
 
-    // »ç¿ëÀÚ Á¶È¸
+    // ì‚¬ìš©ì ì¡°íšŒ
     const user = await this.userRepository.findOneBy({ userId });
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
 
-    // ÀÌ¹Ì ¾à°ü¿¡ µ¿ÀÇÇß´ÂÁö È®ÀÎ
+    // ì´ë¯¸ ì•½ê´€ì— ë™ì˜í–ˆëŠ”ì§€ í™•ì¸
     this.termsValidator.validateNotAlreadyAgreed(user.agreedTerms);
 
-    // ÇÊ¼ö ¾à°ü µ¿ÀÇ È®ÀÎ
+    // í•„ìˆ˜ ì•½ê´€ ë™ì˜ í™•ì¸
     await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
 
-    // ¾à°ü µ¿ÀÇ Á¤º¸ ÀúÀå
+    // ì•½ê´€ ë™ì˜ ì •ë³´ ì €ì¥
     try {
       user.agreedTerms = dto.agreedTerms;
       const savedUser = await this.userRepository.save(user);
       return savedUser;
     } catch (error) {
-      // µ¥ÀÌÅÍº£ÀÌ½º ¿À·ù Ã³¸®
+      // ë°ì´í„°ë² ì´ìŠ¤ ì˜¤ë¥˜ ì²˜ë¦¬
       throw new CustomException(ErrorCode.DATABASE_ERROR);
     }
   }

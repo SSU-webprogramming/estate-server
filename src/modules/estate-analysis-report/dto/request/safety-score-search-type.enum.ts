@@ -3,3 +3,4 @@ export enum SafetyScoreSearchType {
   CAUTION = 'CAUTION',
   DANGER = 'DANGER',
 }
+

@@ -93,4 +93,3 @@ export class CreateEstateAnalysisDto {
   @IsInt({ each: true })
   documentIds: number[];
 }
-

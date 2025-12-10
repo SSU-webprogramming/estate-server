@@ -13,20 +13,18 @@ import {
 } from '@nestjs/common';
 import { HttpCacheInterceptor } from '@/common/interceptors/http-cache.interceptor';
 import { CacheTTL } from '@nestjs/cache-manager';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { EstateAnalysisReportService } from '@/modules/estate-analysis-report/services/estate-analysis-report.service';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
-import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/estate-analysis-req.dto';
-import { SearchEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/req/search-estate-analysis.dto';
-import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/res/estate-analysis-report-response.dto';
+import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/estate-analysis-req.dto';
+import { SearchEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/search-estate-analysis.dto';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/response/estate-analysis-report-response.dto';
 import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
 import {
   ApiEstateAnalysisReportController,
   ApiAnalyzeEstate,
   ApiGetAnalysisResult,
   ApiSearchEstateAnalysis,
-} from '../swagger/estate-analysis-report.api';
-import { EstateAnalysisReportMapper } from '@/modules/estate-analysis-report/mapper/estate-analysis-report.mapper';
+} from '@/modules/estate-analysis-report/swagger/estate-analysis-report.api';
 import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/user/entities/user.entity';
 
@@ -74,3 +72,4 @@ export class EstateAnalysisReportController {
     return this.estateAnalysisReportService.findAll(user.userId, query);
   }
 }
+

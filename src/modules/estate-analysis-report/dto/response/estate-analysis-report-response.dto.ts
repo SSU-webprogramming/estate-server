@@ -223,3 +223,4 @@ export class EstateAnalysisReportResponseDto {
   })
   recommendedInsuranceCompanies: any | null;
 }
+

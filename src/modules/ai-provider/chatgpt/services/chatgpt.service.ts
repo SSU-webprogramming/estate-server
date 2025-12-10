@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources';
-import { CustomException } from 'src/common/errors/custom-exception';
-import { ErrorCode } from 'src/common/errors/error';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 import {
   FileWithMimeType,
   TextGeneratorPort,
@@ -64,7 +64,7 @@ export class ChatGptService implements TextGeneratorPort {
 
       const content = response.choices[0].message.content;
       if (content === null) {
-        throw new Error('ChatGPT returned null content.');
+        throw new CustomException(ErrorCode.GPT_API_REQUEST_FAILED);
       }
       return content;
     } catch (error) {
@@ -109,7 +109,7 @@ export class ChatGptService implements TextGeneratorPort {
 
       const content = response.choices[0].message.content;
       if (content === null) {
-        throw new Error('ChatGPT returned null content.');
+        throw new CustomException(ErrorCode.GPT_API_REQUEST_FAILED);
       }
       return content;
     } catch (error) {
