@@ -7,6 +7,7 @@ import {
   MaxLength,
   IsArray,
   IsInt,
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ContractType } from '@/common/enums/contract-type.enum';
@@ -92,4 +93,14 @@ export class CreateEstateAnalysisDto {
   @IsArray()
   @IsInt({ each: true })
   documentIds: number[];
+
+  @ApiProperty({
+    description: '강제 재분석 여부 (true: 캐시 무시하고 새로 분석, false: 캐시 사용)',
+    example: false,
+    required: false,
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  forceReAnalyze?: boolean;
 }

@@ -1,7 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, IsNull } from 'typeorm';
 import { TextGeneratorPort, FileWithMimeType } from '@/modules/estate-analysis-report/ports/text-generator.port';
+import { ANALYSIS_CACHE_STRATEGY_PORT } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
+import type { AnalysisCacheStrategyPort } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
 import { SYSTEM_PROMPT } from '@/modules/estate-analysis-report/prompts/system.prompt';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { Document } from '@/modules/document/entities/document.entity';
@@ -18,7 +20,6 @@ import { PaginationResponseDto, PaginationMetaDto } from '@/common/dto/paginatio
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
 import { DocumentProcessingService } from './document-processing.service';
-
 @Injectable()
 export class EstateAnalysisReportService {
   constructor(
@@ -32,6 +33,8 @@ export class EstateAnalysisReportService {
     private readonly s3Port: S3Port,
     private readonly estateAnalysisReportCacheService: EstateAnalysisReportCacheService,
     private readonly documentProcessingService: DocumentProcessingService,
+    @Inject(ANALYSIS_CACHE_STRATEGY_PORT)
+    private readonly analysisCacheStrategyPort: AnalysisCacheStrategyPort
   ) {}
 
   async analyzeEsate(fileBuffer: Buffer, mimeType: string): Promise<string> {
@@ -47,6 +50,12 @@ export class EstateAnalysisReportService {
 
   /**
    * 부동산 정보를 받아서 분석을 요청하는 메서드
+   * 
+   * 최적화 전략:
+   * 1. OCR 후 주소 추출
+   * 2. 주소 기반 캐시 검색 (forceReAnalyze가 false인 경우)
+   * 3. 캐시 히트 시 기존 분석 복사, 미스 시 AI 분석 요청
+   * 
    * @param userId 사용자 ID
    * @param createEstateAnalysisDto 부동산 정보 및 문서 ID 목록
    * @returns 생성된 분석 리포트
@@ -86,10 +95,152 @@ export class EstateAnalysisReportService {
     // 4. OCR 수행 및 extractedText 저장
     const { ocrText, documentData } = await this.documentProcessingService.processOcrAndExtractText(documents);
 
+    // 5. OCR 결과에서 주소 추출 (AI 분석 전 캐시 체크를 위해)
+    const extractedAddress = this.extractAddressFromOcrText(ocrText) || createEstateAnalysisDto.address;
 
-    // 5. 사용되지 않은 Document 삭제 (임시파일)
+    // 6. 캐시 전략을 통한 기존 분석 검색 (forceReAnalyze가 false인 경우)
+    let cachedAnalysis: EstateAnalysisReport | null = null;
+    const forceReAnalyze = createEstateAnalysisDto.forceReAnalyze ?? false;
+
+    if (!forceReAnalyze && extractedAddress) {
+      console.log(`[EstateAnalysisReport] 캐시 검색 시도: ${extractedAddress}`);
+      cachedAnalysis = await this.analysisCacheStrategyPort.findCachedAnalysis(
+        extractedAddress,
+        userId,
+      );
+    }
+
+    let analysisReport: EstateAnalysisReport;
+
+    if (cachedAnalysis) {
+      // 캐시 히트: 기존 분석 결과 복사
+      console.log(`[EstateAnalysisReport] 캐시 히트! 기존 분석 재사용 (원본 ID: ${cachedAnalysis.id})`);
+      analysisReport = await this.copyAnalysisFromCache(savedEstate, cachedAnalysis);
+    } else {
+      // 캐시 미스: AI 분석 요청
+      console.log(`[EstateAnalysisReport] 캐시 미스. AI 분석 요청`);
+      analysisReport = await this.performAiAnalysis(
+        savedEstate,
+        documents,
+        ocrText,
+        documentData,
+      );
+    }
+
+    // 7. 사용되지 않은 Document 삭제 (임시파일)
     await this.deleteUnusedDocuments(createEstateAnalysisDto.documentIds);
-    // 6. AI 분석 요청
+
+    // 8. Redis 캐시에 저장 (새로 분석한 경우만)
+    if (!cachedAnalysis && extractedAddress && analysisReport.estateId) {
+      await this.analysisCacheStrategyPort.saveCachedAnalysis(
+        extractedAddress,
+        userId,
+        analysisReport.estateId,
+      );
+    }
+
+    // 9. 기존 캐시 무효화
+    if (analysisReport.estateId) {
+      await this.estateAnalysisReportCacheService.invalidate(analysisReport.estateId);
+    }
+
+    return EstateAnalysisReportMapper.toResponseDto(analysisReport);
+  }
+
+  /**
+   * OCR 텍스트에서 주소를 추출합니다
+   * 
+   * @param ocrText OCR 텍스트
+   * @returns 추출된 주소 또는 null
+   */
+  private extractAddressFromOcrText(ocrText: string): string | null {
+    if (!ocrText) {
+      return null;
+    }
+
+    // 주소 패턴 매칭 (간단한 정규식)
+    // 예: "서울특별시", "경기도", "부산광역시" 등으로 시작하는 주소
+    const addressPatterns = [
+      /([가-힣]+[시도]\s+[가-힣]+[시군구]\s+[가-힣\s\d-]+)/g,
+      /소재지[:\s]*([가-힣\s\d-]+)/g,
+      /주소[:\s]*([가-힣\s\d-]+)/g,
+    ];
+
+    for (const pattern of addressPatterns) {
+      const matches = ocrText.match(pattern);
+      if (matches && matches.length > 0) {
+        // 첫 번째 매칭된 주소 반환
+        return matches[0].replace(/소재지[:\s]*|주소[:\s]*/, '').trim();
+      }
+    }
+
+    return null;
+  }
+
+  /**
+   * 캐시된 분석 결과를 새 Estate에 복사합니다
+   * 
+   * @param estate 새로 생성된 Estate
+   * @param cachedAnalysis 캐시된 분석 결과
+   * @returns 복사된 분석 리포트
+   */
+  private async copyAnalysisFromCache(
+    estate: Estate,
+    cachedAnalysis: EstateAnalysisReport,
+  ): Promise<EstateAnalysisReport> {
+    const analysisReport = this.analysisReportRepository.create({
+      estateId: estate.estateId,
+      estate: estate,
+      analyzedAt: new Date(),
+      // 캐시된 분석 결과 복사
+      safetyScore: cachedAnalysis.safetyScore,
+      address: cachedAnalysis.address,
+      ownershipStatus: cachedAnalysis.ownershipStatus,
+      buildingStructure: cachedAnalysis.buildingStructure,
+      buildingUsage: cachedAnalysis.buildingUsage,
+      totalFloors: cachedAnalysis.totalFloors,
+      totalLandArea: cachedAnalysis.totalLandArea,
+      exclusiveArea: cachedAnalysis.exclusiveArea,
+      landRightRatio: cachedAnalysis.landRightRatio,
+      hasSeparateRegistration: cachedAnalysis.hasSeparateRegistration,
+      isIllegalConstruction: cachedAnalysis.isIllegalConstruction,
+      currentOwner: cachedAnalysis.currentOwner,
+      transferDate: cachedAnalysis.transferDate,
+      transferCause: cachedAnalysis.transferCause,
+      pastOwnerChangeCount: cachedAnalysis.pastOwnerChangeCount,
+      hasOwnershipRestriction: cachedAnalysis.hasOwnershipRestriction,
+      titleSectionAnalysisSummary: cachedAnalysis.titleSectionAnalysisSummary,
+      titleSectionAnalysisResult: cachedAnalysis.titleSectionAnalysisResult,
+      ownershipSectionAnalysisSummary: cachedAnalysis.ownershipSectionAnalysisSummary,
+      ownershipSectionAnalysisResult: cachedAnalysis.ownershipSectionAnalysisResult,
+      rightsSectionAnalysisSummary: cachedAnalysis.rightsSectionAnalysisSummary,
+      rightsSectionAnalysisResult: cachedAnalysis.rightsSectionAnalysisResult,
+      rightsAnalysisSummary: cachedAnalysis.rightsAnalysisSummary,
+      recommendedContractClauses: cachedAnalysis.recommendedContractClauses,
+      isInsuranceEligible: cachedAnalysis.isInsuranceEligible,
+      insuranceAnalysisReasons: cachedAnalysis.insuranceAnalysisReasons,
+      recommendedInsuranceCompanies: cachedAnalysis.recommendedInsuranceCompanies,
+    });
+
+    return await this.analysisReportRepository.save(analysisReport);
+  }
+
+  /**
+   * AI를 통해 새로운 분석을 수행합니다
+   * 
+   * @param estate Estate 엔티티
+   * @param documents 문서 목록
+   * @param ocrText OCR 텍스트
+   * @param documentData 문서 데이터
+   * @returns 분석 리포트
+   */
+  private async performAiAnalysis(
+    estate: Estate,
+    documents: Document[],
+    ocrText: string,
+    documentData: Array<{ base64: string; buffer: Buffer; mimeType: string; name: string }>,
+  ): Promise<EstateAnalysisReport> {
+    // AI 분석 요청
     const fileBuffers: FileWithMimeType[] = documentData.map((data) => ({
       buffer: data.buffer,
       mimeType: data.mimeType,
@@ -98,9 +249,10 @@ export class EstateAnalysisReportService {
     const analysisResult = await this.textGeneratorPort.generateTextFromImages(
       SYSTEM_PROMPT,
       userPrompt,
-      fileBuffers
-    );    
-    // 7. AI 분석 결과 파싱
+      fileBuffers,
+    );
+
+    // AI 분석 결과 파싱
     let parsedAnalysis: any = {};
     try {
       parsedAnalysis = JSON.parse(analysisResult);
@@ -109,13 +261,13 @@ export class EstateAnalysisReportService {
       // JSON 파싱 실패 시 기본값 사용
     }
 
-    // 8. EstateAnalysisReport 저장
+    // EstateAnalysisReport 생성 및 저장
     const analysisReport = this.analysisReportRepository.create({
-      estateId: savedEstate.estateId,
-      estate: savedEstate,
+      estateId: estate.estateId,
+      estate: estate,
       analyzedAt: new Date(),
       safetyScore: parsedAnalysis.safetyScore ?? null,
-      address: parsedAnalysis.address || savedEstate.address || '',
+      address: parsedAnalysis.address || estate.address || '',
       ownershipStatus: parsedAnalysis.ownershipStatus || 'UNKNOWN',
       buildingStructure: parsedAnalysis.buildingStructure || null,
       buildingUsage: parsedAnalysis.buildingUsage || null,
@@ -144,14 +296,9 @@ export class EstateAnalysisReportService {
       insuranceAnalysisReasons: parsedAnalysis.insuranceAnalysisReasons || null,
       recommendedInsuranceCompanies: parsedAnalysis.recommendedInsuranceCompanies || null,
     });
+
     console.log('analysisReport', analysisReport);
-    const savedReport = await this.analysisReportRepository.save(analysisReport);
-
-    if (savedReport.estateId) {
-      await this.estateAnalysisReportCacheService.invalidate(savedReport.estateId);
-    }
-
-    return EstateAnalysisReportMapper.toResponseDto(savedReport);
+    return await this.analysisReportRepository.save(analysisReport);
   }
 
 

@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { GetEstateListDto } from '@/modules/estate/dto/request/get-estate-list.dto';
+import { normalizeAddress } from '@/common/utils/address.util';
 
 @Injectable()
 export class EstateRepository {
@@ -60,6 +61,44 @@ export class EstateRepository {
     return this.repository.find({
       where: { userId },
       relations: ['documents', 'analysisResult'],
+    });
+  }
+
+  /**
+   * 정규화된 주소로 분석 결과가 있는 Estate를 검색
+   * 주소 기반 캐싱 전략에 사용
+   * 
+   * @param address 검색할 주소
+   * @param userId 사용자 ID (선택)
+   * @returns 분석 결과가 있는 Estate 목록 (최신순)
+   */
+  async findByNormalizedAddress(
+    address: string,
+    userId?: number,
+  ): Promise<Estate[]> {
+    const normalized = normalizeAddress(address);
+    
+    if (!normalized) {
+      return [];
+    }
+
+    const qb = this.repository
+      .createQueryBuilder('estate')
+      .leftJoinAndSelect('estate.analysisResult', 'analysisResult')
+      .where('analysisResult.id IS NOT NULL') // 분석 결과가 있는 것만
+      .orderBy('analysisResult.analyzedAt', 'DESC'); // 최신순
+
+    // userId가 제공된 경우 해당 사용자의 데이터만 검색
+    if (userId !== undefined) {
+      qb.andWhere('estate.userId = :userId', { userId });
+    }
+
+    const estates = await qb.getMany();
+
+    // 정규화된 주소로 필터링
+    return estates.filter((estate) => {
+      const estateNormalized = normalizeAddress(estate.address);
+      return estateNormalized === normalized;
     });
   }
 
