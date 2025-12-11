@@ -20,12 +20,6 @@ export class EstateService {
     private readonly documentService: DocumentService,
   ) {}
 
-  /**
-   * 매물을 생성합니다.
-   * @param userId 사용자 ID
-   * @param createEstateDto 매물 생성 DTO
-   * @returns 생성된 매물 엔티티
-   */
   async create(
     userId: number,
     createEstateDto: CreateEstateDto,
@@ -34,7 +28,6 @@ export class EstateService {
     const estate = this.estateRepository.create(estateData);
     const savedEstate = await this.estateRepository.save(estate);
 
-    // documentIds가 있는 경우 문서를 estate에 연결
     if (createEstateDto.documentIds && createEstateDto.documentIds.length > 0) {
       await this.documentService.attachDocumentsToEstate(
         createEstateDto.documentIds,
@@ -45,12 +38,6 @@ export class EstateService {
     return EstateMapper.toResponseDto(savedEstate);
   }
 
-  /**
-   * 부동산 목록을 페이징하여 조회합니다.
-   * @param userId 사용자 ID
-   * @param getEstateListDto 페이징 요청 DTO
-   * @returns 페이징된 부동산 목록
-   */
   async findAllWithPagination(
     userId: number,
     getEstateListDto: GetEstateListDto,
@@ -101,11 +88,6 @@ export class EstateService {
     }
   }
 
-  /**
-   * 매물을 삭제합니다.
-   * @param userId 사용자 ID
-   * @param estateId 매물 ID
-   */
   async deleteEstate(userId: number, estateId: number): Promise<void> {
     const estate = await this.estateRepository.findOneByUserIdAndEstateId(
       userId,

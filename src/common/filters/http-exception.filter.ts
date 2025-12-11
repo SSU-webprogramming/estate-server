@@ -41,7 +41,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       const errorResponse = exception.getResponse();
-      errorCode = ErrorCode.INVALID_INPUT_VALUE; // 기본값 설정
+      errorCode = ErrorCode.INVALID_INPUT_VALUE;
       error = (errorResponse as any).error || exception.constructor.name;
       message = (errorResponse as any).message || exception.message;
     } else if (exception instanceof QueryFailedError) {
@@ -66,7 +66,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorCode,
       error,
       message,
-      timestamp: new Date().toISOString(), // 클라이언트 응답은 ISO 형식 유지
+      timestamp: new Date().toISOString(),
       path: request.url,
     };
 
@@ -76,8 +76,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       stack: (exception as any).stack,
       context: GlobalExceptionFilter.name,
     });
-
-    // Sentry.captureException(exception);
 
     response.status(statusCode).json(errorResponsePayload);
   }

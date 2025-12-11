@@ -35,8 +35,6 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   ) {
     const { id, username, _json } = profile;
     const email = _json?.kakao_account?.email;
-    const birthday = _json?.kakao_account?.birthday;
-    const gender = _json?.kakao_account?.gender;
 
     if (!id) {
       return done(new Error('Kakao profile did not return a user ID.'), null);

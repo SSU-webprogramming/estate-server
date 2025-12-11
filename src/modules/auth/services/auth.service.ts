@@ -105,7 +105,6 @@ export class AuthService {
   }
 
   async logout(userId: number) {
-    // 사용자 존재 확인
     const user = await this.userRepository.findOne({
       where: { userId },
     });
@@ -114,7 +113,6 @@ export class AuthService {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
 
-    // 이전 refresh token 삭제
     await this.redisService.del(`refresh_token:${user.userId}`);
   }
 
