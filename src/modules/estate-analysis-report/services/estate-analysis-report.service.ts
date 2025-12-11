@@ -7,10 +7,12 @@ import type { AnalysisCacheStrategyPort } from '@/modules/estate-analysis-report
 import { SYSTEM_PROMPT } from '@/modules/estate-analysis-report/prompts/system.prompt';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { Document } from '@/modules/document/entities/document.entity';
+import { EstateService } from '@/modules/estate/services/estate.service';
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
 import { S3Port } from '@/common/ports/s3.port';
 import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/estate-analysis-req.dto';
+import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
 import { EstateAnalysisReportResponseDto } from '../dto/response/estate-analysis-report-response.dto';
 import { EstateAnalysisReportMapper } from '../mapper/estate-analysis-report.mapper';
 import { EstateAnalysisReportCacheService } from './estate-analysis-report-cache.service';
@@ -34,6 +36,7 @@ export class EstateAnalysisReportService {
     private readonly s3Port: S3Port,
     private readonly estateAnalysisReportCacheService: EstateAnalysisReportCacheService,
     private readonly documentProcessingService: DocumentProcessingService,
+    private readonly estateService: EstateService,
     @Inject(ANALYSIS_CACHE_STRATEGY_PORT)
     private readonly analysisCacheStrategyPort: AnalysisCacheStrategyPort
   ) {}
@@ -53,16 +56,15 @@ export class EstateAnalysisReportService {
     userId: number,
     createEstateAnalysisDto: CreateEstateAnalysisDto,
   ): Promise<EstateAnalysisReportResponseDto> {
-    const estate = this.estateRepository.create({
-      userId,
-      address: createEstateAnalysisDto.address ?? null,
-      addressDetail: createEstateAnalysisDto.addressDetail ?? null,
-      contractType: createEstateAnalysisDto.contractType ?? null,
-      deposit: createEstateAnalysisDto.deposit ?? 0,
-      monthlyRent: createEstateAnalysisDto.monthlyRent ?? 0,
-      kbMarketPrice: createEstateAnalysisDto.kbMarketPrice ?? 0,
-    });
-    const savedEstate = await this.estateRepository.save(estate);
+    const createEstateDto = new CreateEstateDto();
+    createEstateDto.address = createEstateAnalysisDto.address;
+    createEstateDto.addressDetail = createEstateAnalysisDto.addressDetail;
+    createEstateDto.contractType = createEstateAnalysisDto.contractType;
+    createEstateDto.deposit = createEstateAnalysisDto.deposit;
+    createEstateDto.monthlyRent = createEstateAnalysisDto.monthlyRent;
+    createEstateDto.kbMarketPrice = createEstateAnalysisDto.kbMarketPrice;
+
+    const savedEstate = await this.estateService.createEstateEntity(userId, createEstateDto);
 
     const documents = await this.documentRepository.find({
       where: { docId: In(createEstateAnalysisDto.documentIds) },

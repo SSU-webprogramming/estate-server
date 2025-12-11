@@ -38,6 +38,15 @@ export class EstateService {
     return EstateMapper.toResponseDto(savedEstate);
   }
 
+  async createEstateEntity(
+    userId: number,
+    createEstateDto: CreateEstateDto,
+  ): Promise<Estate> {
+    const estateData = EstateMapper.fromCreateDto(userId, createEstateDto);
+    const estate = this.estateRepository.create(estateData);
+    return await this.estateRepository.save(estate);
+  }
+
   async findAllWithPagination(
     userId: number,
     getEstateListDto: GetEstateListDto,
@@ -47,9 +56,7 @@ export class EstateService {
       getEstateListDto,
     );
 
-    const estateDtos = estates.map((estate) =>
-      EstateMapper.toResponseDto(estate),
-    );
+    const estateDtos = EstateMapper.toResponseDtoList(estates);
     const meta = new PaginationMetaDto(
       getEstateListDto.page,
       getEstateListDto.limit,

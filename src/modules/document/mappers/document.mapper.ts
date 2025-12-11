@@ -7,7 +7,15 @@ export class DocumentMapper {
     return new DocumentResponseDto(document);
   }
 
+  static toResponseDtoList(documents: Document[]): DocumentResponseDto[] {
+    return documents.map((document) => this.toResponseDto(document));
+  }
+
   static toInfoDto(document: Document): DocumentInfoResponseDto {
     return new DocumentInfoResponseDto(document);
+  }
+
+  static toInfoDtoList(documents: Document[]): DocumentInfoResponseDto[] {
+    return documents.map((document) => this.toInfoDto(document));
   }
 }

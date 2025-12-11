@@ -38,7 +38,7 @@ export class DocumentService {
     });
 
     const savedDocument = await this.documentRepository.save(newDocument);
-    return new DocumentResponseDto(savedDocument);
+    return DocumentMapper.toResponseDto(savedDocument);
   }
 
 
@@ -55,7 +55,7 @@ export class DocumentService {
   async getUserDocuments(userId: number): Promise<DocumentInfoResponseDto[]> {
     const documents = await this.documentRepository.findByUserId(userId);
 
-    return documents.map((doc) => DocumentMapper.toInfoDto(doc));
+    return DocumentMapper.toInfoDtoList(documents);
   }
 
   async attachDocumentsToEstate(
