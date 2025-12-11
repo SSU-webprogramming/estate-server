@@ -85,8 +85,6 @@ export class UserService {
   }
 
   async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<User> {
-    this.termsValidator.validateTermsFormat(dto.agreedTerms);
-
     const user = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.findOneBy({ userId }),
       '사용자 조회',
@@ -97,7 +95,6 @@ export class UserService {
     }
 
     this.termsValidator.validateNotAlreadyAgreed(user.agreedTerms);
-
     await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
 
     user.agreedTerms = dto.agreedTerms;

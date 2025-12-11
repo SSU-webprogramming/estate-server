@@ -69,10 +69,6 @@ export class DocumentService {
 
     const documents = await this.documentRepository.findByIds(documentIds);
 
-    if (documents.length === 0) {
-      return;
-    }
-
     for (const document of documents) {
       document.estateId = estateId;
 
