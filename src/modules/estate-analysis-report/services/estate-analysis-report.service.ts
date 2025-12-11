@@ -20,6 +20,7 @@ import { PaginationResponseDto, PaginationMetaDto } from '@/common/dto/paginatio
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
 import { DocumentProcessingService } from './document-processing.service';
+import { ErrorHandler } from '@/common/utils/error-handler.util';
 @Injectable()
 export class EstateAnalysisReportService {
   constructor(
@@ -202,12 +203,7 @@ export class EstateAnalysisReportService {
       fileBuffers,
     );
 
-    let parsedAnalysis: any = {};
-    try {
-      parsedAnalysis = JSON.parse(analysisResult);
-    } catch (error) {
-      console.error('Failed to parse analysis result as JSON:', error);
-    }
+    const parsedAnalysis: any = ErrorHandler.parseJson(analysisResult, {});
 
     const analysisReport = this.analysisReportRepository.create({
       estateId: estate.estateId,
@@ -258,13 +254,13 @@ export class EstateAnalysisReportService {
       (doc) => !usedDocumentIds.includes(doc.docId),
     );
 
-    for (const document of documentsToDelete) {
-      try {
+    await ErrorHandler.handleBatchOperation(
+      documentsToDelete,
+      async (document) => {
         await this.s3Port.delete(document.s3Key);
-      } catch (error) {
-        console.error(`Failed to delete S3 file ${document.s3Key}:`, error);
-      }
-    }
+      },
+      'S3 파일 삭제',
+    );
 
     if (documentsToDelete.length > 0) {
       const docIdsToDelete = documentsToDelete.map((doc) => doc.docId);

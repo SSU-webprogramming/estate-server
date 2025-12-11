@@ -14,6 +14,7 @@ import { UserMapper } from '@/modules/user/mapper/user.mapper';
 import { AgreeTermsRequestDto } from '@/modules/user/dto/request/agree-term.dto';
 import { TermsValidator } from '@/modules/user/validators/terms-validator';
 import { UserRepository } from '@/modules/user/repositories/user.repository';
+import { ErrorHandler } from '@/common/utils/error-handler.util';
 
 @Injectable()
 export class UserService {
@@ -85,7 +86,11 @@ export class UserService {
   async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<User> {
     this.termsValidator.validateTermsFormat(dto.agreedTerms);
 
-    const user = await this.userRepository.findOneBy({ userId });
+    const user = await ErrorHandler.handleDatabaseOperation(
+      () => this.userRepository.findOneBy({ userId }),
+      '사용자 조회',
+    );
+
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
@@ -94,12 +99,10 @@ export class UserService {
 
     await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
 
-    try {
-      user.agreedTerms = dto.agreedTerms;
-      const savedUser = await this.userRepository.save(user);
-      return savedUser;
-    } catch (error) {
-      throw new CustomException(ErrorCode.DATABASE_ERROR);
-    }
+    user.agreedTerms = dto.agreedTerms;
+    return ErrorHandler.handleDatabaseOperation(
+      () => this.userRepository.save(user),
+      '사용자 약관 동의 저장',
+    );
   }
 }

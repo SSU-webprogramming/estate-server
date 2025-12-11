@@ -14,6 +14,22 @@ export enum ErrorCode {
 
   // S3
   S3_CONFIG_ERROR = 'S001',
+  S3_UPLOAD_FAILED = 'S002',
+  S3_DOWNLOAD_FAILED = 'S003',
+  S3_DELETE_FAILED = 'S004',
+  S3_FILE_NOT_FOUND = 'S005',
+
+  // Cache & Redis
+  CACHE_ERROR = 'C001',
+  REDIS_CONNECTION_ERROR = 'C002',
+
+  // OCR
+  OCR_PROCESSING_FAILED = 'O001',
+  OCR_INVALID_IMAGE = 'O002',
+
+  // Document
+  DOCUMENT_PROCESSING_FAILED = 'DOC001',
+  DOCUMENT_ANALYSIS_FAILED = 'DOC002',
 
   // Database
   DATABASE_ERROR = 'D001',
@@ -69,6 +85,46 @@ export const ErrorDictionary: Record<
   [ErrorCode.S3_CONFIG_ERROR]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: 'S3 설정이 올바르지 않습니다. .env 파일을 확인하세요.',
+  },
+  [ErrorCode.S3_UPLOAD_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '파일 업로드 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.S3_DOWNLOAD_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '파일 다운로드 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.S3_DELETE_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '파일 삭제 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.S3_FILE_NOT_FOUND]: {
+    status: HttpStatus.NOT_FOUND,
+    message: 'S3에서 파일을 찾을 수 없습니다.',
+  },
+  [ErrorCode.CACHE_ERROR]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '캐시 처리 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.REDIS_CONNECTION_ERROR]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: 'Redis 연결 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.OCR_PROCESSING_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: 'OCR 처리 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.OCR_INVALID_IMAGE]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '유효하지 않은 이미지 파일입니다.',
+  },
+  [ErrorCode.DOCUMENT_PROCESSING_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '문서 처리 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.DOCUMENT_ANALYSIS_FAILED]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '문서 분석 중 오류가 발생했습니다.',
   },
   [ErrorCode.DATABASE_ERROR]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,

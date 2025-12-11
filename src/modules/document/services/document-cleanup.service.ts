@@ -4,6 +4,7 @@ import { Repository, IsNull } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Document } from '@/modules/document/entities/document.entity';
 import { S3Port } from '@/common/ports/s3.port';
+import { ErrorHandler } from '@/common/utils/error-handler.util';
 
 @Injectable()
 export class DocumentCleanupService {
@@ -35,14 +36,17 @@ export class DocumentCleanupService {
 
       this.logger.log(`Found ${unlinkedDocuments.length} unlinked documents to delete.`);
 
-      for (const document of unlinkedDocuments) {
-        try {
+      const { successCount, failureCount } = await ErrorHandler.handleBatchOperation(
+        unlinkedDocuments,
+        async (document) => {
           await this.s3Port.delete(document.s3Key);
           this.logger.debug(`Deleted S3 file: ${document.s3Key}`);
-        } catch (error) {
-          this.logger.error(`Failed to delete S3 file ${document.s3Key}:`, error);
-        }
-      }
+        },
+        'S3 파일 삭제',
+        this.logger,
+      );
+
+      this.logger.log(`S3 파일 삭제 결과: 성공 ${successCount}개, 실패 ${failureCount}개`);
 
       const deleteResult = await this.documentRepository.delete({
         estateId: IsNull(),
