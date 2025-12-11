@@ -13,7 +13,7 @@ import { EstateRepository } from './repositories/estate.repository';
   ],
   controllers: [EstateController],
   providers: [EstateService, EstateRepository],
-  exports: [EstateService],
+  exports: [EstateService, EstateRepository], // EstateRepository export 추가
 })
 export class EstateModule {}
 
