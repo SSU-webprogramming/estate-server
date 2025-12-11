@@ -7,7 +7,7 @@ import {
   PutObjectCommandOutput,
   S3ClientConfig,
 } from '@aws-sdk/client-s3';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { S3Port } from '@/common/ports/s3.port';
 import { Readable } from 'stream';
@@ -68,7 +68,7 @@ export class S3Service implements S3Port {
       return await this.s3Client.send(command);
     } catch (error) {
       console.error('Error uploading file to S3:', error);
-      throw new InternalServerErrorException('Failed to upload file to S3.');
+      throw new CustomException(ErrorCode.S3_UPLOAD_FAILED);
     }
   }
 
@@ -83,7 +83,7 @@ export class S3Service implements S3Port {
       const body = response.Body;
 
       if (!body) {
-        throw new InternalServerErrorException('S3 object body is empty.');
+        throw new CustomException(ErrorCode.S3_FILE_NOT_FOUND);
       }
 
       // The body can be a stream in Node.js environment
@@ -96,16 +96,13 @@ export class S3Service implements S3Port {
         });
       }
 
-      // Handle other body types if necessary (e.g., Blob in browser)
-      // For this server-side app, we primarily expect a Readable stream.
-      throw new InternalServerErrorException(
-        'Unsupported S3 object body type.',
-      );
+      throw new CustomException(ErrorCode.S3_DOWNLOAD_FAILED);
     } catch (error) {
       console.error('Error downloading file from S3:', error);
-      throw new InternalServerErrorException(
-        'Failed to download file from S3.',
-      );
+      if (error instanceof CustomException) {
+        throw error;
+      }
+      throw new CustomException(ErrorCode.S3_DOWNLOAD_FAILED);
     }
   }
 
@@ -124,7 +121,7 @@ export class S3Service implements S3Port {
       await this.s3Client.send(command);
     } catch (error) {
       console.error('Error deleting file from S3:', error);
-      throw new InternalServerErrorException('Failed to delete file from S3.');
+      throw new CustomException(ErrorCode.S3_DELETE_FAILED);
     }
   }
 
@@ -139,7 +136,7 @@ export class S3Service implements S3Port {
       await this.s3Client.send(command);
     } catch (error) {
       console.error('Error copying file in S3:', error);
-      throw new InternalServerErrorException('Failed to copy file in S3.');
+      throw new CustomException(ErrorCode.S3_UPLOAD_FAILED);
     }
   }
 }

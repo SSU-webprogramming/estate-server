@@ -70,19 +70,15 @@ export class UserRepository {
     await queryRunner.startTransaction();
 
     try {
-      // 1. 사용자 존재 여부 확인
       const user = await queryRunner.manager.findOne(User, { where: { userId } });
       if (!user) {
         throw new Error('User not found');
       }
 
-      // 2. 연관된 문서 Soft Delete
       await queryRunner.manager.softDelete(Document, { userId });
 
-      // 3. 연관된 부동산 Soft Delete
       await queryRunner.manager.softDelete(Estate, { userId });
 
-      // 4. 사용자 Soft Delete
       await queryRunner.manager.softDelete(User, { userId });
 
       await queryRunner.commitTransaction();
@@ -103,13 +99,10 @@ export class UserRepository {
     await queryRunner.startTransaction();
 
     try {
-      // 1. 연관된 문서 Soft Delete
       await queryRunner.manager.softDelete(Document, { userId: In(userIds) });
 
-      // 2. 연관된 부동산 Soft Delete
       await queryRunner.manager.softDelete(Estate, { userId: In(userIds) });
 
-      // 3. 사용자 Soft Delete
       await queryRunner.manager.softDelete(User, { userId: In(userIds) });
 
       await queryRunner.commitTransaction();

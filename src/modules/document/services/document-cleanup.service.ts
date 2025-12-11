@@ -4,11 +4,8 @@ import { Repository, IsNull } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Document } from '@/modules/document/entities/document.entity';
 import { S3Port } from '@/common/ports/s3.port';
+import { ErrorHandler } from '@/common/utils/error-handler.util';
 
-/**
- * 문서 정리 배치 작업 서비스
- * estate와 연결되지 않은 문서들을 주기적으로 삭제합니다.
- */
 @Injectable()
 export class DocumentCleanupService {
   private readonly logger = new Logger(DocumentCleanupService.name);
@@ -28,7 +25,6 @@ export class DocumentCleanupService {
     this.logger.log('Starting cleanup of unlinked documents...');
 
     try {
-      // estateId가 null인 문서들 조회
       const unlinkedDocuments = await this.documentRepository.find({
         where: { estateId: IsNull() },
       });
@@ -40,18 +36,18 @@ export class DocumentCleanupService {
 
       this.logger.log(`Found ${unlinkedDocuments.length} unlinked documents to delete.`);
 
-      // S3에서 파일 삭제
-      for (const document of unlinkedDocuments) {
-        try {
+      const { successCount, failureCount } = await ErrorHandler.handleBatchOperation(
+        unlinkedDocuments,
+        async (document) => {
           await this.s3Port.delete(document.s3Key);
           this.logger.debug(`Deleted S3 file: ${document.s3Key}`);
-        } catch (error) {
-          this.logger.error(`Failed to delete S3 file ${document.s3Key}:`, error);
-          // S3 삭제 실패해도 DB 레코드는 삭제 진행
-        }
-      }
+        },
+        'S3 파일 삭제',
+        this.logger,
+      );
 
-      // DB에서 문서 삭제
+      this.logger.log(`S3 파일 삭제 결과: 성공 ${successCount}개, 실패 ${failureCount}개`);
+
       const deleteResult = await this.documentRepository.delete({
         estateId: IsNull(),
       });

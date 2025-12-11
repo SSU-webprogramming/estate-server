@@ -27,9 +27,7 @@ export class AuthController {
   @Get('kakao')
   @UseGuards(KakaoAuthGuard)
   @ApiKakaoLogin()
-  kakaoLogin() {
-    // This endpoint will trigger the Kakao login flow
-  }
+  kakaoLogin() {}
 
   @Get('kakao/callback')
   @UseGuards(KakaoAuthGuard)

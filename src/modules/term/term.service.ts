@@ -15,19 +15,11 @@ export class TermService {
     private readonly termRepository: TermRepository,
   ) {}
 
-  /**
-   * 모든 약관 목록 조회
-   * 정렬: 필수 > 선택, 생성일 순
-   */
   async findAll(): Promise<TermResponseDto[]> {
     const terms = await this.termRepository.findAll();
     return TermMapper.toResponseDtoList(terms);
   }
 
-  /**
-   * 회원이 동의한 약관 목록 조회
-   * 정렬: 필수 > 선택, 생성일 내림차순
-   */
   async findAgreedTerms(user: User): Promise<TermResponseDto[]> {
     const agreedTermsMap = user.agreedTerms;
 
@@ -48,9 +40,6 @@ export class TermService {
     return TermMapper.toResponseDtoList(terms);
   }
 
-  /**
-   * 약관 생성
-   */
   async create(dto: CreateTermDto): Promise<TermResponseDto> {
     const termData = TermMapper.fromCreateDto(dto);
     const term = this.termRepository.create(termData);
@@ -58,9 +47,6 @@ export class TermService {
     return TermMapper.toResponseDto(savedTerm);
   }
 
-  /**
-   * 약관 수정
-   */
   async update(id: number, dto: UpdateTermDto): Promise<TermResponseDto> {
     const term = await this.termRepository.findOne(id);
     if (!term) {

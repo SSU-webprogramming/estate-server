@@ -64,14 +64,6 @@ export class EstateRepository {
     });
   }
 
-  /**
-   * 정규화된 주소로 분석 결과가 있는 Estate를 검색
-   * 주소 기반 캐싱 전략에 사용
-   * 
-   * @param address 검색할 주소
-   * @param userId 사용자 ID (선택)
-   * @returns 분석 결과가 있는 Estate 목록 (최신순)
-   */
   async findByNormalizedAddress(
     address: string,
     userId?: number,
@@ -85,17 +77,15 @@ export class EstateRepository {
     const qb = this.repository
       .createQueryBuilder('estate')
       .leftJoinAndSelect('estate.analysisResult', 'analysisResult')
-      .where('analysisResult.id IS NOT NULL') // 분석 결과가 있는 것만
-      .orderBy('analysisResult.analyzedAt', 'DESC'); // 최신순
+      .where('analysisResult.id IS NOT NULL')
+      .orderBy('analysisResult.analyzedAt', 'DESC');
 
-    // userId가 제공된 경우 해당 사용자의 데이터만 검색
     if (userId !== undefined) {
       qb.andWhere('estate.userId = :userId', { userId });
     }
 
     const estates = await qb.getMany();
 
-    // 정규화된 주소로 필터링
     return estates.filter((estate) => {
       const estateNormalized = normalizeAddress(estate.address);
       return estateNormalized === normalized;

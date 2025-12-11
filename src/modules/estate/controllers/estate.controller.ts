@@ -30,10 +30,7 @@ import {
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
 import { User } from '@/modules/user/entities/user.entity';
-/**
- * 부동산 컨트롤러
- * 부동산 관련 API 엔드포인트를 제공합니다.
- */
+
 @ApiEstateController()
 @Controller('estates')
 export class EstateController {

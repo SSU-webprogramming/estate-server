@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   Inject,
+  BadRequestException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError, TypeORMError } from 'typeorm';
@@ -38,10 +39,29 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorCode = errorResponse.errorCode;
       error = exception.constructor.name;
       message = errorResponse.message;
+    } else if (exception instanceof BadRequestException) {
+      statusCode = exception.getStatus();
+      const errorResponse = exception.getResponse();
+      errorCode = ErrorCode.INVALID_INPUT_VALUE;
+      error = 'ValidationError';
+
+      // ValidationPipe 에러인 경우 상세한 메시지 추출
+      if (typeof errorResponse === 'object' && errorResponse !== null) {
+        const response = errorResponse as any;
+        if (response.message && Array.isArray(response.message)) {
+          message = response.message.join(', ');
+        } else if (response.message) {
+          message = response.message;
+        } else {
+          message = '입력값 검증에 실패했습니다.';
+        }
+      } else {
+        message = exception.message || '입력값 검증에 실패했습니다.';
+      }
     } else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       const errorResponse = exception.getResponse();
-      errorCode = ErrorCode.INVALID_INPUT_VALUE; // 기본값 설정
+      errorCode = ErrorCode.INVALID_INPUT_VALUE;
       error = (errorResponse as any).error || exception.constructor.name;
       message = (errorResponse as any).message || exception.message;
     } else if (exception instanceof QueryFailedError) {
@@ -66,7 +86,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorCode,
       error,
       message,
-      timestamp: new Date().toISOString(), // 클라이언트 응답은 ISO 형식 유지
+      timestamp: new Date().toISOString(),
       path: request.url,
     };
 
@@ -76,8 +96,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       stack: (exception as any).stack,
       context: GlobalExceptionFilter.name,
     });
-
-    // Sentry.captureException(exception);
 
     response.status(statusCode).json(errorResponsePayload);
   }

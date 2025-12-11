@@ -48,7 +48,7 @@ import { CacheModule } from '@/common/cache/cache.module';
         },
       ],
     }),
-    LoggerModule, // Winston log
+    LoggerModule,
     RedisModule.register(),
     HttpClientModule,
     CacheModule,

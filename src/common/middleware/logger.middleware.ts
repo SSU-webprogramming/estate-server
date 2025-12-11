@@ -18,7 +18,6 @@ export class LoggerMiddleware implements NestMiddleware {
       const { statusCode } = res;
       const duration = Date.now() - startTime;
 
-      // Body masking (remove sensitive fields)
       const maskedBody = { ...body };
       const sensitiveFields = ['password', 'token', 'secret', 'refreshToken'];
       sensitiveFields.forEach((field) => {
@@ -29,7 +28,7 @@ export class LoggerMiddleware implements NestMiddleware {
         `[${method}] ${originalUrl} ${statusCode} - ${duration}ms - ${ip} - ${userAgent}`,
         { 
           context: 'HTTP',
-          body: JSON.stringify(maskedBody), // Log masked body
+          body: JSON.stringify(maskedBody),
         },
       );
     });
