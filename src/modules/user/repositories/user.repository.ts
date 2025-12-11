@@ -6,9 +6,10 @@ import { Estate } from '@/modules/estate/entities/estate.entity';
 import { Document } from '@/modules/document/entities/document.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 import { GetUserListDto } from '@/modules/user/dto/request/get-user-list.dto';
+import { IUserRepository } from '@/common/ports/user-repository.port';
 
 @Injectable()
-export class UserRepository {
+export class UserRepository implements IUserRepository {
   constructor(
     @InjectRepository(User)
     private readonly repository: Repository<User>,

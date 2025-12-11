@@ -4,9 +4,10 @@ import { Repository } from 'typeorm';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { GetEstateListDto } from '@/modules/estate/dto/request/get-estate-list.dto';
 import { normalizeAddress } from '@/common/utils/address.util';
+import { IEstateRepository } from '@/common/ports/estate-repository.port';
 
 @Injectable()
-export class EstateRepository {
+export class EstateRepository implements IEstateRepository {
   constructor(
     @InjectRepository(Estate)
     private readonly repository: Repository<Estate>,
