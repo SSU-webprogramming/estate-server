@@ -28,6 +28,7 @@ import { TermModule } from '@/modules/term/term.module';
 // Config
 import { getTypeOrmConfig } from '@/config/typeorm.config';
 import redisConfig from '@/config/redis.config';
+import { validate } from '@/config/env.validation';
 import { HttpClientModule } from '@/common/http/http-client.module';
 import { CacheModule } from '@/common/cache/cache.module';
 
@@ -36,6 +37,7 @@ import { CacheModule } from '@/common/cache/cache.module';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [redisConfig],
+      validate,
     }),
     ScheduleModule.forRoot(),
     ThrottlerModule.forRootAsync({
