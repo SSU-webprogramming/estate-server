@@ -79,6 +79,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
       error = 'InternalServerError';
       message = '서버 내부 오류가 발생했습니다. 관리자에게 문의해주세요.';
+      console.log(exception);
+      console.log(statusCode);
+      console.log(errorCode);
+      console.log(error);
+      console.log(message);
     }
 
     const errorResponsePayload = {
