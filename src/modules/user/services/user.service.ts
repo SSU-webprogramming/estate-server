@@ -88,21 +88,22 @@ export class UserService {
 
     const user = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.findOneBy({ userId }),
-      '»ç¿ëÀÚ Á¶È¸',
+      'ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¸',
     );
 
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
 
-    this.termsValidator.validateNotAlreadyAgreed(user.agreedTerms);
+    // ì•½ê´€ ìž¬ë™ì˜ í—ˆìš© - validateNotAlreadyAgreed ê²€ì¦ ì œê±°
+    // this.termsValidator.validateNotAlreadyAgreed(user.agreedTerms);
 
     await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
 
     user.agreedTerms = dto.agreedTerms;
     return ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.save(user),
-      '»ç¿ëÀÚ ¾à°ü µ¿ÀÇ ÀúÀå',
+      'ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½',
     );
   }
 }
