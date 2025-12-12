@@ -13,6 +13,8 @@ import { EstateAnalysisReportCacheService } from './services/estate-analysis-rep
 import { DocumentProcessingService } from './services/document-processing.service';
 import { AddressBasedCacheStrategyService } from './services/address-based-cache-strategy.service';
 import { ANALYSIS_CACHE_STRATEGY_PORT } from './ports/analysis-cache-strategy.port';
+import { EstateAnalysisReportRepository } from './repositories/estate-analysis-report.repository';
+import { DocumentModule } from '@/modules/document/document.module';
 
 @Module({
   imports: [
@@ -21,10 +23,12 @@ import { ANALYSIS_CACHE_STRATEGY_PORT } from './ports/analysis-cache-strategy.po
     OcrModule,
     S3Module,
     RedisModule.register(),
+    DocumentModule,
   ],
   controllers: [EstateAnalysisReportController],
   providers: [
     EstateAnalysisReportService,
+    EstateAnalysisReportRepository,
     EstateAnalysisReportCacheService,
     DocumentProcessingService,
     {

@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, IsNull } from 'typeorm';
+import { Repository } from 'typeorm';
 import { TextGeneratorPort, FileWithMimeType } from '@/modules/estate-analysis-report/ports/text-generator.port';
 import { ANALYSIS_CACHE_STRATEGY_PORT } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
 import type { AnalysisCacheStrategyPort } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
@@ -10,28 +10,28 @@ import { Document } from '@/modules/document/entities/document.entity';
 import { EstateService } from '@/modules/estate/services/estate.service';
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
 import { S3Port } from '@/common/ports/s3.port';
-import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/estate-analysis-req.dto';
 import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
 import { EstateAnalysisReportResponseDto } from '../dto/response/estate-analysis-report-response.dto';
 import { EstateAnalysisReportMapper } from '../mapper/estate-analysis-report.mapper';
+import { CachedAnalysisDto } from '../dto/cached-analysis.dto';
+import { AiAnalysisResultDto } from '../dto/ai-analysis-result.dto';
 import { EstateAnalysisReportCacheService } from './estate-analysis-report-cache.service';
 import { SearchEstateAnalysisDto } from '../dto/request/search-estate-analysis.dto';
-import { SafetyScoreSearchType } from '../dto/request/safety-score-search-type.enum';
-import { PaginationResponseDto, PaginationMetaDto } from '@/common/dto/pagination-response.dto';
+import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
 import { DocumentProcessingService } from './document-processing.service';
 import { ErrorHandler } from '@/common/utils/error-handler.util';
+import { EstateAnalysisReportRepository } from '../repositories/estate-analysis-report.repository';
+import { DocumentRepository } from '@/modules/document/repositories/document.repository';
 @Injectable()
 export class EstateAnalysisReportService {
   constructor(
     @InjectRepository(Estate)
     private readonly estateRepository: Repository<Estate>,
-    @InjectRepository(Document)
-    private readonly documentRepository: Repository<Document>,
-    @InjectRepository(EstateAnalysisReport)
-    private readonly analysisReportRepository: Repository<EstateAnalysisReport>,
+    private readonly documentRepository: DocumentRepository,
+    private readonly estateAnalysisReportRepository: EstateAnalysisReportRepository,
     private readonly textGeneratorPort: TextGeneratorPort,
     private readonly s3Port: S3Port,
     private readonly estateAnalysisReportCacheService: EstateAnalysisReportCacheService,
@@ -66,9 +66,7 @@ export class EstateAnalysisReportService {
 
     const savedEstate = await this.estateService.createEstateEntity(userId, createEstateDto);
 
-    const documents = await this.documentRepository.find({
-      where: { docId: In(createEstateAnalysisDto.documentIds) },
-    });
+    const documents = await this.documentRepository.findByIds(createEstateAnalysisDto.documentIds);
 
     for (const document of documents) {
       document.estateId = savedEstate.estateId;
@@ -148,40 +146,11 @@ export class EstateAnalysisReportService {
     estate: Estate,
     cachedAnalysis: EstateAnalysisReport,
   ): Promise<EstateAnalysisReport> {
-    const analysisReport = this.analysisReportRepository.create({
-      estateId: estate.estateId,
-      estate: estate,
-      analyzedAt: new Date(),
-      safetyScore: cachedAnalysis.safetyScore,
-      address: cachedAnalysis.address,
-      ownershipStatus: cachedAnalysis.ownershipStatus,
-      buildingStructure: cachedAnalysis.buildingStructure,
-      buildingUsage: cachedAnalysis.buildingUsage,
-      totalFloors: cachedAnalysis.totalFloors,
-      totalLandArea: cachedAnalysis.totalLandArea,
-      exclusiveArea: cachedAnalysis.exclusiveArea,
-      landRightRatio: cachedAnalysis.landRightRatio,
-      hasSeparateRegistration: cachedAnalysis.hasSeparateRegistration,
-      isIllegalConstruction: cachedAnalysis.isIllegalConstruction,
-      currentOwner: cachedAnalysis.currentOwner,
-      transferDate: cachedAnalysis.transferDate,
-      transferCause: cachedAnalysis.transferCause,
-      pastOwnerChangeCount: cachedAnalysis.pastOwnerChangeCount,
-      hasOwnershipRestriction: cachedAnalysis.hasOwnershipRestriction,
-      titleSectionAnalysisSummary: cachedAnalysis.titleSectionAnalysisSummary,
-      titleSectionAnalysisResult: cachedAnalysis.titleSectionAnalysisResult,
-      ownershipSectionAnalysisSummary: cachedAnalysis.ownershipSectionAnalysisSummary,
-      ownershipSectionAnalysisResult: cachedAnalysis.ownershipSectionAnalysisResult,
-      rightsSectionAnalysisSummary: cachedAnalysis.rightsSectionAnalysisSummary,
-      rightsSectionAnalysisResult: cachedAnalysis.rightsSectionAnalysisResult,
-      rightsAnalysisSummary: cachedAnalysis.rightsAnalysisSummary,
-      recommendedContractClauses: cachedAnalysis.recommendedContractClauses,
-      isInsuranceEligible: cachedAnalysis.isInsuranceEligible,
-      insuranceAnalysisReasons: cachedAnalysis.insuranceAnalysisReasons,
-      recommendedInsuranceCompanies: cachedAnalysis.recommendedInsuranceCompanies,
-    });
+    const cachedData = EstateAnalysisReportMapper.toCachedAnalysisDto(cachedAnalysis);
+    const analysisReportData = EstateAnalysisReportMapper.fromCachedAnalysis(estate, cachedData);
+    const analysisReport = this.estateAnalysisReportRepository.create(analysisReportData);
 
-    return await this.analysisReportRepository.save(analysisReport);
+    return await this.estateAnalysisReportRepository.save(analysisReport);
   }
 
   private async performAiAnalysis(
@@ -203,50 +172,17 @@ export class EstateAnalysisReportService {
 
     const parsedAnalysis: any = ErrorHandler.parseJson(analysisResult, {});
 
-    const analysisReport = this.analysisReportRepository.create({
-      estateId: estate.estateId,
-      estate: estate,
-      analyzedAt: new Date(),
-      safetyScore: parsedAnalysis.safetyScore ?? null,
-      address: parsedAnalysis.address || estate.address || '',
-      ownershipStatus: parsedAnalysis.ownershipStatus || 'UNKNOWN',
-      buildingStructure: parsedAnalysis.buildingStructure || null,
-      buildingUsage: parsedAnalysis.buildingUsage || null,
-      totalFloors: parsedAnalysis.totalFloors || null,
-      totalLandArea: parsedAnalysis.totalLandArea || null,
-      exclusiveArea: parsedAnalysis.exclusiveArea || null,
-      landRightRatio: parsedAnalysis.landRightRatio || null,
-      hasSeparateRegistration: parsedAnalysis.hasSeparateRegistration ?? null,
-      isIllegalConstruction: parsedAnalysis.isIllegalConstruction ?? null,
-      currentOwner: parsedAnalysis.currentOwner || null,
-      transferDate: parsedAnalysis.transferDate 
-        ? new Date(parsedAnalysis.transferDate) 
-        : null,
-      transferCause: parsedAnalysis.transferCause || null,
-      pastOwnerChangeCount: parsedAnalysis.pastOwnerChangeCount || null,
-      hasOwnershipRestriction: parsedAnalysis.hasOwnershipRestriction ?? null,
-      titleSectionAnalysisSummary: parsedAnalysis.titleSectionAnalysisSummary || null,
-      titleSectionAnalysisResult: this.parseAnalysisResultStatus(parsedAnalysis.titleSectionAnalysisResult),
-      ownershipSectionAnalysisSummary: parsedAnalysis.ownershipSectionAnalysisSummary || null,
-      ownershipSectionAnalysisResult: this.parseAnalysisResultStatus(parsedAnalysis.ownershipSectionAnalysisResult),
-      rightsSectionAnalysisSummary: parsedAnalysis.rightsSectionAnalysisSummary || null,
-      rightsSectionAnalysisResult: this.parseAnalysisResultStatus(parsedAnalysis.rightsSectionAnalysisResult),
-      rightsAnalysisSummary: parsedAnalysis.rightsAnalysisSummary || analysisResult,
-      recommendedContractClauses: parsedAnalysis.recommendedContractClauses || null,
-      isInsuranceEligible: parsedAnalysis.isInsuranceEligible ?? null,
-      insuranceAnalysisReasons: parsedAnalysis.insuranceAnalysisReasons || null,
-      recommendedInsuranceCompanies: parsedAnalysis.recommendedInsuranceCompanies || null,
-    });
+    const aiResult = EstateAnalysisReportMapper.toAiAnalysisResultDto(parsedAnalysis, estate, analysisResult);
+    const analysisReportData = EstateAnalysisReportMapper.fromAiAnalysisResult(estate, aiResult);
+    const analysisReport = this.estateAnalysisReportRepository.create(analysisReportData);
 
     console.log('analysisReport', analysisReport);
-    return await this.analysisReportRepository.save(analysisReport);
+    return await this.estateAnalysisReportRepository.save(analysisReport);
   }
 
 
   private async deleteUnusedDocuments(usedDocumentIds: number[]): Promise<void> {
-    const unlinkedDocuments = await this.documentRepository.find({
-      where: { estateId: IsNull() },
-    });
+    const unlinkedDocuments = await this.documentRepository.findUnlinked();
 
     const documentsToDelete = unlinkedDocuments.filter(
       (doc) => !usedDocumentIds.includes(doc.docId),
@@ -262,18 +198,14 @@ export class EstateAnalysisReportService {
 
     if (documentsToDelete.length > 0) {
       const docIdsToDelete = documentsToDelete.map((doc) => doc.docId);
-      await this.documentRepository.delete({
-        docId: In(docIdsToDelete),
-      });
+      await this.documentRepository.delete(docIdsToDelete);
     }
   }
 
   async findByEstateId(
     estateId: number,
   ): Promise<EstateAnalysisReport | null> {
-    return await this.analysisReportRepository.findOne({
-      where: { estateId },
-    });
+    return await this.estateAnalysisReportRepository.findByEstateId(estateId);
   }
 
   async getAnalysisResult(estateId: number): Promise<EstateAnalysisReportResponseDto> {
@@ -295,61 +227,6 @@ export class EstateAnalysisReportService {
   }
 
   async findAll(userId: number, query: SearchEstateAnalysisDto): Promise<PaginationResponseDto<EstateAnalysisReportResponseDto>> {
-    const qb = this.analysisReportRepository
-      .createQueryBuilder('report');
-
-    qb.innerJoin('report.estate', 'estate');
-    qb.where('estate.userId = :userId', { userId });
-
-    if (query.address) {
-      qb.andWhere('report.address LIKE :address', { address: `%${query.address}%` });
-    }
-
-    if (query.safetyScore) {
-      if (query.safetyScore === SafetyScoreSearchType.SAFE) {
-        qb.andWhere('report.safetyScore >= :minScore', { minScore: 80 });
-      } else if (query.safetyScore === SafetyScoreSearchType.CAUTION) {
-        qb.andWhere('report.safetyScore >= :minScore AND report.safetyScore < :maxScore', {
-          minScore: 60,
-          maxScore: 80,
-        });
-      } else if (query.safetyScore === SafetyScoreSearchType.DANGER) {
-        qb.andWhere('report.safetyScore < :maxScore', { maxScore: 60 });
-      }
-    }
-
-    qb.orderBy('report.analyzedAt', 'DESC');
-
-    qb.skip(query.skip).take(query.limit);
-
-    const [reports, total] = await qb.getManyAndCount();
-
-    const data = reports.map((report) => EstateAnalysisReportMapper.toResponseDto(report));
-    const meta = new PaginationMetaDto(query.page, query.limit, total);
-
-    return new PaginationResponseDto(data, meta);
-  }
-
-  private parseAnalysisResultStatus(status: string | undefined): AnalysisResultStatus | null {
-    if (!status) {
-      return null;
-    }
-    
-    const upperStatus = status.toUpperCase();
-    
-    if (upperStatus === 'SAFE') {
-      return AnalysisResultStatus.SAFE;
-    }
-    if (upperStatus === 'CAUTION') {
-      return AnalysisResultStatus.CAUTION;
-    }
-    if (upperStatus === 'DANGER') {
-      return AnalysisResultStatus.DANGER;
-    }
-    if (upperStatus === 'UNKNOWN') {
-      return AnalysisResultStatus.UNKNOWN;
-    }
-    
-    return null;
+    return await this.estateAnalysisReportRepository.findAll(userId, query);
   }
 }

@@ -5,6 +5,7 @@ import { AnalysisCacheStrategyPort } from '@/modules/estate-analysis-report/port
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
 import { RedisService } from '@/modules/redis/redis.service';
 import { normalizeAddress } from '@/common/utils/address.util';
+import { Duration } from 'js-joda';
 
 /**
  * 주소 기반 분석 캐싱 전략 서비스 (Redis 기반)
@@ -27,7 +28,7 @@ import { normalizeAddress } from '@/common/utils/address.util';
 @Injectable()
 export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPort {
   private readonly MAX_CACHE_AGE_DAYS = 90; // 90일 이내 분석만 캐시 사용
-  private readonly CACHE_TTL_SECONDS = 90 * 24 * 60 * 60; // 90일 = 7,776,000초
+  private readonly CACHE_TTL_SECONDS = Duration.ofDays(90).seconds(); // 90일 = 7,776,000초
 
   constructor(
     private readonly redisService: RedisService,
