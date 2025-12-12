@@ -3,10 +3,11 @@ import { RedisService } from '@/modules/redis/redis.service';
 import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/response/estate-analysis-report-response.dto';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
+import { Duration } from 'js-joda';
 
 @Injectable()
 export class EstateAnalysisReportCacheService {
-  private readonly ttlSeconds = 300; // TODO: 환경 변수로 추출 가능
+  private readonly ttlSeconds = Duration.ofSeconds(300).seconds(); // TODO: 환경 변수로 추출 가능
 
   constructor(private readonly redisService: RedisService) {}
 
