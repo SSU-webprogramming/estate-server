@@ -4,7 +4,6 @@ import { CachedAnalysisDto } from '@/modules/estate-analysis-report/dto/cached-a
 import { AiAnalysisResultDto } from '@/modules/estate-analysis-report/dto/ai-analysis-result.dto';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/estate-analysis-req.dto';
 import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
-import { Estate } from '@/modules/estate/entities/estate.entity';
 import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
 
 /**
@@ -149,14 +148,14 @@ export class EstateAnalysisReportMapper {
 
   /**
    * 캐시된 분석 데이터 -> 엔티티
+   * @param estateId - Estate ID (Entity가 아닌 ID만 전달하여 계층 분리 원칙 준수)
    */
   static fromCachedAnalysis(
-    estate: Estate,
+    estateId: number,
     cachedData: CachedAnalysisDto,
   ): Partial<EstateAnalysisReport> {
     return {
-      estateId: estate.estateId,
-      estate: estate,
+      estateId: estateId,
       analyzedAt: new Date(),
       safetyScore: cachedData.safetyScore,
       address: cachedData.address ?? '',
@@ -190,14 +189,14 @@ export class EstateAnalysisReportMapper {
 
   /**
    * AI 분석 결과 -> 엔티티
+   * @param estateId - Estate ID (Entity가 아닌 ID만 전달하여 계층 분리 원칙 준수)
    */
   static fromAiAnalysisResult(
-    estate: Estate,
+    estateId: number,
     aiResult: AiAnalysisResultDto,
   ): Partial<EstateAnalysisReport> {
     return {
-      estateId: estate.estateId,
-      estate: estate,
+      estateId: estateId,
       analyzedAt: new Date(),
       safetyScore: aiResult.safetyScore,
       address: aiResult.address ?? '',
@@ -232,14 +231,18 @@ export class EstateAnalysisReportMapper {
   /**
    * AI 파싱 결과 -> AI 분석 결과 DTO
    */
+  /**
+   * AI 파싱 결과를 DTO로 변환
+   * @param estateId - Estate ID (Entity가 아닌 ID만 전달)
+   */
   static toAiAnalysisResultDto(
     parsedAnalysis: any,
-    estate: Estate,
+    estateId: number,
     analysisResult: string,
   ): AiAnalysisResultDto {
     return {
       safetyScore: parsedAnalysis.safetyScore ?? null,
-      address: parsedAnalysis.address || estate.address || '',
+      address: parsedAnalysis.address || '',
       ownershipStatus: parsedAnalysis.ownershipStatus || 'UNKNOWN',
       buildingStructure: parsedAnalysis.buildingStructure || null,
       buildingUsage: parsedAnalysis.buildingUsage || null,

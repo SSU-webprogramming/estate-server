@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@/modules/user/entities/user.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
@@ -10,12 +8,12 @@ import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
 import { RefreshTokenDto } from '@/modules/auth/dto/request/refresh-token.dto';
 import { KakaoRegisterInfo } from '@/modules/auth/interfaces/request-with-user.interface';
+import { UserRepository } from '@/modules/user/repositories/user.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly redisService: RedisService,
     private readonly configService: ConfigService,
@@ -27,17 +25,13 @@ export class AuthService {
     username: string,
     email: string,
   ): Promise<User | KakaoRegisterInfo> {
-    let user = await this.userRepository.findOne({
-      where: { providerType, providerId },
-    });
+    let user = await this.userRepository.findByProvider(providerType, providerId);
 
     if (user) {
       return user;
     }
 
-    user = await this.userRepository.findOne({
-      where: { email },
-    });
+    user = await this.userRepository.findByEmail(email);
     
     return {
       providerType,
@@ -89,9 +83,7 @@ export class AuthService {
     }
 
     // 사용자 존재 확인
-    const user = await this.userRepository.findOne({
-      where: { userId: payload.sub },
-    });
+    const user = await this.userRepository.findOne(payload.sub);
 
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
@@ -105,9 +97,7 @@ export class AuthService {
   }
 
   async logout(userId: number) {
-    const user = await this.userRepository.findOne({
-      where: { userId },
-    });
+    const user = await this.userRepository.findOne(userId);
 
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);

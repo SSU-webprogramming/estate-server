@@ -38,13 +38,18 @@ export class EstateService {
     return EstateMapper.toResponseDto(savedEstate);
   }
 
-  async createEstateEntity(
+  /**
+   * 분석용 Estate 생성 (Service 간 통신용)
+   * Entity가 아닌 DTO를 반환하여 계층 분리 원칙 준수
+   */
+  async createEstateForAnalysis(
     userId: number,
     createEstateDto: CreateEstateDto,
-  ): Promise<Estate> {
+  ): Promise<EstateResponseDto> {
     const estateData = EstateMapper.fromCreateDto(userId, createEstateDto);
     const estate = this.estateRepository.create(estateData);
-    return await this.estateRepository.save(estate);
+    const savedEstate = await this.estateRepository.save(estate);
+    return EstateMapper.toResponseDto(savedEstate);
   }
 
   async findAllWithPagination(

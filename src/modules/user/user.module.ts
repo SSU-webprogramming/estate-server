@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './controllers/user.controller';
 import { UserService } from './services/user.service';
@@ -9,9 +9,9 @@ import { TermsValidator } from './validators/terms-validator';
 import { UserRepository } from './repositories/user.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), AuthModule, TermModule],
+  imports: [TypeOrmModule.forFeature([User]), forwardRef(() => AuthModule), TermModule],
   controllers: [UserController],
   providers: [UserService, TermsValidator, UserRepository],
-  exports: [UserService],
+  exports: [UserService, UserRepository],
 })
 export class UserModule {}

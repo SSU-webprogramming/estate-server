@@ -1,11 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { TextGeneratorPort, FileWithMimeType } from '@/modules/estate-analysis-report/ports/text-generator.port';
 import { ANALYSIS_CACHE_STRATEGY_PORT } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
 import type { AnalysisCacheStrategyPort } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
 import { SYSTEM_PROMPT } from '@/modules/estate-analysis-report/prompts/system.prompt';
-import { Estate } from '@/modules/estate/entities/estate.entity';
 import { Document } from '@/modules/document/entities/document.entity';
 import { EstateService } from '@/modules/estate/services/estate.service';
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
@@ -23,8 +20,6 @@ import { DocumentRepository } from '@/modules/document/repositories/document.rep
 @Injectable()
 export class EstateAnalysisReportService {
   constructor(
-    @InjectRepository(Estate)
-    private readonly estateRepository: Repository<Estate>,
     private readonly documentRepository: DocumentRepository,
     private readonly estateAnalysisReportRepository: EstateAnalysisReportRepository,
     private readonly textGeneratorPort: TextGeneratorPort,
@@ -69,8 +64,8 @@ export class EstateAnalysisReportService {
     // 1. Estate DTO 생성 및 매핑 (Mapper 사용)
     const createEstateDto = EstateAnalysisReportMapper.toCreateEstateDto(createEstateAnalysisDto);
 
-    // 2. Estate 엔티티 생성 및 저장
-    const savedEstate = await this.estateService.createEstateEntity(userId, createEstateDto);
+    // 2. Estate 생성 및 저장 (DTO 반환으로 계층 분리 원칙 준수)
+    const savedEstateDto = await this.estateService.createEstateForAnalysis(userId, createEstateDto);
 
     // 3. Document 조회 및 유효성 검증
     const documents = await this.documentRepository.findByIds(createEstateAnalysisDto.documentIds);
@@ -80,8 +75,7 @@ export class EstateAnalysisReportService {
 
     // 4. Document에 Estate 정보 할당 및 저장
     for (const document of documents) {
-      document.estateId = savedEstate.estateId;
-      document.estate = savedEstate;
+      document.estateId = savedEstateDto.estateId;
     }
     await this.documentRepository.save(documents);
 
@@ -110,12 +104,12 @@ export class EstateAnalysisReportService {
     if (cachedAnalysis) {
       // 9-1. 캐시된 분석 결과 재사용
       console.log(`[EstateAnalysisReport] 캐시 히트! 기존 분석 재사용 (원본 ID: ${cachedAnalysis.id})`);
-      analysisReport = await this.copyAnalysisFromCache(savedEstate, cachedAnalysis);
+      analysisReport = await this.copyAnalysisFromCache(savedEstateDto.estateId, cachedAnalysis);
     } else {
       // 9-2. AI를 통한 새로운 분석 수행
       console.log(`[EstateAnalysisReport] 캐시 미스. AI 분석 요청`);
       analysisReport = await this.performAiAnalysis(
-        savedEstate,
+        savedEstateDto.estateId,
         documents,
         ocrText,
         documentData,
@@ -178,19 +172,19 @@ export class EstateAnalysisReportService {
   /**
    * 캐시된 분석 결과를 새로운 Estate에 복사
    * 기존 분석 결과를 재사용하여 AI 호출 비용 절감
-   * @param estate - 새로 생성된 Estate 엔티티
+   * @param estateId - 새로 생성된 Estate ID (Entity가 아닌 ID만 사용하여 계층 분리)
    * @param cachedAnalysis - 캐시된 분석 리포트
    * @returns 새로 생성된 분석 리포트
    */
   private async copyAnalysisFromCache(
-    estate: Estate,
+    estateId: number,
     cachedAnalysis: EstateAnalysisReport,
   ): Promise<EstateAnalysisReport> {
     // 1. 캐시된 분석 결과를 DTO로 변환
     const cachedData = EstateAnalysisReportMapper.toCachedAnalysisDto(cachedAnalysis);
     
-    // 2. DTO를 새로운 Estate와 함께 분석 리포트 데이터로 변환
-    const analysisReportData = EstateAnalysisReportMapper.fromCachedAnalysis(estate, cachedData);
+    // 2. DTO와 Estate ID를 사용하여 분석 리포트 데이터로 변환
+    const analysisReportData = EstateAnalysisReportMapper.fromCachedAnalysis(estateId, cachedData);
     
     // 3. 엔티티 생성
     const analysisReport = this.estateAnalysisReportRepository.create(analysisReportData);
@@ -202,14 +196,14 @@ export class EstateAnalysisReportService {
   /**
    * AI를 사용하여 실제 부동산 문서 분석 수행
    * 여러 이미지를 함께 분석하여 종합적인 리포트 생성
-   * @param estate - Estate 엔티티
+   * @param estateId - Estate ID (Entity가 아닌 ID만 사용하여 계층 분리)
    * @param documents - 분석할 문서 목록
    * @param ocrText - OCR로 추출된 텍스트
    * @param documentData - 문서 데이터 배열 (버퍼, MIME 타입 등)
    * @returns 생성된 분석 리포트
    */
   private async performAiAnalysis(
-    estate: Estate,
+    estateId: number,
     documents: Document[],
     ocrText: string,
     documentData: Array<{ base64: string; buffer: Buffer; mimeType: string; name: string }>,
@@ -233,12 +227,12 @@ export class EstateAnalysisReportService {
     // 4. AI 응답 JSON 파싱 (에러 처리 포함)
     const parsedAnalysis: any = ErrorHandler.parseJson(analysisResult, {});
 
-    // 5. 파싱된 결과를 AI 분석 결과 DTO로 변환
-    const aiResult = EstateAnalysisReportMapper.toAiAnalysisResultDto(parsedAnalysis, estate, analysisResult);
+    // 5. 파싱된 결과를 AI 분석 결과 DTO로 변환 (estateId 전달)
+    const aiResult = EstateAnalysisReportMapper.toAiAnalysisResultDto(parsedAnalysis, estateId, analysisResult);
 
-    // 6. AI 결과 DTO를 분석 리포트 엔티티 데이터로 변환
-    const analysisReportData = EstateAnalysisReportMapper.fromAiAnalysisResult(estate, aiResult);
-
+    // 6. AI 결과 DTO와 Estate ID를 사용하여 분석 리포트 엔티티 데이터로 변환
+    const analysisReportData = EstateAnalysisReportMapper.fromAiAnalysisResult(estateId, aiResult);
+    
     // 7. 엔티티 생성
     const analysisReport = this.estateAnalysisReportRepository.create(analysisReportData);
 
