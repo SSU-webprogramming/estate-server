@@ -8,15 +8,17 @@ import { EstateService } from '@/modules/estate/services/estate.service';
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
 import { S3Port } from '@/common/ports/s3.port';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/estate-analysis-req.dto';
-import { EstateAnalysisReportResponseDto } from '../dto/response/estate-analysis-report-response.dto';
-import { EstateAnalysisReportMapper } from '../mapper/estate-analysis-report.mapper';
-import { EstateAnalysisReportCacheService } from './estate-analysis-report-cache.service';
-import { SearchEstateAnalysisDto } from '../dto/request/search-estate-analysis.dto';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/response/estate-analysis-report-response.dto';
+import { EstateAnalysisReportMapper } from '@/modules/estate-analysis-report/mapper/estate-analysis-report.mapper';
+import { EstateAnalysisReportCacheService } from '@/modules/estate-analysis-report/services/estate-analysis-report-cache.service';
+import { SearchEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/search-estate-analysis.dto';
 import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
-import { DocumentProcessingService } from './document-processing.service';
+import { DocumentProcessingService } from '@/modules/estate-analysis-report/services/document-processing.service';
 import { ErrorHandler } from '@/common/utils/error-handler.util';
-import { EstateAnalysisReportRepository } from '../repositories/estate-analysis-report.repository';
+import { EstateAnalysisReportRepository } from '@/modules/estate-analysis-report/repositories/estate-analysis-report.repository';
 import { DocumentRepository } from '@/modules/document/repositories/document.repository';
+import { RedisService } from '@/modules/redis/redis.service';
+import { Duration } from 'js-joda';
 @Injectable()
 export class EstateAnalysisReportService {
   constructor(
@@ -27,6 +29,7 @@ export class EstateAnalysisReportService {
     private readonly estateAnalysisReportCacheService: EstateAnalysisReportCacheService,
     private readonly documentProcessingService: DocumentProcessingService,
     private readonly estateService: EstateService,
+    private readonly redisService: RedisService,
     @Inject(ANALYSIS_CACHE_STRATEGY_PORT)
     private readonly analysisCacheStrategyPort: AnalysisCacheStrategyPort
   ) {}
@@ -327,12 +330,30 @@ export class EstateAnalysisReportService {
   }
 
   /**
-   * 사용자의 분석 리포트 목록 조회 (페이징)
+   * 사용자의 분석 리포트 목록 조회 (페이징, Redis 캐시 적용)
    * @param userId - 사용자 ID
    * @param query - 검색 조건 DTO
    * @returns 페이지네이션된 분석 리포트 목록
    */
   async findAll(userId: number, query: SearchEstateAnalysisDto): Promise<PaginationResponseDto<EstateAnalysisReportResponseDto>> {
-    return await this.estateAnalysisReportRepository.findAll(userId, query);
+    // 1. Redis 캐시 키 생성 (사용자별, 쿼리별 격리)
+    const cacheKey = `estate-analysis-list:${userId}:page:${query.page || 1}:limit:${query.limit || 10}`;
+    const cacheTTL = Duration.ofMinutes(20).seconds();
+
+    // 2. Redis 캐시에서 조회 시도
+    const cached = await this.redisService.get(cacheKey);
+    if (cached) {
+      console.log(`[EstateAnalysisReport] Redis 캐시 히트: ${cacheKey}`);
+      return JSON.parse(cached);
+    }
+
+    // 3. 캐시 미스 시 Repository에서 조회
+    console.log(`[EstateAnalysisReport] Redis 캐시 미스: ${cacheKey}`);
+    const result = await this.estateAnalysisReportRepository.findAll(userId, query);
+
+    // 4. Redis 캐시에 저장
+    await this.redisService.set(cacheKey, JSON.stringify(result), cacheTTL);
+
+    return result;
   }
 }

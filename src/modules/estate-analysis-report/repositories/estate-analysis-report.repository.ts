@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
-import { SearchEstateAnalysisDto } from '../dto/request/search-estate-analysis.dto';
-import { SafetyScoreSearchType } from '../dto/request/safety-score-search-type.enum';
-import { EstateAnalysisReportResponseDto } from '../dto/response/estate-analysis-report-response.dto';
+import { SearchEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/search-estate-analysis.dto';
+import { SafetyScoreSearchType } from '@/modules/estate-analysis-report/dto/request/safety-score-search-type.enum';
+import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/response/estate-analysis-report-response.dto';
 import { PaginationResponseDto, PaginationMetaDto } from '@/common/dto/pagination-response.dto';
-import { EstateAnalysisReportMapper } from '../mapper/estate-analysis-report.mapper';
+import { EstateAnalysisReportMapper } from '@/modules/estate-analysis-report/mapper/estate-analysis-report.mapper';
 
 @Injectable()
 export class EstateAnalysisReportRepository {
