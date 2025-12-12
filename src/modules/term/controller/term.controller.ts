@@ -1,20 +1,20 @@
 import { Controller, Get, Post, Body, Patch, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
-import { TermService } from './term.service';
-import { CreateTermDto } from '../dto/request/create-term.dto';
-import { UpdateTermDto } from '../dto/request/update-term.dto';
-import { TermResponseDto } from '../dto/response/term-response.dto';
+import { TermService } from '@/modules/term/service/term.service';
+import { CreateTermDto } from '@/modules/term/dto/request/create-term.dto';
+import { UpdateTermDto } from '@/modules/term/dto/request/update-term.dto';
+import { TermResponseDto } from '@/modules/term/dto/response/term-response.dto';
 import {
   ApiTermController,
   ApiGetTerms,
   ApiCreateTerm,
   ApiUpdateTerm,
   ApiGetAgreedTerms,
-} from '../swagger/term.api';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../auth/guards/roles.guard';
-import { Roles } from '../../auth/decorators/roles.decorator';
-import { GetUser } from '../../auth/decorators/get-user.decorator';
-import { User } from '../../user/entities/user.entity';
+} from '@/modules/term/swagger/term.api';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '@/modules/auth/guards/roles.guard';
+import { Roles } from '@/modules/auth/decorators/roles.decorator';
+import { GetUser } from '@/modules/auth/decorators/get-user.decorator';
+import { User } from '@/modules/user/entities/user.entity';
 import { UserRole } from '@/common/enums/user-role.enum';
 
 @ApiTermController()

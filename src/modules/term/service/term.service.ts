@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@/modules/user/entities/user.entity';
-import { Term } from './entities/term.entity';
-import { CreateTermDto } from './dto/request/create-term.dto';
-import { UpdateTermDto } from './dto/request/update-term.dto';
-import { TermResponseDto } from './dto/response/term-response.dto';
-import { TermMapper } from './mapper/term.mapper';
+import { Term } from '@/modules/term/entities/term.entity';
+import { CreateTermDto } from '@/modules/term/dto/request/create-term.dto';
+import { UpdateTermDto } from '@/modules/term/dto/request/update-term.dto';
+import { TermResponseDto } from '@/modules/term/dto/response/term-response.dto';
+import { TermMapper } from '@/modules/term/mapper/term.mapper';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
-import { TermRepository } from './repositories/term.repository';
+import { TermRepository } from '@/modules/term/repositories/term.repository';
 
 @Injectable()
 export class TermService {
