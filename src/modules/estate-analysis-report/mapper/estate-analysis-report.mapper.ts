@@ -2,6 +2,8 @@ import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/
 import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/response/estate-analysis-report-response.dto';
 import { CachedAnalysisDto } from '@/modules/estate-analysis-report/dto/cached-analysis.dto';
 import { AiAnalysisResultDto } from '@/modules/estate-analysis-report/dto/ai-analysis-result.dto';
+import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/estate-analysis-req.dto';
+import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
 
@@ -9,6 +11,21 @@ import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum
  * EstateAnalysisReport 엔티티 <-> DTO 매핑 전담 클래스
  */
 export class EstateAnalysisReportMapper {
+  /**
+   * 분석 요청 DTO -> Estate 생성 DTO 변환
+   * @param dto - 부동산 분석 요청 DTO
+   * @returns Estate 생성 DTO
+   */
+  static toCreateEstateDto(dto: CreateEstateAnalysisDto): CreateEstateDto {
+    const createEstateDto = new CreateEstateDto();
+    createEstateDto.address = dto.address;
+    createEstateDto.addressDetail = dto.addressDetail;
+    createEstateDto.contractType = dto.contractType;
+    createEstateDto.deposit = dto.deposit;
+    createEstateDto.monthlyRent = dto.monthlyRent;
+    createEstateDto.kbMarketPrice = dto.kbMarketPrice;
+    return createEstateDto;
+  }
   /**
    * 엔티티 -> 응답 DTO
    */

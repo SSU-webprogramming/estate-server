@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { RedisService } from '@/modules/redis/redis.service';
 import { EstateAnalysisReportResponseDto } from '@/modules/estate-analysis-report/dto/response/estate-analysis-report-response.dto';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 
 @Injectable()
 export class EstateAnalysisReportCacheService {
@@ -17,11 +19,10 @@ export class EstateAnalysisReportCacheService {
     }
 
     try {
-      return JSON.parse(
-        cached,
-      ) as unknown as EstateAnalysisReportResponseDto;
+      return JSON.parse(cached) as unknown as EstateAnalysisReportResponseDto;
     } catch {
-      return null;
+      console.error(`[EstateAnalysisReportCache] 캐시 파싱 실패: ${cacheKey}`);
+      throw new CustomException(ErrorCode.CACHE_PARSE_ERROR, '캐시 파싱 실패');
     }
   }
 

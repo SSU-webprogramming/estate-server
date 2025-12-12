@@ -28,6 +28,6 @@ import { IDocumentRepository } from '@/common/ports/document-repository.port';
       useClass: DocumentRepository,
     },
   ],
-  exports: [DocumentService],
+  exports: [DocumentService, DocumentRepository],
 })
 export class DocumentModule {}

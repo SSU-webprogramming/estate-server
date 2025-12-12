@@ -15,6 +15,7 @@ import { AddressBasedCacheStrategyService } from './services/address-based-cache
 import { ANALYSIS_CACHE_STRATEGY_PORT } from './ports/analysis-cache-strategy.port';
 import { EstateAnalysisReportRepository } from './repositories/estate-analysis-report.repository';
 import { DocumentModule } from '@/modules/document/document.module';
+import { EstateModule } from '@/modules/estate/estate.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { DocumentModule } from '@/modules/document/document.module';
     S3Module,
     RedisModule.register(),
     DocumentModule,
+    EstateModule,
   ],
   controllers: [EstateAnalysisReportController],
   providers: [
