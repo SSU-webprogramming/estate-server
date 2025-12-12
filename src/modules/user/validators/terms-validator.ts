@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { TermService } from '@/modules/term/term.service';
+import { TermService } from '@/modules/term/service/term.service';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
 import { TermResponseDto } from '@/modules/term/dto/response/term-response.dto';
