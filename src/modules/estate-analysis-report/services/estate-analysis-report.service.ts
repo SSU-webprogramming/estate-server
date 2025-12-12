@@ -18,6 +18,7 @@ import { ErrorHandler } from '@/common/utils/error-handler.util';
 import { EstateAnalysisReportRepository } from '@/modules/estate-analysis-report/repositories/estate-analysis-report.repository';
 import { DocumentRepository } from '@/modules/document/repositories/document.repository';
 import { RedisService } from '@/modules/redis/redis.service';
+import { Duration } from 'js-joda';
 @Injectable()
 export class EstateAnalysisReportService {
   constructor(
@@ -337,7 +338,7 @@ export class EstateAnalysisReportService {
   async findAll(userId: number, query: SearchEstateAnalysisDto): Promise<PaginationResponseDto<EstateAnalysisReportResponseDto>> {
     // 1. Redis 캐시 키 생성 (사용자별, 쿼리별 격리)
     const cacheKey = `estate-analysis-list:${userId}:page:${query.page || 1}:limit:${query.limit || 10}`;
-    const cacheTTL = Duration.ofMinutes(1).seconds(); // 20분 (기존 @CacheTTL과 동일)
+    const cacheTTL = Duration.ofSeconds(60).seconds(); // 20분 (기존 @CacheTTL과 동일)
 
     // 2. Redis 캐시에서 조회 시도
     const cached = await this.redisService.get(cacheKey);
