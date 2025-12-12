@@ -9,6 +9,7 @@ import { Document } from '@/modules/document/entities/document.entity';
 import { OcrModule } from '@/modules/ocr/ocr.module';
 import { S3Module } from '@/modules/s3/s3.module';
 import { RedisModule } from '@/modules/redis/redis.module';
+import { EstateModule } from '@/modules/estate/estate.module';
 import { EstateAnalysisReportCacheService } from './services/estate-analysis-report-cache.service';
 import { DocumentProcessingService } from './services/document-processing.service';
 import { AddressBasedCacheStrategyService } from './services/address-based-cache-strategy.service';
@@ -21,6 +22,7 @@ import { ANALYSIS_CACHE_STRATEGY_PORT } from './ports/analysis-cache-strategy.po
     OcrModule,
     S3Module,
     RedisModule.register(),
+    EstateModule,
   ],
   controllers: [EstateAnalysisReportController],
   providers: [
