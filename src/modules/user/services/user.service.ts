@@ -83,10 +83,7 @@ export class UserService {
     await this.userRepository.deleteUsers(userIds);
   }
 
-  /**
-   * 약관 동의 처리
-   * Entity가 아닌 약관 동의 데이터만 반환하여 계층 분리 원칙 준수
-   */
+
   async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<Record<string, boolean>> {
     const user = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.findOneBy({ userId }),

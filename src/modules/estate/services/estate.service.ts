@@ -38,10 +38,6 @@ export class EstateService {
     return EstateMapper.toResponseDto(savedEstate);
   }
 
-  /**
-   * 분석용 Estate 생성 (Service 간 통신용)
-   * Entity가 아닌 DTO를 반환하여 계층 분리 원칙 준수
-   */
   async createEstateForAnalysis(
     userId: number,
     createEstateDto: CreateEstateDto,
