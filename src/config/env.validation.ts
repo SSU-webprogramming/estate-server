@@ -12,7 +12,7 @@ import {
 } from 'class-validator';
 
 /**
- * È¯°æ º¯¼ö Enum Á¤ÀÇ
+ * í™˜ê²½ ë³€ìˆ˜ Enum ì •ì˜
  */
 enum Environment {
   Development = 'development',
@@ -26,18 +26,18 @@ enum AiProvider {
 }
 
 /**
- * È¯°æ º¯¼ö °ËÁõ Å¬·¡½º
- * ¾ÖÇÃ¸®ÄÉÀÌ¼Ç ½ÃÀÛ ½Ã ¸ğµç ÇÊ¼ö È¯°æº¯¼ö°¡ ¿Ã¹Ù¸£°Ô ¼³Á¤µÇ¾ú´ÂÁö °ËÁõÇÕ´Ï´Ù.
+ * í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ í´ë˜ìŠ¤
+ * ì• í”Œë¦¬ì¼€ì´ì…˜ ì‹œì‘ ì‹œ ëª¨ë“  í•„ìˆ˜ í™˜ê²½ë³€ìˆ˜ê°€ ì˜¬ë°”ë¥´ê²Œ ì„¤ì •ë˜ì—ˆëŠ”ì§€ ê²€ì¦í•©ë‹ˆë‹¤.
  */
 class EnvironmentVariables {
-  // === ±âº» ¼³Á¤ ===
+  // === ê¸°ë³¸ ì„¤ì • ===
   @IsEnum(Environment)
   @IsOptional()
   NODE_ENV: Environment = Environment.Development;
 
-  // === µ¥ÀÌÅÍº£ÀÌ½º ¼³Á¤ ===
+  // === ë°ì´í„°ë² ì´ìŠ¤ ì„¤ì • ===
   @IsString()
-  @MinLength(1, { message: 'DB_HOST´Â ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'DB_HOSTëŠ” í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   DB_HOST: string;
 
   @IsNumber()
@@ -46,37 +46,37 @@ class EnvironmentVariables {
   DB_PORT: number;
 
   @IsString()
-  @MinLength(1, { message: 'DB_USERNAMEÀº ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'DB_USERNAMEì€ í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   DB_USERNAME: string;
 
   @IsString()
-  @MinLength(1, { message: 'DB_PASSWORD´Â ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'DB_PASSWORDëŠ” í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   DB_PASSWORD: string;
 
   @IsString()
-  @MinLength(1, { message: 'DB_DATABASE´Â ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'DB_DATABASEëŠ” í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   DB_DATABASE: string;
 
-  // === Kakao OAuth ¼³Á¤ ===
+  // === Kakao OAuth ì„¤ì • ===
   @IsString()
-  @MinLength(1, { message: 'KAKAO_CLIENT_ID´Â ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'KAKAO_CLIENT_IDëŠ” í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   KAKAO_CLIENT_ID: string;
 
   @IsString()
-  @MinLength(1, { message: 'KAKAO_CLIENT_SECRETÀº ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'KAKAO_CLIENT_SECRETì€ í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   KAKAO_CLIENT_SECRET: string;
 
-  // === JWT ¼³Á¤ ===
+  // === JWT ì„¤ì • ===
   @IsString()
-  @MinLength(32, { message: 'JWT_SECRETÀº ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù.' })
+  @MinLength(32, { message: 'JWT_SECRETì€ ìµœì†Œ 32ì ì´ìƒì´ì–´ì•¼ í•©ë‹ˆë‹¤.' })
   JWT_SECRET: string;
 
   @IsString()
-  @MinLength(32, { message: 'JWT_REGISTER_SECRETÀº ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù.' })
+  @MinLength(32, { message: 'JWT_REGISTER_SECRETì€ ìµœì†Œ 32ì ì´ìƒì´ì–´ì•¼ í•©ë‹ˆë‹¤.' })
   JWT_REGISTER_SECRET: string;
 
   @IsString()
-  @MinLength(32, { message: 'JWT_REFRESH_SECRETÀº ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù.' })
+  @MinLength(32, { message: 'JWT_REFRESH_SECRETì€ ìµœì†Œ 32ì ì´ìƒì´ì–´ì•¼ í•©ë‹ˆë‹¤.' })
   JWT_REFRESH_SECRET: string;
 
   @IsString()
@@ -91,9 +91,9 @@ class EnvironmentVariables {
   @IsOptional()
   JWT_REFRESH_TOKEN_EXPIRATION_TIME_TTL: number = 604800;
 
-  // === AI Provider ¼³Á¤ ===
+  // === AI Provider ì„¤ì • ===
   @IsEnum(AiProvider, {
-    message: 'AI_PROVIDER´Â gemini ¶Ç´Â chatgpt Áß ÇÏ³ª¿©¾ß ÇÕ´Ï´Ù.',
+    message: 'AI_PROVIDERëŠ” gemini ë˜ëŠ” chatgpt ì¤‘ í•˜ë‚˜ì—¬ì•¼ í•©ë‹ˆë‹¤.',
   })
   AI_PROVIDER: AiProvider;
 
@@ -113,27 +113,27 @@ class EnvironmentVariables {
   @IsOptional()
   GPT_MODEL_NAME?: string;
 
-  // === AWS S3 ¼³Á¤ ===
+  // === AWS S3 ì„¤ì • ===
   @IsString()
-  @MinLength(1, { message: 'AWS_ACCESS_KEY_ID´Â ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'AWS_ACCESS_KEY_IDëŠ” í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   AWS_ACCESS_KEY_ID: string;
 
   @IsString()
-  @MinLength(1, { message: 'AWS_SECRET_ACCESS_KEY´Â ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'AWS_SECRET_ACCESS_KEYëŠ” í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   AWS_SECRET_ACCESS_KEY: string;
 
-  @IsUrl({ require_tld: false }, { message: 'AWS_S3_ENDPOINT´Â À¯È¿ÇÑ URLÀÌ¾î¾ß ÇÕ´Ï´Ù.' })
+  @IsUrl({ require_tld: false }, { message: 'AWS_S3_ENDPOINTëŠ” ìœ íš¨í•œ URLì´ì–´ì•¼ í•©ë‹ˆë‹¤.' })
   AWS_S3_ENDPOINT: string;
 
   @IsString()
-  @MinLength(1, { message: 'AWS_S3_BUCKET_NAMEÀº ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'AWS_S3_BUCKET_NAMEì€ í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   AWS_S3_BUCKET_NAME: string;
 
   @IsString()
-  @MinLength(1, { message: 'AWS_REGIONÀº ÇÊ¼ö °ªÀÔ´Ï´Ù.' })
+  @MinLength(1, { message: 'AWS_REGIONì€ í•„ìˆ˜ ê°’ì…ë‹ˆë‹¤.' })
   AWS_REGION: string;
 
-  // === Redis ¼³Á¤ ===
+  // === Redis ì„¤ì • ===
   @IsString()
   @IsOptional()
   REDIS_HOST: string = 'localhost';
@@ -144,7 +144,7 @@ class EnvironmentVariables {
   @Max(65535)
   REDIS_PORT: number = 6379;
 
-  // === ±âÅ¸ ¼³Á¤ ===
+  // === ê¸°íƒ€ ì„¤ì • ===
   @IsString()
   @IsOptional()
   FRONTEND_URL?: string;
@@ -165,12 +165,12 @@ class EnvironmentVariables {
 }
 
 /**
- * È¯°æ º¯¼ö °ËÁõ ÇÔ¼ö
- * ConfigModule¿¡¼­ »ç¿ëµË´Ï´Ù.
+ * í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ í•¨ìˆ˜
+ * ConfigModuleì—ì„œ ì‚¬ìš©ë©ë‹ˆë‹¤.
  *
- * @param config È¯°æ º¯¼ö °´Ã¼
- * @returns °ËÁõµÈ È¯°æ º¯¼ö °´Ã¼
- * @throws Error °ËÁõ ½ÇÆĞ ½Ã
+ * @param config í™˜ê²½ ë³€ìˆ˜ ê°ì²´
+ * @returns ê²€ì¦ëœ í™˜ê²½ ë³€ìˆ˜ ê°ì²´
+ * @throws Error ê²€ì¦ ì‹¤íŒ¨ ì‹œ
  */
 export function validate(config: Record<string, unknown>) {
   const validatedConfig = plainToInstance(EnvironmentVariables, config, {
@@ -186,24 +186,24 @@ export function validate(config: Record<string, unknown>) {
       .map((error) => {
         const constraints = error.constraints
           ? Object.values(error.constraints).join(', ')
-          : '¾Ë ¼ö ¾ø´Â ¿¡·¯';
+          : 'ì•Œ ìˆ˜ ì—†ëŠ” ì—ëŸ¬';
         return `[${error.property}] ${constraints}`;
       })
       .join('\n');
 
-    throw new Error(`È¯°æ º¯¼ö °ËÁõ ½ÇÆĞ:\n${errorMessages}`);
+    throw new Error(`í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:\n${errorMessages}`);
   }
 
-  // AI Providerº° ÇÊ¼ö Å° °ËÁõ
+  // AI Providerë³„ í•„ìˆ˜ í‚¤ ê²€ì¦
   if (validatedConfig.AI_PROVIDER === AiProvider.Gemini) {
     if (!validatedConfig.GEMINI_API_KEY) {
       throw new Error(
-        'È¯°æ º¯¼ö °ËÁõ ½ÇÆĞ:\n[GEMINI_API_KEY] AI_PROVIDER°¡ geminiÀÎ °æ¿ì GEMINI_API_KEY´Â ÇÊ¼öÀÔ´Ï´Ù.',
+        'í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:\n[GEMINI_API_KEY] AI_PROVIDERê°€ geminiì¸ ê²½ìš° GEMINI_API_KEYëŠ” í•„ìˆ˜ì…ë‹ˆë‹¤.',
       );
     }
     if (!validatedConfig.GEMINI_MODEL_NAME) {
       throw new Error(
-        'È¯°æ º¯¼ö °ËÁõ ½ÇÆĞ:\n[GEMINI_MODEL_NAME] AI_PROVIDER°¡ geminiÀÎ °æ¿ì GEMINI_MODEL_NAMEÀº ÇÊ¼öÀÔ´Ï´Ù.',
+        'í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:\n[GEMINI_MODEL_NAME] AI_PROVIDERê°€ geminiì¸ ê²½ìš° GEMINI_MODEL_NAMEì€ í•„ìˆ˜ì…ë‹ˆë‹¤.',
       );
     }
   }
@@ -211,12 +211,12 @@ export function validate(config: Record<string, unknown>) {
   if (validatedConfig.AI_PROVIDER === AiProvider.ChatGpt) {
     if (!validatedConfig.OPENAI_API_KEY) {
       throw new Error(
-        'È¯°æ º¯¼ö °ËÁõ ½ÇÆĞ:\n[OPENAI_API_KEY] AI_PROVIDER°¡ chatgptÀÎ °æ¿ì OPENAI_API_KEY´Â ÇÊ¼öÀÔ´Ï´Ù.',
+        'í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:\n[OPENAI_API_KEY] AI_PROVIDERê°€ chatgptì¸ ê²½ìš° OPENAI_API_KEYëŠ” í•„ìˆ˜ì…ë‹ˆë‹¤.',
       );
     }
     if (!validatedConfig.GPT_MODEL_NAME) {
       throw new Error(
-        'È¯°æ º¯¼ö °ËÁõ ½ÇÆĞ:\n[GPT_MODEL_NAME] AI_PROVIDER°¡ chatgptÀÎ °æ¿ì GPT_MODEL_NAMEÀº ÇÊ¼öÀÔ´Ï´Ù.',
+        'í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:\n[GPT_MODEL_NAME] AI_PROVIDERê°€ chatgptì¸ ê²½ìš° GPT_MODEL_NAMEì€ í•„ìˆ˜ì…ë‹ˆë‹¤.',
       );
     }
   }
