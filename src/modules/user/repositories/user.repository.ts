@@ -6,10 +6,11 @@ import { Estate } from '@/modules/estate/entities/estate.entity';
 import { Document } from '@/modules/document/entities/document.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 import { GetUserListDto } from '@/modules/user/dto/request/get-user-list.dto';
-import { IUserRepository } from '@/common/ports/user-repository.port';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 
 @Injectable()
-export class UserRepository implements IUserRepository {
+export class UserRepository {
   constructor(
     @InjectRepository(User)
     private readonly repository: Repository<User>,
@@ -73,7 +74,7 @@ export class UserRepository implements IUserRepository {
     try {
       const user = await queryRunner.manager.findOne(User, { where: { userId } });
       if (!user) {
-        throw new Error('User not found');
+        throw new CustomException(ErrorCode.USER_NOT_FOUND);
       }
 
       await queryRunner.manager.softDelete(Document, { userId });

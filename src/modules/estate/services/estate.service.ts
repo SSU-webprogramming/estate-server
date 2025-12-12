@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto';
 import { EstateMapper } from '@/modules/estate/mapper/estate.mapper';
@@ -11,13 +11,12 @@ import {
 } from '@/common/dto/pagination-response.dto';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
-import { IEstateRepository } from '@/common/ports/estate-repository.port';
+import { EstateRepository } from '@/modules/estate/repositories/estate.repository';
 
 @Injectable()
 export class EstateService {
   constructor(
-    @Inject('IEstateRepository')
-    private readonly estateRepository: IEstateRepository,
+    private readonly estateRepository: EstateRepository,
     private readonly documentService: DocumentService,
   ) {}
 

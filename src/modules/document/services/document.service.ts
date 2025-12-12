@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Document } from '@/modules/document/entities/document.entity';
 import { DocumentType } from '@/common/enums/document-type.enum';
 import { S3Port } from '@/common/ports/s3.port';
@@ -6,15 +6,14 @@ import { v4 as uuidV4 } from 'uuid';
 import { DocumentResponseDto } from '@/modules/document/dto/response/document-response.dto';
 import { DocumentInfoResponseDto } from '@/modules/document/dto/response/document-info-response.dto';
 import { DocumentMapper } from '../mappers/document.mapper';
-import { IDocumentRepository } from '@/common/ports/document-repository.port';
+import { DocumentRepository } from '@/modules/document/repositories/document.repository';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
 
 @Injectable()
 export class DocumentService {
   constructor(
-    @Inject('IDocumentRepository')
-    private readonly documentRepository: IDocumentRepository,
+    private readonly documentRepository: DocumentRepository,
     private readonly s3Port: S3Port
   ) {}
 

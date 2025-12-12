@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
 import { User } from '@/modules/user/entities/user.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
@@ -13,14 +13,13 @@ import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
 import { UserMapper } from '@/modules/user/mapper/user.mapper';
 import { AgreeTermsRequestDto } from '@/modules/user/dto/request/agree-term.dto';
 import { TermsValidator } from '@/modules/user/validators/terms-validator';
-import { IUserRepository } from '@/common/ports/user-repository.port';
+import { UserRepository } from '@/modules/user/repositories/user.repository';
 import { ErrorHandler } from '@/common/utils/error-handler.util';
 
 @Injectable()
 export class UserService {
   constructor(
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
+    private readonly userRepository: UserRepository,
     private readonly termsValidator: TermsValidator,
   ) {}
 

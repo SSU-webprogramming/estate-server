@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, IsNull } from 'typeorm';
 import { Document } from '@/modules/document/entities/document.entity';
-import { IDocumentRepository } from '@/common/ports/document-repository.port';
 
 @Injectable()
-export class DocumentRepository implements IDocumentRepository {
+export class DocumentRepository {
   constructor(
     @InjectRepository(Document)
     private readonly repository: Repository<Document>,
