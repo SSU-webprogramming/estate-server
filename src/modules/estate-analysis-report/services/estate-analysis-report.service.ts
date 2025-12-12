@@ -70,10 +70,6 @@ export class EstateAnalysisReportService {
       where: { docId: In(createEstateAnalysisDto.documentIds) },
     });
 
-    if (documents.length === 0) {
-      throw new CustomException(ErrorCode.FILE_NOT_FOUND);
-    }
-
     for (const document of documents) {
       document.estateId = savedEstate.estateId;
       document.estate = savedEstate;

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { UpdateUserDto } from '@/modules/user/dto/request/update-user.dto';
 import { User } from '@/modules/user/entities/user.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
@@ -13,13 +13,14 @@ import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
 import { UserMapper } from '@/modules/user/mapper/user.mapper';
 import { AgreeTermsRequestDto } from '@/modules/user/dto/request/agree-term.dto';
 import { TermsValidator } from '@/modules/user/validators/terms-validator';
-import { UserRepository } from '@/modules/user/repositories/user.repository';
+import { IUserRepository } from '@/common/ports/user-repository.port';
 import { ErrorHandler } from '@/common/utils/error-handler.util';
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepository: UserRepository,
+    @Inject('IUserRepository')
+    private readonly userRepository: IUserRepository,
     private readonly termsValidator: TermsValidator,
   ) {}
 
@@ -84,8 +85,6 @@ export class UserService {
   }
 
   async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<User> {
-    this.termsValidator.validateTermsFormat(dto.agreedTerms);
-
     const user = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.findOneBy({ userId }),
       '사용자 조회',
@@ -96,7 +95,6 @@ export class UserService {
     }
 
     this.termsValidator.validateNotAlreadyAgreed(user.agreedTerms);
-
     await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
 
     user.agreedTerms = dto.agreedTerms;

@@ -9,6 +9,7 @@ import { S3Module } from '@/modules/s3/s3.module';
 import { AiProviderModule } from '@/modules/ai-provider/ai-provider.module';
 import { OcrModule } from '@/modules/ocr/ocr.module';
 import { DocumentRepository } from '@/modules/document/repositories/document.repository';
+import { IDocumentRepository } from '@/common/ports/document-repository.port';
 
 @Module({
   imports: [
@@ -18,7 +19,15 @@ import { DocumentRepository } from '@/modules/document/repositories/document.rep
     OcrModule,
   ],
   controllers: [DocumentController],
-  providers: [DocumentService, DocumentCleanupService, DocumentRepository],
+  providers: [
+    DocumentService,
+    DocumentCleanupService,
+    DocumentRepository,
+    {
+      provide: 'IDocumentRepository',
+      useClass: DocumentRepository,
+    },
+  ],
   exports: [DocumentService],
 })
 export class DocumentModule {}

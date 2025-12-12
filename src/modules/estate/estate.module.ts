@@ -5,6 +5,7 @@ import { EstateService } from './services/estate.service';
 import { EstateController } from './controllers/estate.controller';
 import { DocumentModule } from '@/modules/document/document.module';
 import { EstateRepository } from './repositories/estate.repository';
+import { IEstateRepository } from '@/common/ports/estate-repository.port';
 
 @Module({
   imports: [
@@ -12,7 +13,14 @@ import { EstateRepository } from './repositories/estate.repository';
     DocumentModule,
   ],
   controllers: [EstateController],
-  providers: [EstateService, EstateRepository],
+  providers: [
+    EstateService,
+    EstateRepository,
+    {
+      provide: 'IEstateRepository',
+      useClass: EstateRepository,
+    },
+  ],
   exports: [EstateService, EstateRepository],
 })
 export class EstateModule {}
