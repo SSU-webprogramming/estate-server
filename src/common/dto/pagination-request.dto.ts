@@ -9,8 +9,8 @@ export class PaginationRequestDto {
     default: 1,
   })
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: '페이지 번호는 정수여야 합니다.' })
+  @Min(1, { message: '페이지 번호는 1 이상이어야 합니다.' })
   @IsOptional()
   page: number = 1;
 
@@ -20,8 +20,8 @@ export class PaginationRequestDto {
     default: 10,
   })
   @Type(() => Number)
-  @IsInt()
-  @Min(1)
+  @IsInt({ message: '페이지당 항목 수는 정수여야 합니다.' })
+  @Min(1, { message: '페이지당 항목 수는 1 이상이어야 합니다.' })
   @IsOptional()
   limit: number = 10;
 

@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { TermService } from '@/modules/term/term.service';
+import { TermService } from '@/modules/term/service/term.service';
 import { CustomException } from '@/common/errors/custom-exception';
 import { ErrorCode } from '@/common/errors/error';
 import { TermResponseDto } from '@/modules/term/dto/response/term-response.dto';
 
 /**
- * 약관 검증을 담당하는 클래스
- * 단일 책임 원칙(SRP)에 따라 약관 관련 검증 로직만 담당
+ * 약관 비즈니스 검증을 담당하는 클래스
+ * 단일 책임 원칙(SRP)에 따라 약관 관련 비즈니스 로직 검증만 담당
+ * 
+ * Note: 약관 형식 검증은 DTO의 @IsValidAgreedTerms 데코레이터에서 처리됩니다.
  */
 @Injectable()
 export class TermsValidator {
@@ -28,25 +30,6 @@ export class TermsValidator {
 
     if (!hasAllRequiredTerms) {
       throw new CustomException(ErrorCode.TERMS_NOT_AGREED);
-    }
-  }
-
-  /**
-   * 약관 ID 형식 및 동의 값 유효성 검증
-   * @param agreedTerms 사용자가 동의한 약관 목록
-   * @throws CustomException 잘못된 형식의 경우
-   */
-  validateTermsFormat(agreedTerms: Record<string, boolean>): void {
-    for (const [termId, isAgreed] of Object.entries(agreedTerms)) {
-      // 약관 ID가 숫자 형식인지 확인
-      if (isNaN(Number(termId))) {
-        throw new CustomException(ErrorCode.INVALID_TERM_ID_FORMAT);
-      }
-
-      // 동의 값이 boolean인지 확인
-      if (typeof isAgreed !== 'boolean') {
-        throw new CustomException(ErrorCode.INVALID_AGREEMENT_VALUE);
-      }
     }
   }
 

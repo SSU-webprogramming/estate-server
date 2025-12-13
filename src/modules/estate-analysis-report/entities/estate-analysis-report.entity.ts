@@ -7,6 +7,7 @@ import {
 } from 'typeorm';
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { AnalysisResultStatus } from '@/common/enums/analysis-result-status.enum';
+import { getEncryptionTransformer } from '@/common/utils/encryption.transformer';
 
 /**
  * 부동산 분석 리포트 엔티티
@@ -58,12 +59,12 @@ export class EstateAnalysisReport {
   })
   safetyScore: number | null;
 
-  /** 주소 */
+  /** 주소 - 암호화됨 */
   @Column({ 
     name: 'address', 
-    type: 'varchar', 
-    length: 255, 
-    comment: '주소' 
+    type: 'text',
+    comment: '주소 (암호화)',
+    transformer: getEncryptionTransformer(),
   })
   address: string;
 
@@ -154,13 +155,13 @@ export class EstateAnalysisReport {
   })
   ownershipStatus: string;
 
-  /** 현재 소유자 */
+  /** 현재 소유자 - 암호화됨 */
   @Column({ 
     name: 'current_owner', 
-    type: 'varchar', 
-    length: 100, 
+    type: 'text',
     nullable: true,
-    comment: '현재 소유자'
+    comment: '현재 소유자 (암호화)',
+    transformer: getEncryptionTransformer(),
   })
   currentOwner: string | null;
 

@@ -5,29 +5,16 @@ import { AnalysisCacheStrategyPort } from '@/modules/estate-analysis-report/port
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
 import { RedisService } from '@/modules/redis/redis.service';
 import { normalizeAddress } from '@/common/utils/address.util';
+import { Duration } from 'js-joda';
 
 /**
- * 주소 기반 분석 캐싱 전략 서비스 (Redis 기반)
- * 
- * 전략 패턴(Strategy Pattern) 구현:
- * - AnalysisCacheStrategyPort 인터페이스를 구현
- * - Redis를 활용한 초고속 캐싱
- * 
- * 단일 책임 원칙(SRP):
- * - 주소 기반 캐시 검색만 담당
- * - 주소 정규화는 address.util에 위임
- * - Redis 접근은 RedisService에 위임
- * 
- * 캐싱 전략:
- * 1. 주소 정규화 → Redis 키 생성
- * 2. Redis에서 estateId 조회 (O(1) 시간 복잡도)
- * 3. estateId로 분석 결과 조회 (DB 쿼리 1회만)
- * 4. TTL 90일 자동 만료
+ * 주소 기반 분석 캐싱 전략 (Strategy Pattern)
+ * Redis를 활용한 O(1) 캐시 조회, TTL 90일
  */
 @Injectable()
 export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPort {
-  private readonly MAX_CACHE_AGE_DAYS = 90; // 90일 이내 분석만 캐시 사용
-  private readonly CACHE_TTL_SECONDS = 90 * 24 * 60 * 60; // 90일 = 7,776,000초
+  private readonly MAX_CACHE_AGE_DAYS = 90;
+  private readonly CACHE_TTL_SECONDS = Duration.ofDays(90).seconds();
 
   constructor(
     private readonly redisService: RedisService,
@@ -36,17 +23,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
   ) {}
 
   /**
-   * 주소 기반으로 캐시된 분석 결과를 찾습니다 (Redis 기반)
-   * 
-   * 검색 전략:
-   * 1. 주소 정규화 → Redis 키 생성
-   * 2. Redis에서 estateId 조회 (초고속)
-   * 3. estateId로 DB에서 분석 결과 조회 (1회만)
-   * 4. 만료 기간 체크 (Redis TTL 자동 관리)
-   * 
-   * Redis 키 구조:
-   * - `estate-analysis:by-address:{normalizedAddress}:{userId}` → estateId
-   * 
+   * 주소 기반으로 캐시된 분석 결과 조회
    * @param address 검색할 주소
    * @param userId 사용자 ID (선택)
    * @returns 캐시된 분석 결과 또는 null
@@ -55,12 +32,12 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
     address: string,
     userId?: number,
   ): Promise<EstateAnalysisReport | null> {
+    // 목적: 너무 짧은 주소는 캐시 오류 방지
     if (!this.isCacheable(address)) {
       console.log(`[AddressBasedCache-Redis] 캐시 불가능 (주소 너무 짧음): ${address}`);
       return null;
     }
 
-    // 1. Redis 키 생성
     const normalized = normalizeAddress(address);
     const cacheKey = this.getCacheKey(address, userId);
     
@@ -71,7 +48,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
     console.log(`  - Redis 키: "${cacheKey}"`);
 
     try {
-      // 2. Redis에서 estateId 조회 (O(1) 초고속)
+      // 목적: Redis에서 O(1) 시간복잡도로 estateId 조회
       const cachedEstateId = await this.redisService.get(cacheKey);
 
       if (!cachedEstateId) {
@@ -81,22 +58,21 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
 
       console.log(`  - Redis에서 조회된 estateId: ${cachedEstateId}`);
 
-      // 3. estateId로 분석 결과 조회 (DB 쿼리 1회만)
+      // 목적: estateId로 실제 분석 결과 조회 (DB 쿼리 최소화)
       const estateId = parseInt(cachedEstateId, 10);
       const analysis = await this.analysisReportRepository.findOne({
         where: { estateId },
       });
 
+      // 목적: 데이터 정합성 보장 (Redis-DB 불일치 방지)
       if (!analysis) {
-        // Redis에는 있지만 DB에 없는 경우 (드문 경우) → 캐시 무효화
         await this.redisService.del(cacheKey);
         console.log(`[AddressBasedCache-Redis] ❌ 캐시 불일치, 무효화 (DB에 없음)`);
         return null;
       }
 
-      // 4. 유효성 체크 (만료 기간)
+      // 목적: 오래된 분석 결과 자동 제거 (데이터 신선도 유지)
       if (!this.isAnalysisValid(analysis)) {
-        // 만료된 경우 캐시 무효화
         await this.redisService.del(cacheKey);
         console.log(`[AddressBasedCache-Redis] ❌ 캐시 만료, 무효화 (${this.MAX_CACHE_AGE_DAYS}일 초과)`);
         return null;
@@ -112,8 +88,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
   }
 
   /**
-   * 분석 결과를 Redis 캐시에 저장합니다
-   * 
+   * 분석 결과를 Redis 캐시에 저장
    * @param address 주소
    * @param userId 사용자 ID
    * @param estateId Estate ID
@@ -123,6 +98,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
     userId: number,
     estateId: number,
   ): Promise<void> {
+    // 목적: 너무 짧은 주소는 캐시 오류 방지
     if (!this.isCacheable(address)) {
       console.log(`[AddressBasedCache-Redis] 캐시 저장 불가 (주소 너무 짧음): ${address}`);
       return;
@@ -140,7 +116,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
     console.log(`  - TTL: ${this.CACHE_TTL_SECONDS}초 (${this.MAX_CACHE_AGE_DAYS}일)`);
 
     try {
-      // Redis에 estateId 저장 (TTL 90일)
+      // 목적: TTL로 자동 만료되는 캐시 저장 (메모리 관리)
       await this.redisService.set(
         cacheKey,
         estateId.toString(),
@@ -150,28 +126,22 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
       console.log(`[AddressBasedCache-Redis] ✅ 캐시 저장 완료!`);
     } catch (error) {
       console.error(`[AddressBasedCache-Redis] ❌ 캐시 저장 에러:`, error);
-      // 에러 발생 시에도 분석은 계속 진행 (캐시는 선택적 기능)
+      // 목적: 캐시 실패가 비즈니스 로직을 중단시키지 않도록 함
     }
   }
 
   /**
-   * Redis 캐시 키 생성
-   * 
-   * @param address 주소
-   * @param userId 사용자 ID
-   * @returns Redis 키
+   * Redis 캐시 키 생성 (정규화된 주소 + 사용자별 격리)
    */
   private getCacheKey(address: string, userId?: number): string {
     const normalized = normalizeAddress(address);
+    // 목적: 사용자별 캐시 격리 (개인정보 보호)
     const userPart = userId ? `:${userId}` : ':global';
     return `estate-analysis:by-address:${normalized}${userPart}`;
   }
 
   /**
-   * 분석 결과가 유효한지 확인 (만료 기간 체크)
-   * 
-   * @param analysis 분석 결과
-   * @returns 유효 여부
+   * 분석 결과 유효성 체크 (만료 기간 검증)
    */
   private isAnalysisValid(analysis: EstateAnalysisReport): boolean {
     if (!analysis.analyzedAt) {
@@ -180,6 +150,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
 
     const now = new Date();
     const analyzedDate = new Date(analysis.analyzedAt);
+    // 목적: 일 단위 차이 계산으로 오래된 분석 필터링
     const daysDiff = Math.floor(
       (now.getTime() - analyzedDate.getTime()) / (1000 * 60 * 60 * 24),
     );
@@ -188,10 +159,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
   }
 
   /**
-   * 주소가 캐시 가능한지 확인
-   * 
-   * @param address 주소
-   * @returns 캐시 가능 여부
+   * 주소 캐시 가능 여부 검증
    */
   isCacheable(address: string): boolean {
     const normalized = normalizeAddress(address);
@@ -199,9 +167,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
   }
 
   /**
-   * 전략 이름 반환
-   * 
-   * @returns 전략 이름
+   * 전략 이름 반환 (디버깅용)
    */
   getStrategyName(): string {
     return 'AddressBasedCacheStrategy-Redis';

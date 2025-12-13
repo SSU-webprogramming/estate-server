@@ -38,13 +38,14 @@ export class EstateService {
     return EstateMapper.toResponseDto(savedEstate);
   }
 
-  async createEstateEntity(
+  async createEstateForAnalysis(
     userId: number,
     createEstateDto: CreateEstateDto,
-  ): Promise<Estate> {
+  ): Promise<EstateResponseDto> {
     const estateData = EstateMapper.fromCreateDto(userId, createEstateDto);
     const estate = this.estateRepository.create(estateData);
-    return await this.estateRepository.save(estate);
+    const savedEstate = await this.estateRepository.save(estate);
+    return EstateMapper.toResponseDto(savedEstate);
   }
 
   async findAllWithPagination(

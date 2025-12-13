@@ -1,17 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * ¾à°ü µ¿ÀÇ ÀÀ´ä DTO
+ * ì•½ê´€ ë™ì˜ ì‘ë‹µ DTO
  */
 export class AgreeTermsResponseDto {
   @ApiProperty({
-    description: '¾à°ü µ¿ÀÇ ¼º°ø ¸Ş½ÃÁö',
-    example: '¾à°ü µ¿ÀÇ°¡ ¿Ï·áµÇ¾ú½À´Ï´Ù.',
+    description: 'ì•½ê´€ ë™ì˜ ì„±ê³µ ë©”ì‹œì§€',
+    example: 'ì•½ê´€ ë™ì˜ê°€ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.',
   })
   message: string;
 
   @ApiProperty({
-    description: '¾à°ü µ¿ÀÇ ³»¿ª',
+    description: 'ì•½ê´€ ë™ì˜ ë‚´ì—­',
     example: { 1: true, 2: true, 3: false },
     type: 'object',
     additionalProperties: { type: 'boolean' },
@@ -19,7 +19,7 @@ export class AgreeTermsResponseDto {
   agreedTerms: Record<string, boolean>;
 
   constructor(agreedTerms: Record<string, boolean>) {
-    this.message = '¾à°ü µ¿ÀÇ°¡ ¿Ï·áµÇ¾ú½À´Ï´Ù.';
+    this.message = 'ì•½ê´€ ë™ì˜ê°€ ì™„ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.';
     this.agreedTerms = agreedTerms;
   }
 }

@@ -10,6 +10,7 @@ import {
 import { Estate } from '@/modules/estate/entities/estate.entity';
 import { Document } from '@/modules/document/entities/document.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
+import { getEncryptionTransformer } from '@/common/utils/encryption.transformer';
 
 /**
  * 사용자 엔티티
@@ -25,23 +26,23 @@ export class User {
   })
   userId: number;
 
-  /** 이메일 주소 (고유값) */
+  /** 이메일 주소 (고유값) - 암호화됨 */
   @Column({ 
     name: 'email',
-    type: 'varchar', 
-    length: 255, 
+    type: 'text',
     unique: true,
-    comment: '이메일 주소'
+    comment: '이메일 주소 (암호화)',
+    transformer: getEncryptionTransformer(),
   })
   email: string;
 
-  /** 사용자명 */
+  /** 사용자명 - 암호화됨 */
   @Column({ 
     name: 'username',
-    type: 'varchar', 
-    length: 100, 
+    type: 'text',
     nullable: true,
-    comment: '사용자명'
+    comment: '사용자명 (암호화)',
+    transformer: getEncryptionTransformer(),
   })
   username: string | null;
 

@@ -1,9 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '@/modules/user/entities/user.entity';
+import { UserModule } from '@/modules/user/user.module';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { AuthController } from '@/modules/auth/controllers/auth.controller';
 import { KakaoStrategy } from '@/modules/auth/strategies/kakao.strategy';
@@ -14,7 +13,7 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    forwardRef(() => UserModule),
     PassportModule,
     RedisModule.register(),
     JwtModule.registerAsync({

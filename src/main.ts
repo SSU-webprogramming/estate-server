@@ -21,17 +21,16 @@ async function bootstrap() {
 
   app.use(compression());
 
-  app.enableCors({
-    origin: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    credentials: true,
-  });
+  // CORS 설정
+  const allowedOrigins =
+    process.env.NODE_ENV === 'production'
+      ? process.env.FRONTEND_URL?.split(',') || []
+      : ['http://localhost:3001', 'http://localhost:3000'];
 
-  // CORS 설정 추가
   app.enableCors({
-    origin: ['http://localhost:3001'], // 프론트엔드 URL
+    origin: allowedOrigins,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     exposedHeaders: ['Authorization'],
   });

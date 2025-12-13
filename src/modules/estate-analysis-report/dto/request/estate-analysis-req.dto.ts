@@ -8,6 +8,7 @@ import {
   IsArray,
   IsInt,
   IsBoolean,
+  ArrayNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { ContractType } from '@/common/enums/contract-type.enum';
@@ -91,7 +92,8 @@ export class CreateEstateAnalysisDto {
     required: true,
   })
   @IsArray()
-  @IsInt({ each: true })
+  @ArrayNotEmpty({ message: '분석에 사용할 문서는 최소 1개 이상 필요합니다.' })
+  @IsInt({ each: true, message: '문서 ID는 정수여야 합니다.' })
   documentIds: number[];
 
   @ApiProperty({

@@ -22,6 +22,7 @@ export enum ErrorCode {
   // Cache & Redis
   CACHE_ERROR = 'C001',
   REDIS_CONNECTION_ERROR = 'C002',
+  CACHE_PARSE_ERROR = 'C003',
 
   // OCR
   OCR_PROCESSING_FAILED = 'O001',
@@ -109,6 +110,10 @@ export const ErrorDictionary: Record<
   [ErrorCode.REDIS_CONNECTION_ERROR]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: 'Redis 연결 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.CACHE_PARSE_ERROR]: {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    message: '캐시 파싱 중 오류가 발생했습니다.',
   },
   [ErrorCode.OCR_PROCESSING_FAILED]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,

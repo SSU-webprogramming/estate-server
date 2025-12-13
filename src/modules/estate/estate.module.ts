@@ -7,10 +7,7 @@ import { DocumentModule } from '@/modules/document/document.module';
 import { EstateRepository } from './repositories/estate.repository';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Estate]),
-    DocumentModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Estate]), DocumentModule],
   controllers: [EstateController],
   providers: [EstateService, EstateRepository],
   exports: [EstateService, EstateRepository],

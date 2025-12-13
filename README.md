@@ -33,7 +33,11 @@ nvm use 22
 
 ### 환경 변수
 
+**⚠️ 중요: 환경 변수 자동 검증**
 
+이 프로젝트는 애플리케이션 시작 시 모든 필수 환경변수를 자동으로 검증합니다. 누락되거나 잘못된 값이 있으면 명확한 에러 메시지와 함께 시작이 중단됩니다.
+
+📖 **상세 가이드**: [환경 변수 설정 가이드](./docs/environment-variables.md)
 
 프로젝트 루트에 `.env` 파일을 작성 후 실행:
 
@@ -49,8 +53,13 @@ DB_DATABASE=webprogramming
 KAKAO_CLIENT_ID=YOUR_KAKAO_CLIENT_ID
 KAKAO_CLIENT_SECRET=YOUR_KAKAO_CLIENT_SECRET
 
-# --- JWT
-JWT_SECRET=YOUR_JWT_SECRET
+# --- JWT (최소 32자 이상의 안전한 랜덤 문자열)
+JWT_SECRET=YOUR_JWT_SECRET_MIN_32_CHARACTERS
+JWT_REGISTER_SECRET=YOUR_JWT_REGISTER_SECRET_MIN_32_CHARACTERS
+JWT_REFRESH_SECRET=YOUR_JWT_REFRESH_SECRET_MIN_32_CHARACTERS
+JWT_ACCESS_TOKEN_EXPIRATION_TIME=1h
+JWT_REFRESH_TOKEN_EXPIRATION_TIME=7d
+JWT_REFRESH_TOKEN_EXPIRATION_TIME_TTL=604800
 
 # --- AI Provider
 # AI_PROVIDER는 'gemini' 또는 'chatgpt' 중 하나를 선택합니다.
@@ -66,9 +75,19 @@ AWS_SECRET_ACCESS_KEY=minioadmin
 AWS_S3_ENDPOINT=http://localhost:9000
 AWS_S3_BUCKET_NAME=documents
 AWS_REGION=us-east-1
+
+# --- Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# --- Frontend
+FRONTEND_URL=http://localhost:3001
 ```
 
-**참고:** 본인의 PostgreSQL 설정에 맞게 수정하세요.
+**참고:** 
+- 본인의 PostgreSQL 설정에 맞게 수정하세요.
+- JWT Secret은 반드시 32자 이상의 안전한 랜덤 문자열을 사용하세요.
+- 환경변수 누락 시 애플리케이션이 시작되지 않으며 명확한 에러 메시지가 표시됩니다.
 
 ### TypeORM 설정
 

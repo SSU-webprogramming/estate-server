@@ -83,9 +83,8 @@ export class UserService {
     await this.userRepository.deleteUsers(userIds);
   }
 
-  async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<User> {
-    this.termsValidator.validateTermsFormat(dto.agreedTerms);
 
+  async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<Record<string, boolean>> {
     const user = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.findOneBy({ userId }),
       '����� ��ȸ',
@@ -101,9 +100,11 @@ export class UserService {
     await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
 
     user.agreedTerms = dto.agreedTerms;
-    return ErrorHandler.handleDatabaseOperation(
+    const savedUser = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.save(user),
       '����� ��� ���� ����',
     );
+    
+    return savedUser.agreedTerms || {};
   }
 }

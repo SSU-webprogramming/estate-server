@@ -8,11 +8,8 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
-  UseInterceptors,
   Query,
 } from '@nestjs/common';
-import { HttpCacheInterceptor } from '@/common/interceptors/http-cache.interceptor';
-import { CacheTTL } from '@nestjs/cache-manager';
 import { EstateAnalysisReportService } from '@/modules/estate-analysis-report/services/estate-analysis-report.service';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { CreateEstateAnalysisDto } from '@/modules/estate-analysis-report/dto/request/estate-analysis-req.dto';
@@ -62,8 +59,6 @@ export class EstateAnalysisReportController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @UseInterceptors(HttpCacheInterceptor)
-  @CacheTTL(1200)
   @ApiSearchEstateAnalysis()
   async findAll(
     @GetUser() user: User,

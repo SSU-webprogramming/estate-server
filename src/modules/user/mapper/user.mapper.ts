@@ -1,5 +1,6 @@
 import { User } from '@/modules/user/entities/user.entity';
 import { UserResponseDto } from '@/modules/user/dto/response/user-response.dto';
+import { KakaoRegisterInfo } from '@/modules/auth/interfaces/request-with-user.interface';
 
 export class UserMapper {
   static toResponseDto(user: User): UserResponseDto {
@@ -16,5 +17,15 @@ export class UserMapper {
 
   static toResponseDtoList(users: User[]): UserResponseDto[] {
     return users.map((user) => this.toResponseDto(user));
+  }
+
+  static fromKakaoRegisterInfo(info: KakaoRegisterInfo): User {
+    const user = new User();
+    user.email = info.email;
+    user.username = info.username;
+    user.providerType = info.providerType;
+    user.providerId = info.providerId;
+    user.role = 'USER';
+    return user;
   }
 }

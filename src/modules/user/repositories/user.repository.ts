@@ -6,6 +6,9 @@ import { Estate } from '@/modules/estate/entities/estate.entity';
 import { Document } from '@/modules/document/entities/document.entity';
 import { ProviderType } from '@/common/enums/provider-type.enum';
 import { GetUserListDto } from '@/modules/user/dto/request/get-user-list.dto';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
+import { TransactionHelper } from '@/common/utils/transaction.util';
 
 @Injectable()
 export class UserRepository {
@@ -64,53 +67,33 @@ export class UserRepository {
   }
 
   async remove(userId: number): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
+    await TransactionHelper.runInTransaction(
+      this.dataSource,
+      async (queryRunner) => {
+        const user = await queryRunner.manager.findOne(User, { where: { userId } });
+        if (!user) {
+          throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
 
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      const user = await queryRunner.manager.findOne(User, { where: { userId } });
-      if (!user) {
-        throw new Error('User not found');
-      }
-
-      await queryRunner.manager.softDelete(Document, { userId });
-
-      await queryRunner.manager.softDelete(Estate, { userId });
-
-      await queryRunner.manager.softDelete(User, { userId });
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+        await queryRunner.manager.softDelete(Document, { userId });
+        await queryRunner.manager.softDelete(Estate, { userId });
+        await queryRunner.manager.softDelete(User, { userId });
+      },
+      '사용자 및 관련 데이터 삭제',
+    );
   }
 
   async deleteUsers(userIds: number[]): Promise<void> {
     if (userIds.length === 0) return;
 
-    const queryRunner = this.dataSource.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      await queryRunner.manager.softDelete(Document, { userId: In(userIds) });
-
-      await queryRunner.manager.softDelete(Estate, { userId: In(userIds) });
-
-      await queryRunner.manager.softDelete(User, { userId: In(userIds) });
-
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
+    await TransactionHelper.runInTransaction(
+      this.dataSource,
+      async (queryRunner) => {
+        await queryRunner.manager.softDelete(Document, { userId: In(userIds) });
+        await queryRunner.manager.softDelete(Estate, { userId: In(userIds) });
+        await queryRunner.manager.softDelete(User, { userId: In(userIds) });
+      },
+      `복수 사용자(${userIds.length}명) 및 관련 데이터 삭제`,
+    );
   }
 }

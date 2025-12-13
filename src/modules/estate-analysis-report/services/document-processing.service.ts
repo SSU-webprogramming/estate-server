@@ -3,14 +3,12 @@ import { Document } from '@/modules/document/entities/document.entity';
 import { OcrPort } from '@/common/ports/ocr.port';
 import { S3Port } from '@/common/ports/s3.port';
 import { isEmpty } from '@/common/utils/string.util';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DocumentRepository } from '@/modules/document/repositories/document.repository';
 
 @Injectable()
 export class DocumentProcessingService {
   constructor(
-    @InjectRepository(Document)
-    private readonly documentRepository: Repository<Document>,
+    private readonly documentRepository: DocumentRepository,
     private readonly ocrPort: OcrPort,
     private readonly s3Port: S3Port,
   ) {}

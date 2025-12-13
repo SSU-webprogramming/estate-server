@@ -91,6 +91,6 @@ export class CreateEstateDto {
   })
   @IsOptional()
   @IsArray()
-  @IsInt({ each: true })
+  @IsInt({ each: true, message: '문서 ID는 정수여야 합니다.' })
   documentIds?: number[];
 }

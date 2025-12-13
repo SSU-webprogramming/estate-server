@@ -19,6 +19,6 @@ import { DocumentRepository } from '@/modules/document/repositories/document.rep
   ],
   controllers: [DocumentController],
   providers: [DocumentService, DocumentCleanupService, DocumentRepository],
-  exports: [DocumentService],
+  exports: [DocumentService, DocumentRepository],
 })
 export class DocumentModule {}

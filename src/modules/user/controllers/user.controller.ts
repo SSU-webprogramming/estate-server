@@ -49,11 +49,11 @@ export class UserController {
     @Body() agreeTermsRequestDto: AgreeTermsRequestDto,
     @GetUser() user: User,
   ): Promise<AgreeTermsResponseDto> {
-    const savedUser = await this.userService.agreeTerms(
+    const agreedTerms = await this.userService.agreeTerms(
       agreeTermsRequestDto,
       user.userId,
     );
-    return new AgreeTermsResponseDto(savedUser.agreedTerms || {});
+    return new AgreeTermsResponseDto(agreedTerms);
   }
 
   @Get()
