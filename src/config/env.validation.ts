@@ -72,10 +72,6 @@ class EnvironmentVariables {
   JWT_SECRET: string;
 
   @IsString()
-  @MinLength(32, { message: 'JWT_REGISTER_SECRET은 최소 32자 이상이어야 합니다.' })
-  JWT_REGISTER_SECRET: string;
-
-  @IsString()
   @MinLength(32, { message: 'JWT_REFRESH_SECRET은 최소 32자 이상이어야 합니다.' })
   JWT_REFRESH_SECRET: string;
 
@@ -162,6 +158,15 @@ class EnvironmentVariables {
   @IsString()
   @IsOptional()
   CLOVA_API_GATEWAY?: string;
+
+  // === 암호화 설정 ===
+  @IsString()
+  @MinLength(32, { message: 'ENCRYPTION_KEY는 최소 32자 이상이어야 합니다.' })
+  ENCRYPTION_KEY: string;
+
+  @IsString()
+  @IsOptional()
+  ENCRYPTION_ENABLED?: string;
 }
 
 /**

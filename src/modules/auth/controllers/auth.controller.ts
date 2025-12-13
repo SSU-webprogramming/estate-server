@@ -34,11 +34,9 @@ export class AuthController {
   @ApiKakaoLoginCallback()
   async kakaoLoginCallback(
     @Req() req: RequestWithUser,
-    @Res() res: Response,
-  ) {
+  ): Promise<{ access_token: string; refresh_token: string }> {
     const { user } = req;
-    const redirectUrl = await this.authService.handleKakaoLogin(user);
-    return res.redirect(redirectUrl);
+    return await this.authService.handleKakaoLogin(user);
   }
 
   @Post('refresh')
