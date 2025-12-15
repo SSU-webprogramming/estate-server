@@ -87,7 +87,7 @@ export class UserService {
   async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<Record<string, boolean>> {
     const user = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.findOneBy({ userId }),
-      '사용자 조회',
+      'User lookup',
     );
 
     if (!user) {
@@ -100,7 +100,7 @@ export class UserService {
     user.agreedTerms = dto.agreedTerms;
     const savedUser = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.save(user),
-      '사용자 약관 동의 저장',
+      'User terms save',
     );
     
     return savedUser.agreedTerms || {};

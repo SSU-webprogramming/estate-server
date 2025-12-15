@@ -34,9 +34,15 @@ export class AuthController {
   @ApiKakaoLoginCallback()
   async kakaoLoginCallback(
     @Req() req: RequestWithUser,
-  ): Promise<{ access_token: string; refresh_token: string }> {
+    @Res() res: Response,
+  ) {
     const { user } = req;
-    return await this.authService.handleKakaoLogin(user);
+    const tokens = await this.authService.handleKakaoLogin(user);
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+    const redirectUrl = `${frontendUrl}/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`;
+
+    return res.redirect(redirectUrl);
   }
 
   @Post('refresh')

@@ -20,6 +20,14 @@ export class TermService {
     return TermMapper.toResponseDtoList(terms);
   }
 
+  async findOne(id: number): Promise<TermResponseDto> {
+    const term = await this.termRepository.findOne(id);
+    if (!term) {
+      throw new CustomException(ErrorCode.TERM_NOT_FOUND);
+    }
+    return TermMapper.toResponseDto(term);
+  }
+
   async findAgreedTerms(user: User): Promise<TermResponseDto[]> {
     const agreedTermsMap = user.agreedTerms;
 

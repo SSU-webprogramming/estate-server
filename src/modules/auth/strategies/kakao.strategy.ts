@@ -15,6 +15,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   ) {
     const clientID = configService.get<string>('KAKAO_CLIENT_ID');
     const clientSecret = configService.get<string>('KAKAO_CLIENT_SECRET');
+    const backendUrl = configService.get<string>('BACKEND_URL') || 'http://localhost:3000';
 
     if (!clientID || !clientSecret) {
       throw new CustomException(ErrorCode.KAKAO_VAL_NOT_FOUND);
@@ -23,7 +24,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     super({
       clientID,
       clientSecret,
-      callbackURL: '/auth/kakao/callback',
+      callbackURL: `${backendUrl}/auth/kakao/callback`,
     } as any);
   }
 
