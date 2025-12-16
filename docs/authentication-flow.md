@@ -23,7 +23,7 @@ sequenceDiagram
     Kakao-->>-User: 인증 완료 후 콜백 URL로 리다이렉트
 
     Note over User, DB: 3. 콜백 처리 및 토큰 발급
-    User->>+Server: GET /auth/kakao/callback?code={인가코드}
+    User->>+Server: GET /auth/kakao/callback?code=AUTH_CODE
     Server->>+Kakao: 인가 코드로 Access Token 요청
     Kakao-->>-Server: Access Token 응답
     Server->>+Kakao: Access Token으로 사용자 정보 요청
@@ -32,8 +32,8 @@ sequenceDiagram
     Note over Server, DB: 4. 사용자 처리
     Server->>+DB: providerId로 사용자 조회
     alt 신규 사용자
-        DB-->>Server: null
-        Server->>DB: 새 사용자 생성
+        DB-->>-Server: null
+        Server->>+DB: 새 사용자 생성
         DB-->>-Server: 생성된 사용자
     else 기존 사용자
         DB-->>-Server: 기존 사용자
@@ -47,21 +47,21 @@ sequenceDiagram
     Server-->>-User: JWT 응답 (access_token, refresh_token)
 
     Note over User, Server: 6. JWT를 이용한 API 접근
-    User->>+Server: POST /estate-analysis<br/>(Authorization: Bearer {access_token})
+    User->>+Server: POST /estate-analysis (Authorization: Bearer access_token)
     Server->>Server: JwtStrategy로 토큰 검증
     Server->>Server: payload에서 사용자 정보 추출
     Server->>Server: 비즈니스 로직 실행
     Server-->>-User: API 응답
 
     Note over User, Redis: 7. Access Token 갱신
-    User->>+Server: POST /auth/refresh<br/>(Authorization: Bearer {refresh_token})
+    User->>+Server: POST /auth/refresh (Authorization: Bearer refresh_token)
     Server->>+Redis: Refresh Token 검증
     Redis-->>-Server: 토큰 유효성 확인
     Server->>Server: 새 Access Token 생성
     Server-->>-User: 새 Access Token 응답
 
     Note over User, Redis: 8. 로그아웃
-    User->>+Server: POST /auth/logout<br/>(Authorization: Bearer {access_token})
+    User->>+Server: POST /auth/logout (Authorization: Bearer access_token)
     Server->>+Redis: Refresh Token 삭제
     Redis-->>-Server: 삭제 완료
     Server-->>-User: 로그아웃 성공
