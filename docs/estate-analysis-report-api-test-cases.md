@@ -1,13 +1,18 @@
-# 부동산 분석 리포트 API 테스트 케이스 문서
+# 부동산 분석 리포트 API 테스트 케이스
 
 ## 1. API 개요
-- API 이름: 부동산 분석 리포트 API
-- 설명: 부동산 문서 분석을 수행하고 결과를 관리하는 API
-- HTTP Method: POST, GET
-- URI: /estate-analysis
-- 요청 파라미터: estateId (GET 단일 조회 시), 쿼리 파라미터 (검색 시)
-- 요청 Body: CreateEstateAnalysisDto (분석 요청 시)
-- 응답 Body: EstateAnalysisReportResponseDto, PaginationResponseDto
+
+- **API 이름**: 부동산 분석 리포트 API
+- **설명**: 등기부등본 OCR 및 AI 분석을 수행하고 결과를 관리하는 API
+- **HTTP Method**: POST, GET
+- **Base URI**: `/estate-analysis`
+- **인증**: JWT Bearer Token 필요
+- **주요 기능**:
+  - 등기부등본 문서 업로드 및 OCR 처리
+  - AI 기반 법적 위험도 분석 (표제부, 갑구, 을구)
+  - 안전도 점수 산출 (0-100점)
+  - 분석 결과 조회 및 검색
+  - Redis 캐싱을 통한 중복 분석 방지
 
 ## 2. 테스트 케이스 목록 (표로 작성)
 

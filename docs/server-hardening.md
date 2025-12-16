@@ -1,6 +1,6 @@
 # NestJS 서버 하드닝 문서
 
-**Last Updated**: 2025-12-07
+**Last Updated**: 2024-12-16  
 **Author**: Backend Engineering Team
 
 > **요약**
@@ -37,6 +37,7 @@
 - NestJS 애플리케이션 레벨의 설정 및 코드
 - 미들웨어, 인터셉터, 필터, 파이프 등 요청 처리 파이프라인
 - 데이터베이스 연결 및 외부 API 호출 설정
+- Estate Server (부동산 등기부등본 분석 서비스)의 보안 강화 조치
 
 ---
 
@@ -320,4 +321,5 @@ app.enableShutdownHooks();
 
 | 날짜 | 작업자 | 내용 |
 |---|---|---|
-| 2025-12-07 | Backend Team | 최초 문서 작성 및 현재 하드닝 상태 현행화 |
+| 2024-12-07 | Backend Team | 최초 문서 작성 및 현재 하드닝 상태 현행화 |
+| 2024-12-16 | Backend Team | 문서 최신화 및 프로젝트 정보 추가 |

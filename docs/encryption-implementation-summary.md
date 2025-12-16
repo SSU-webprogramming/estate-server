@@ -364,7 +364,7 @@ npm run test
 
 ---
 
-**구현 완료일:** 2025-12-12  
+**구현 완료일:** 2024-12-12  
 **버전:** 1.0.0  
-**구현자:** NestJS Backend Engineer
+**구현자:** Backend Engineering Team
 

@@ -1,246 +1,371 @@
-# NestJS 계층형 아키텍처 프로젝트
+# Estate Server - 부동산 등기부등본 분석 서비스
 
-NestJS로 만든 샘플 애플리케이션입니다. Controller, Service, Repository 구조로 이루어진 계층형 아키텍처를 구현했으며, TypeORM(PostgreSQL), `class-validator`, `class-transformer` 등을 사용했습니다.
+NestJS 기반의 부동산 등기부등본 AI 분석 서비스입니다. OCR로 문서를 인식하고 AI가 법적 위험도를 분석하여 안전한 부동산 거래를 지원합니다.
 
-## 목차
+## 📋 목차
 
-- [설치 방법](#설치-방법)
-- [환경 설정](#환경-설정)
-- [실행 방법](#실행-방법)
-- [Swagger API 문서](#swagger-api-문서)
-- [프로젝트 구조](#프로젝트-구조)
-- [코드 품질](#코드-품질)
-- [성능 최적화](#성능-최적화)
+- [프로젝트 개요](#-프로젝트-개요)
+- [핵심 비즈니스 플로우](#-핵심-비즈니스-플로우)
+- [기술 스택](#-기술-스택)
+- [프로젝트 구조](#-프로젝트-구조)
+- [로컬 실행 방법](#-로컬-실행-방법)
+- [API 문서](#-api-문서)
+- [문서 가이드](#-문서-가이드)
 
-## 설치 방법
+## 🎯 프로젝트 개요
 
-1.  **저장소 클론**
-    ```bash
-    git clone <your-repository-url>
-    cd <your-project-name>
-    ```
+부동산 거래 시 필수인 등기부등본을 AI가 자동 분석하여 법적 위험 요소를 진단하고, 안전한 계약을 위한 인사이트를 제공하는 서비스입니다.
 
-2.  **패키지 설치**
-    ```bash
-    npm install
-    ```
+### 주요 기능
 
-## 환경 설정
+- **문서 OCR 인식**: Clova OCR로 등기부등본 텍스트 추출
+- **AI 기반 분석**: Gemini/ChatGPT가 소유권, 근저당권, 가압류 등 위험 요소 분석
+- **안전도 점수 산출**: 0-100점 안전도 점수 및 등급(SAFE/CAUTION/DANGER) 제공
+- **맞춤형 계약 조항 추천**: 분석 결과 기반 필수 계약 조항 제시
+- **전세보증보험 가입 가능 여부 판단**: 보험 가입 적격성 자동 판단
+- **Redis 기반 캐싱**: 동일 주소 재분석 시 90% 응답 시간 단축, 토큰 비용 절감
+
+## 🔄 핵심 비즈니스 플로우
+
+### 1. 사용자 인증 (Kakao OAuth)
 
 ```
-nvm use 22
+사용자 → 카카오 로그인 요청 → 카카오 인증 → JWT 발급 → 서비스 이용
 ```
 
-### 환경 변수
+- Passport.js + Kakao OAuth 2.0 전략 패턴
+- Access Token (1시간) + Refresh Token (7일) 발급
+- Redis 기반 토큰 관리
 
-**⚠️ 중요: 환경 변수 자동 검증**
+### 2. 부동산 분석 요청 (메인 플로우)
 
-이 프로젝트는 애플리케이션 시작 시 모든 필수 환경변수를 자동으로 검증합니다. 누락되거나 잘못된 값이 있으면 명확한 에러 메시지와 함께 시작이 중단됩니다.
+```mermaid
+sequenceDiagram
+    participant 사용자
+    participant API
+    participant Redis
+    participant OCR
+    participant AI
+    participant DB
 
-📖 **상세 가이드**: [환경 변수 설정 가이드](./docs/environment-variables.md)
+    사용자->>API: 문서 업로드 + 분석 요청
+    API->>OCR: 문서 OCR 처리
+    OCR-->>API: 주소 및 텍스트 추출
+    API->>Redis: 캐시 조회 (주소 기반)
+    
+    alt 캐시 히트
+        Redis-->>API: 기존 분석 결과
+        API-->>사용자: 즉시 응답 (1-2초)
+    else 캐시 미스
+        API->>AI: 문서 분석 요청
+        AI-->>API: 분석 결과
+        API->>DB: 결과 저장
+        API->>Redis: 캐시 저장 (TTL 90일)
+        API-->>사용자: 분석 결과 (10-15초)
+    end
+```
 
-프로젝트 루트에 `.env` 파일을 작성 후 실행:
+**주요 분석 항목:**
+- 표제부: 건물 구조, 용도, 면적, 토지 권리 비율
+- 갑구(소유권): 현재 소유자, 이전 내역, 소유권 제한 사항
+- 을구(권리 제한): 근저당권, 가압류, 가등기, 지상권 등
+
+## 🛠 기술 스택
+
+### Backend Framework
+- **NestJS 11**: TypeScript 기반 엔터프라이즈급 프레임워크
+- **TypeORM 0.3**: PostgreSQL ORM
+- **Passport.js**: 인증 (Kakao OAuth, JWT)
+
+### AI & OCR
+- **Google Gemini API**: 등기부등본 AI 분석
+- **OpenAI GPT**: 대체 AI 프로바이더
+- **Naver Clova OCR**: 문서 텍스트 추출
+
+### 인프라 & DevOps
+- **PostgreSQL**: 메인 데이터베이스
+- **Redis**: 캐싱 및 세션 관리
+- **MinIO (S3 호환)**: 문서 파일 저장
+- **Docker Compose**: 로컬 개발 환경
+
+### 보안 & 최적화
+- **AES-256-GCM**: 민감정보 암호화 (이메일, 주소, 소유자명)
+- **Helmet**: HTTP 보안 헤더
+- **Throttler**: Rate Limiting (1분 100회)
+- **Winston**: 구조화된 로깅 (Daily Rotate)
+
+## 📂 프로젝트 구조
+
+```
+src/
+├── app.module.ts                    # 애플리케이션 루트 모듈
+├── main.ts                          # 엔트리 포인트
+├── config/                          # 환경설정
+│   ├── typeorm.config.ts           # DB 설정
+│   ├── redis.config.ts             # Redis 설정
+│   ├── encryption.config.ts        # 암호화 설정
+│   └── env.validation.ts           # 환경변수 검증
+├── common/                          # 공통 모듈
+│   ├── filters/                    # 전역 예외 필터
+│   ├── interceptors/               # HTTP 인터셉터
+│   ├── middleware/                 # 로깅 미들웨어
+│   ├── pipes/                      # Validation 파이프
+│   ├── utils/                      # 유틸리티 (암호화, 주소 정규화 등)
+│   └── ports/                      # Repository 인터페이스
+└── modules/                         # 기능 모듈
+    ├── auth/                       # 인증 (Kakao OAuth, JWT)
+    │   ├── controllers/
+    │   ├── services/
+    │   ├── strategies/             # Passport 전략
+    │   ├── guards/                 # 인증/인가 가드
+    │   └── dto/
+    ├── user/                       # 사용자 관리
+    ├── estate/                     # 부동산 정보
+    ├── estate-analysis-report/     # 분석 리포트 (메인 비즈니스)
+    │   ├── services/
+    │   │   ├── estate-analysis-report.service.ts
+    │   │   ├── estate-analysis-report-cache.service.ts
+    │   │   ├── address-based-cache-strategy.service.ts
+    │   │   └── document-processing.service.ts
+    │   ├── ports/                  # 전략 패턴 인터페이스
+    │   ├── prompts/                # AI 프롬프트
+    │   └── repositories/
+    ├── document/                   # 문서 업로드/관리
+    ├── term/                       # 이용약관
+    ├── ai-provider/                # AI 연동 (Gemini/ChatGPT)
+    ├── ocr/                        # OCR 처리
+    ├── s3/                         # 파일 저장소
+    └── redis/                      # 캐시 관리
+```
+
+### 계층형 아키텍처 (Layered Architecture)
+
+모든 비즈니스 모듈은 다음 계층으로 구성됩니다:
+
+- **Controller**: HTTP 요청 처리, DTO 검증
+- **Service**: 비즈니스 로직, 트랜잭션 관리
+- **Repository**: 데이터베이스 접근
+- **Entity**: 데이터 모델 (TypeORM)
+- **DTO**: 요청/응답 데이터 전송 객체
+
+## 🚀 로컬 실행 방법
+
+### 1. 사전 요구사항
+
+- Node.js 22.x
+- Docker & Docker Compose
+- PostgreSQL 16.x (또는 Docker로 실행)
+
+### 2. 패키지 설치
+
+```bash
+npm install
+```
+
+### 3. 환경 변수 설정
+
+프로젝트 루트에 `.env` 파일 생성:
 
 ```env
-# --- Database
+# Database
 DB_HOST=localhost
 DB_PORT=54322
 DB_USERNAME=postgres
 DB_PASSWORD=postgres
 DB_DATABASE=webprogramming
 
-# --- Kakao Login
+# Kakao OAuth
 KAKAO_CLIENT_ID=YOUR_KAKAO_CLIENT_ID
 KAKAO_CLIENT_SECRET=YOUR_KAKAO_CLIENT_SECRET
 
-# --- JWT (최소 32자 이상의 안전한 랜덤 문자열)
-JWT_SECRET=YOUR_JWT_SECRET_MIN_32_CHARACTERS
-JWT_REGISTER_SECRET=YOUR_JWT_REGISTER_SECRET_MIN_32_CHARACTERS
-JWT_REFRESH_SECRET=YOUR_JWT_REFRESH_SECRET_MIN_32_CHARACTERS
+# JWT (최소 32자)
+JWT_SECRET=your_jwt_secret_minimum_32_characters_required
+JWT_REGISTER_SECRET=your_jwt_register_secret_minimum_32_characters
+JWT_REFRESH_SECRET=your_jwt_refresh_secret_minimum_32_characters
 JWT_ACCESS_TOKEN_EXPIRATION_TIME=1h
 JWT_REFRESH_TOKEN_EXPIRATION_TIME=7d
 JWT_REFRESH_TOKEN_EXPIRATION_TIME_TTL=604800
 
-# --- AI Provider
-# AI_PROVIDER는 'gemini' 또는 'chatgpt' 중 하나를 선택합니다.
+# AI Provider ('gemini' 또는 'chatgpt')
 AI_PROVIDER=gemini
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-GEMINI_MODEL_NAME=YOUR_GEMINI_MODEL_NAME
-OPENAI_API_KEY=YOUR_OPENAI_API_KEY
-GPT_MODEL_NAME=YOUR_GPT_MODEL_NAME
+GEMINI_MODEL_NAME=gemini-1.5-flash
+# OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+# GPT_MODEL_NAME=gpt-4
 
-# --- AWS S3 (MinIO)
+# AWS S3 (MinIO)
 AWS_ACCESS_KEY_ID=minioadmin
 AWS_SECRET_ACCESS_KEY=minioadmin
 AWS_S3_ENDPOINT=http://localhost:9000
 AWS_S3_BUCKET_NAME=documents
 AWS_REGION=us-east-1
 
-# --- Redis
+# Redis
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
-# --- Frontend
+# Frontend
 FRONTEND_URL=http://localhost:3001
+
+# 암호화 키 (최소 32자)
+ENCRYPTION_KEY=your_encryption_key_minimum_32_characters_required
+ENCRYPTION_ENABLED=true
+
+# Clova OCR (선택)
+CLOVA_API_KEY=YOUR_CLOVA_API_KEY
+CLOVA_API_GATEWAY=YOUR_CLOVA_API_GATEWAY
 ```
 
-**참고:** 
-- 본인의 PostgreSQL 설정에 맞게 수정하세요.
-- JWT Secret은 반드시 32자 이상의 안전한 랜덤 문자열을 사용하세요.
-- 환경변수 누락 시 애플리케이션이 시작되지 않으며 명확한 에러 메시지가 표시됩니다.
+📖 **환경변수 상세 가이드**: [환경 변수 설정 가이드](./docs/environment-variables.md)
 
-### TypeORM 설정
+### 4. Docker 인프라 실행
 
-TypeORM 설정 파일은 `src/config/typeorm.config.ts`. 현재는 PostgreSQL에 연결하도록 되어 있으며, `synchronize: true` 옵션으로 빌드시 엔티티가 스키마에 적용됨.
+PostgreSQL, Redis, MinIO를 Docker로 실행:
 
-**⚠️ 운영 환경에서는  `synchronize: false`로 사용.**
-
-## 실행 방법
-0. local 환경 세팅: 
-   ```bash
-   npm run docker:up
-   ```
-1.  **PostgreSQL 확인:** `.env`에 설정한 내용대로 PostgreSQL이 켜져있는지 확인하세요.
-
-2.  **개발 모드 실행**
-    ```bash
-    npm run start:dev
-    ```
-
-    `http://localhost:3000`에서 접속할 수 있습니다.
-
-3.  **프로덕션 빌드 후 실행**
-    ```bash
-    npm run build
-    npm run start
-    ```
-
-## API Endpoints
-
-애플리케이션 실행 후, `http://localhost:3000/api`에서 Swagger UI를 통해 API 엔드포인트를 직접 테스트하고 요청/응답 구조를 확인할 수 있습니다.
-
-### Auth
-
--   `GET /auth/kakao`: 카카오 OAuth 로그인 흐름을 시작합니다.
--   `GET /auth/kakao/callback`: 카카오 로그인 성공 후 콜백을 처리하고 JWT를 발급합니다.
-
-### Users
-
--   `GET /users`: 모든 사용자를 조회합니다. (JWT 인증 필요)
--   `GET /users/:id`: 특정 ID의 사용자를 조회합니다.
--   `PUT /users/:id`: 특정 ID의 사용자 정보를 업데이트합니다.
--   `DELETE /users/:id`: 특정 ID의 사용자를 삭제합니다.
-
-### Document Analyzer (단일 분석)
-
--   `POST /analyses`: 문서를 업로드하여 직접 분석 결과를 받습니다.
-
-### Documents (비동기 분석)
-
--   `POST /documents`: 문서를 업로드하고 저장합니다. (JWT 인증 필요)
--   `GET /documents/analyze/stream`: 저장된 모든 문서를 분석하고 결과를 SSE로 스트리밍합니다. (JWT 인증 필요)
-
-### Health Check
-
--   `GET /health`: 서버의 상태를 확인합니다.
-
-## 프로젝트 구조
-
-모듈 기반 레이어드 아키텍처로 구성
-
-```
-src/
-├── app.module.ts
-├── main.ts
-├── config/
-│   └── typeorm.config.ts
-└── modules/
-    ├── user/
-    │   ├── controllers/
-    │   │   └── user.controller.ts
-    │   ├── services/
-    │   │   └── user.service.ts
-    │   ├── entities/
-    │   │   └── user.entity.ts
-    │   ├── dto/
-    │   │   ├── create-user.dto.ts
-    │   │   └── update-user.dto.ts
-    │   └── user.module.ts
-    └── document-analyzer/
-        ├── controllers/
-        │   └── document-analyzer.controller.ts
-        ├── services/
-        │   └── document-analyzer.service.ts
-        └── document-analyzer.module.ts
-```
-
-
-## 코드 품질
-
-ESLint, Prettier로 코드 품질 관리
-
--   **린트 검사 및 자동 수정**
-    ```bash
-    npm run lint
-    ```
-
--   **코드 포맷팅**
-    ```bash
-    npm run format
-    ```
-
-## 성능 최적화
-
-### Estate Analysis API 최적화 (v1.0.0)
-
-`POST /estate-analysis` API의 성능 최적화를 통해 **Gemini AI 토큰 사용량을 70-90% 절감**하고 **응답 시간을 85-90% 단축**했습니다.
-
-#### 주요 개선 사항
-
-1. **Redis 기반 주소 캐싱 전략**
-   - **초고속 Redis 캐싱**: O(1) 시간 복잡도, 밀리초 단위
-   - OCR 후 추출된 주소로 기존 분석 결과 검색
-   - 동일 주소 재분석 시 AI 호출 생략
-   - 캐시 히트 시 1-2초 내 응답 (기존 10-15초)
-   - TTL 90일 자동 만료
-
-2. **SOLID 원칙 준수 아키텍처**
-   - 전략 패턴으로 다양한 캐싱 전략 교체 가능
-   - 의존성 역전으로 테스트 용이성 향상
-   - 단일 책임으로 유지보수성 개선
-
-3. **스마트 주소 매칭**
-   - 주소 정규화 (공백, 특수문자 제거)
-   - Levenshtein Distance 기반 유사도 계산
-   - 90% 이상 유사 주소 자동 매칭
-
-#### 사용 방법
-
-**일반 분석 (캐시 사용)**
 ```bash
-POST /estate-analysis
-{
-  "address": "서울특별시 강남구 테헤란로 123",
-  "documentIds": [1, 2, 3]
-}
+npm run docker:up
 ```
 
-**강제 재분석 (캐시 무시)**
+### 5. 애플리케이션 실행
+
 ```bash
-POST /estate-analysis
-{
-  "address": "서울특별시 강남구 테헤란로 123",
-  "documentIds": [1, 2, 3],
-  "forceReAnalyze": true
-}
+# 개발 모드 (Hot Reload)
+npm run start:dev
+
+# 프로덕션 빌드
+npm run build
+npm run start:prod
 ```
 
-#### 예상 효과
+서버는 `http://localhost:3000`에서 실행됩니다.
 
-| 지표 | 기존 | 최적화 | 개선율 |
-|------|------|--------|--------|
-| 응답 시간 (캐시 히트) | 10-15초 | 1-2초 | **85-90% 단축** |
-| 토큰 사용량 (50% 중복) | 100% | 50% | **50% 절감** |
-| 토큰 사용량 (90% 중복) | 100% | 10% | **90% 절감** |
+## 📚 API 문서
 
-📖 **상세 문서**: [Estate Analysis 최적화 가이드](./docs/estate-analysis-optimization.md)
+### Swagger UI
+
+애플리케이션 실행 후 `http://localhost:3000/api`에서 대화형 API 문서를 확인할 수 있습니다.
+
+### 주요 엔드포인트
+
+#### 인증 (Auth)
+- `GET /auth/kakao` - 카카오 로그인 시작
+- `GET /auth/kakao/callback` - 카카오 로그인 콜백
+- `POST /auth/refresh` - Access Token 갱신
+- `POST /auth/logout` - 로그아웃
+
+#### 부동산 분석 (Estate Analysis)
+- `POST /estate-analysis` - 등기부등본 분석 요청 (JWT 필요)
+- `GET /estate-analysis/:estateId` - 분석 결과 조회
+- `GET /estate-analysis` - 분석 결과 목록 (페이지네이션, 필터링)
+
+#### 문서 관리 (Document)
+- `POST /documents` - 문서 업로드 (JWT 필요)
+- `GET /documents` - 업로드한 문서 목록
+- `DELETE /documents/:id` - 문서 삭제
+
+#### 사용자 (User)
+- `GET /users` - 사용자 목록 (관리자 전용)
+- `GET /users/:id` - 사용자 상세 조회
+- `PUT /users/:id` - 사용자 정보 수정
+- `DELETE /users/:id` - 사용자 삭제
+
+#### 이용약관 (Term)
+- `GET /terms` - 이용약관 조회
+- `POST /terms` - 이용약관 생성 (관리자 전용)
+
+#### 헬스 체크
+- `GET /health` - 서버 상태 확인
+
+## 📖 문서 가이드
+
+### 아키텍처 & 설계
+- [프로젝트 아키텍처 개요](./docs/project-architecture.md) - 계층형 아키텍처, 전략 패턴, 헥사고날 아키텍처
+- [Passport와 전략 패턴](./docs/passport-and-strategy-pattern.md) - 인증 전략 패턴 설명
+- [인증 플로우](./docs/authentication-flow.md) - 카카오 OAuth + JWT 인증 흐름도
+
+### 보안 & 성능
+- [데이터 암호화 가이드](./docs/data-encryption-guide.md) - AES-256-GCM 암호화 구현 상세
+- [암호화 구현 요약](./docs/encryption-implementation-summary.md) - 암호화 적용 대상 및 사용법
+- [서버 하드닝](./docs/server-hardening.md) - 보안, 안정성, 성능 최적화 조치
+- [Estate Analysis 최적화](./docs/estate-analysis-optimization.md) - Redis 캐싱으로 토큰 70-90% 절감
+
+### 운영 & 테스트
+- [환경 변수 설정 가이드](./docs/environment-variables.md) - 필수/선택 환경변수 및 검증 규칙
+- [API 테스트 케이스](./docs/estate-analysis-report-api-test-cases.md) - 부동산 분석 API 테스트 시나리오
+
+## 🔒 보안 기능
+
+### 데이터 암호화
+- **암호화 대상**: 이메일, 사용자명, 주소, 소유자명
+- **알고리즘**: AES-256-GCM
+- **특징**: 자동 암호화/복호화 (TypeORM ValueTransformer)
+
+### 인증 & 인가
+- **OAuth 2.0**: 카카오 로그인
+- **JWT**: Access Token (1h) + Refresh Token (7d)
+- **Role-Based Access Control**: 사용자/관리자 권한 분리
+
+### 보안 미들웨어
+- **Helmet**: HTTP 보안 헤더 (CSP, HSTS, X-Frame-Options 등)
+- **Throttler**: Rate Limiting (1분 100회)
+- **CORS**: 허용된 도메인만 접근
+- **Sanitization**: XSS 방어 (HTML 태그 제거)
+
+## ⚡ 성능 최적화
+
+### Redis 캐싱 전략
+- **주소 기반 캐싱**: 동일 주소 재분석 시 캐시 사용
+- **응답 시간**: 10-15초 → 1-2초 (85-90% 단축)
+- **토큰 절감**: 중복 요청 시 AI 호출 생략 (50-90% 절감)
+- **TTL**: 90일 자동 만료
+
+### DB 최적화
+- **Connection Pool**: TypeORM 연결 풀
+- **N+1 방지**: Relations 옵션 활용
+- **인덱싱**: 자주 조회되는 필드에 인덱스 적용
+
+## 🧪 코드 품질
+
+```bash
+# Lint 검사
+npm run lint
+
+# 코드 포맷팅
+npm run format
+```
+
+## 🐳 Docker 관리
+
+```bash
+# 인프라 시작 (PostgreSQL, Redis, MinIO)
+npm run docker:up
+
+# 인프라 중지
+docker-compose down
+
+# 볼륨 포함 완전 삭제
+docker-compose down -v
+```
+
+## 📝 SOLID 원칙 준수
+
+이 프로젝트는 NestJS의 모듈 시스템과 의존성 주입을 활용하여 SOLID 원칙을 엄격히 따릅니다:
+
+- **단일 책임 원칙 (SRP)**: 각 서비스는 하나의 책임만 가짐
+- **개방-폐쇄 원칙 (OCP)**: 전략 패턴으로 확장 가능
+- **리스코프 치환 원칙 (LSP)**: 인터페이스 기반 설계
+- **인터페이스 분리 원칙 (ISP)**: Ports & Adapters
+- **의존성 역전 원칙 (DIP)**: 추상화에 의존
+
+## 📄 라이센스
+
+Private - UNLICENSED
+
+## 👥 기여자
+
+Backend Engineering Team
+
+---
+
+**Last Updated**: 2024-12-16  
+**Version**: 1.0.0
