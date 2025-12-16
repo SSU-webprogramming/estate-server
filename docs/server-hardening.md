@@ -1,83 +1,83 @@
-# NestJS ¼­¹ö ÇÏµå´× ¹®¼­
+# NestJS ì„œë²„ í•˜ë“œë‹ ë¬¸ì„œ
 
 **Last Updated**: 2024-12-16  
 **Author**: Backend Engineering Team
 
-> **¿ä¾à**
-> º» ¹®¼­´Â NestJS ±â¹İ ¼­¹öÀÇ ¾ÈÁ¤¼º, º¸¾È, ¼º´É ¹× È¸º¹·Â(Resilience)À» °­È­ÇÏ±â À§ÇØ Àû¿ëµÈ ÇÏµå´×(Hardening) Á¶Ä¡¸¦ ±â¼úÇÕ´Ï´Ù.
-> ÀÔ·Â °ËÁõ, Æ®·¡ÇÈ Á¦¾î, º¸¾È ¹Ìµé¿ş¾î, ·Î±ë Ã¼°è, DB ÃÖÀûÈ­ µî °¢ ¿µ¿ªº° ±¸Ã¼ÀûÀÎ ¼³Á¤°ú ÄÚµå¸¦ Æ÷ÇÔÇÏ¸ç,
-> ¿î¿µ È¯°æ¿¡¼­ÀÇ ¾ÈÁ¤ÀûÀÎ ¼­ºñ½º¸¦ º¸ÀåÇÏ±â À§ÇÑ °¡ÀÌµå¶óÀÎÀ» Á¦°øÇÕ´Ï´Ù.
+> **ìš”ì•½**  
+> ë³¸ ë¬¸ì„œëŠ” NestJS ê¸°ë°˜ ì„œë²„ì˜ ì•ˆì •ì„±, ë³´ì•ˆ, ì„±ëŠ¥ ë° íšŒë³µë ¥(Resilience)ì„ ê°•í™”í•˜ê¸° ìœ„í•´ ì ìš©ëœ í•˜ë“œë‹(Hardening) ì¡°ì¹˜ë¥¼ ê¸°ìˆ í•©ë‹ˆë‹¤.  
+> ì…ë ¥ ê²€ì¦, íŠ¸ë˜í”½ ì œì–´, ë³´ì•ˆ ë¯¸ë“¤ì›¨ì–´, ë¡œê¹… ì²´ê³„, DB ìµœì í™” ë“± ê° ì˜ì—­ë³„ êµ¬ì²´ì ì¸ ì„¤ì •ê³¼ ì½”ë“œë¥¼ í¬í•¨í•˜ë©°,  
+> ìš´ì˜ í™˜ê²½ì—ì„œì˜ ì•ˆì •ì ì¸ ì„œë¹„ìŠ¤ë¥¼ ë³´ì¥í•˜ê¸° ìœ„í•œ ê°€ì´ë“œë¼ì¸ì„ ì œê³µí•©ë‹ˆë‹¤.
 
 ---
 
-## ¸ñÂ÷
-1. [°³¿ä (Goal & Scope)](#1-°³¿ä-goal--scope)
-2. [Àû¿ëµÈ ÇÏµå´× Ç×¸ñ ¿ä¾à](#2-Àû¿ëµÈ-ÇÏµå´×-Ç×¸ñ-¿ä¾à)
-3. [ÀÔ·Â °ËÁõ ¹× Sanitization](#3-ÀÔ·Â-°ËÁõ-¹×-sanitization)
-4. [Rate Limiting & ºñÁ¤»ó Æ®·¡ÇÈ ¹æ¾î](#4-rate-limiting--ºñÁ¤»ó-Æ®·¡ÇÈ-¹æ¾î)
-5. [Resilience (Timeout / Retry / Circuit Breaker / Å¥À×)](#5-resilience-timeout--retry--circuit-breaker--Å¥À×)
-6. [º¸¾È ¹Ìµé¿ş¾î ¹× ¼­¹ö ¼³Á¤](#6-º¸¾È-¹Ìµé¿ş¾î-¹×-¼­¹ö-¼³Á¤)
-7. [·Î±ë¡¤¸ğ´ÏÅÍ¸µ¡¤¾Ë¸² Ã¼°è](#7-·Î±ë¸ğ´ÏÅÍ¸µ¾Ë¸²-Ã¼°è)
-8. [DB ¹× Äõ¸® ¼º´É ÃÖÀûÈ­](#8-db-¹×-Äõ¸®-¼º´É-ÃÖÀûÈ­)
-9. [Å×½ºÆ® ¹× °ËÁõ Àü·«](#9-Å×½ºÆ®-¹×-°ËÁõ-Àü·«)
-10. [¹èÆ÷ ¹× ¿î¿µ °í·Á»çÇ×](#10-¹èÆ÷-¹×-¿î¿µ-°í·Á»çÇ×)
-11. [ÃÖÁ¾ Ã¼Å©¸®½ºÆ®](#11-ÃÖÁ¾-Ã¼Å©¸®½ºÆ®)
-12. [º¯°æ ·Î±×(Change Log)](#12-º¯°æ-·Î±×change-log)
+## ëª©ì°¨
+1. [ê°œìš” (Goal & Scope)](#1-ê°œìš”-goal--scope)
+2. [ì ìš©ëœ í•˜ë“œë‹ í•­ëª© ìš”ì•½](#2-ì ìš©ëœ-í•˜ë“œë‹-í•­ëª©-ìš”ì•½)
+3. [ì…ë ¥ ê²€ì¦ ë° Sanitization](#3-ì…ë ¥-ê²€ì¦-ë°-sanitization)
+4. [Rate Limiting & ë¹„ì •ìƒ íŠ¸ë˜í”½ ë°©ì–´](#4-rate-limiting--ë¹„ì •ìƒ-íŠ¸ë˜í”½-ë°©ì–´)
+5. [Resilience (Timeout / Retry / Circuit Breaker / íì‰)](#5-resilience-timeout--retry--circuit-breaker--íì‰)
+6. [ë³´ì•ˆ ë¯¸ë“¤ì›¨ì–´ ë° ì„œë²„ ì„¤ì •](#6-ë³´ì•ˆ-ë¯¸ë“¤ì›¨ì–´-ë°-ì„œë²„-ì„¤ì •)
+7. [ë¡œê¹…Â·ëª¨ë‹ˆí„°ë§Â·ì•Œë¦¼ ì²´ê³„](#7-ë¡œê¹…ëª¨ë‹ˆí„°ë§ì•Œë¦¼-ì²´ê³„)
+8. [DB ë° ì¿¼ë¦¬ ì„±ëŠ¥ ìµœì í™”](#8-db-ë°-ì¿¼ë¦¬-ì„±ëŠ¥-ìµœì í™”)
+9. [í…ŒìŠ¤íŠ¸ ë° ê²€ì¦ ì „ëµ](#9-í…ŒìŠ¤íŠ¸-ë°-ê²€ì¦-ì „ëµ)
+10. [ë°°í¬ ë° ìš´ì˜ ê³ ë ¤ì‚¬í•­](#10-ë°°í¬-ë°-ìš´ì˜-ê³ ë ¤ì‚¬í•­)
+11. [ìµœì¢… ì²´í¬ë¦¬ìŠ¤íŠ¸](#11-ìµœì¢…-ì²´í¬ë¦¬ìŠ¤íŠ¸)
+12. [ë³€ê²½ ë¡œê·¸(Change Log)](#12-ë³€ê²½-ë¡œê·¸change-log)
 
 ---
 
-## 1. °³¿ä (Goal & Scope)
+## 1. ê°œìš” (Goal & Scope)
 
 ### Goal
-- **Security**: ¾ÇÀÇÀûÀÎ °ø°İ(XSS, Injection, DDoS µî)À¸·ÎºÎÅÍ ½Ã½ºÅÛ º¸È£
-- **Stability**: ¿¹¿Ü »óÈ² ¹× °úºÎÇÏ ½Ã¿¡µµ ¼­ºñ½º °¡¿ë¼º À¯Áö
-- **Observability**: ¹®Á¦ ¹ß»ı ½Ã ½Å¼ÓÇÑ ¿øÀÎ ÆÄ¾Ç ¹× ´ëÀÀ °¡´É
+- **Security**: ì•…ì˜ì ì¸ ê³µê²©(XSS, Injection, DDoS ë“±)ìœ¼ë¡œë¶€í„° ì‹œìŠ¤í…œ ë³´í˜¸
+- **Stability**: ì˜ˆì™¸ ìƒí™© ë° ê³¼ë¶€í•˜ ì‹œì—ë„ ì„œë¹„ìŠ¤ ê°€ìš©ì„± ìœ ì§€
+- **Observability**: ë¬¸ì œ ë°œìƒ ì‹œ ì‹ ì†í•œ ì›ì¸ íŒŒì•… ë° ëŒ€ì‘ ê°€ëŠ¥
 
 ### Scope
-- NestJS ¾ÖÇÃ¸®ÄÉÀÌ¼Ç ·¹º§ÀÇ ¼³Á¤ ¹× ÄÚµå
-- ¹Ìµé¿ş¾î, ÀÎÅÍ¼ÁÅÍ, ÇÊÅÍ, ÆÄÀÌÇÁ µî ¿äÃ» Ã³¸® ÆÄÀÌÇÁ¶óÀÎ
-- µ¥ÀÌÅÍº£ÀÌ½º ¿¬°á ¹× ¿ÜºÎ API È£Ãâ ¼³Á¤
-- Estate Server (ºÎµ¿»ê µî±âºÎµîº» ºĞ¼® ¼­ºñ½º)ÀÇ º¸¾È °­È­ Á¶Ä¡
+- NestJS ì• í”Œë¦¬ì¼€ì´ì…˜ ë ˆë²¨ì˜ ì„¤ì • ë° ì½”ë“œ
+- ë¯¸ë“¤ì›¨ì–´, ì¸í„°ì…‰í„°, í•„í„°, íŒŒì´í”„ ë“± ìš”ì²­ ì²˜ë¦¬ íŒŒì´í”„ë¼ì¸
+- ë°ì´í„°ë² ì´ìŠ¤ ì—°ê²° ë° ì™¸ë¶€ API í˜¸ì¶œ ì„¤ì •
+- Estate Server (ë¶€ë™ì‚° ë“±ê¸°ë¶€ë“±ë³¸ ë¶„ì„ ì„œë¹„ìŠ¤)ì˜ ë³´ì•ˆ ê°•í™” ì¡°ì¹˜
 
 ---
 
-## 2. Àû¿ëµÈ ÇÏµå´× Ç×¸ñ ¿ä¾à
+## 2. ì ìš©ëœ í•˜ë“œë‹ í•­ëª© ìš”ì•½
 
-| ¿µ¿ª | ÁÖ¿ä Ç×¸ñ | Àû¿ë ¿©ºÎ | ºñ°í |
+| ì˜ì—­ | ì£¼ìš” í•­ëª© | ì ìš© ì—¬ë¶€ | ë¹„ê³  |
 |---|---|---|---|
-| **Validation** | ValidationPipe, DTO °ËÁõ | ? Àû¿ë | Whitelist, Transform È°¼ºÈ­ |
-| **Sanitization** | HTML Tag Strip | ? Àû¿ë | `sanitize-html` ±â¹İ Ä¿½ºÅÒ ÆÄÀÌÇÁ |
-| **Rate Limit** | ThrottlerModule | ? Àû¿ë | 1ºĞ´ç 100È¸ Á¦ÇÑ |
-| **Security** | Helmet, CORS, Body Limit | ? Àû¿ë | Body 10MB Á¦ÇÑ |
-| **Resilience** | HTTP Retry, Timeout | ? Àû¿ë | Axios Retry (3È¸), Timeout (5s) |
-| **Logging** | Winston, Request Logging | ? Àû¿ë | Daily Rotate File, ¹Î°¨Á¤º¸ ¸¶½ºÅ· |
-| **DB** | Connection Pool | ? Àû¿ë | TypeORM ¼³Á¤ |
+| **Validation** | ValidationPipe, DTO ê²€ì¦ | âœ… ì ìš© | Whitelist, Transform í™œì„±í™” |
+| **Sanitization** | HTML Tag Strip | âœ… ì ìš© | `sanitize-html` ê¸°ë°˜ ì»¤ìŠ¤í…€ íŒŒì´í”„ |
+| **Rate Limit** | ThrottlerModule | âœ… ì ìš© | 1ë¶„ë‹¹ 100íšŒ ì œí•œ |
+| **Security** | Helmet, CORS, Body Limit | âœ… ì ìš© | Body 10MB ì œí•œ |
+| **Resilience** | HTTP Retry, Timeout | âœ… ì ìš© | Axios Retry (3íšŒ), Timeout (5s) |
+| **Logging** | Winston, Request Logging | âœ… ì ìš© | Daily Rotate File, ë¯¼ê°ì •ë³´ ë§ˆìŠ¤í‚¹ |
+| **DB** | Connection Pool | âœ… ì ìš© | TypeORM ì„¤ì • |
 
 ---
 
-## 3. ÀÔ·Â °ËÁõ ¹× Sanitization
+## 3. ì…ë ¥ ê²€ì¦ ë° Sanitization
 
 ### 3.1 Global ValidationPipe
-- **¸ñÀû**: Àß¸øµÈ µ¥ÀÌÅÍ Çü½ÄÀÌ ºñÁî´Ï½º ·ÎÁ÷À¸·Î À¯ÀÔµÇ´Â °ÍÀ» ¿øÃµ Â÷´Ü
-- **¼³Á¤**: `whitelist`·Î ºÒÇÊ¿äÇÑ ÇÊµå Á¦°Å, `transform`À¸·Î ÀÚµ¿ Çüº¯È¯
+- **ëª©ì **: ì˜ëª»ëœ ë°ì´í„° í˜•ì‹ì´ ë¹„ì¦ˆë‹ˆìŠ¤ ë¡œì§ìœ¼ë¡œ ìœ ì…ë˜ëŠ” ê²ƒì„ ì›ì²œ ì°¨ë‹¨
+- **ì„¤ì •**: `whitelist`ë¡œ ë¶ˆí•„ìš”í•œ í•„ë“œ ì œê±°, `transform`ìœ¼ë¡œ ìë™ í˜•ë³€í™˜
 
 ```typescript
 // src/main.ts
 app.useGlobalPipes(
   new ValidationPipe({
-    whitelist: true,            // DTO¿¡ ¾ø´Â ¼Ó¼º Á¦°Å
-    forbidNonWhitelisted: true, // DTO¿¡ ¾ø´Â ¼Ó¼º Á¸Àç ½Ã ¿¡·¯ ¹ß»ı
-    transform: true,            // Payload¸¦ DTO ÀÎ½ºÅÏ½º·Î º¯È¯
+    whitelist: true,            // DTOì— ì—†ëŠ” ì†ì„± ì œê±°
+    forbidNonWhitelisted: true, // DTOì— ì—†ëŠ” ì†ì„± ì¡´ì¬ ì‹œ ì—ëŸ¬ ë°œìƒ
+    transform: true,            // Payloadë¥¼ DTO ì¸ìŠ¤í„´ìŠ¤ë¡œ ë³€í™˜
     transformOptions: {
-      enableImplicitConversion: true, // ¾Ï½ÃÀû Å¸ÀÔ º¯È¯ Çã¿ë
+      enableImplicitConversion: true, // ì•”ì‹œì  íƒ€ì… ë³€í™˜ í—ˆìš©
     },
   }),
 );
 ```
 
-### 3.2 XSS ¹æ¾î (Sanitization)
-- **¸ñÀû**: HTML ÅÂ±×¸¦ Æ÷ÇÔÇÑ ¾Ç¼º ½ºÅ©¸³Æ® ÁÖÀÔ(XSS) ¹æÁö
-- **±¸Çö**: `sanitize-html` ¶óÀÌºê·¯¸®¸¦ »ç¿ëÇÑ Ä¿½ºÅÒ ÆÄÀÌÇÁ Àû¿ë
+### 3.2 XSS ë°©ì–´ (Sanitization)
+- **ëª©ì **: HTML íƒœê·¸ë¥¼ í¬í•¨í•œ ì•…ì„± ìŠ¤í¬ë¦½íŠ¸ ì£¼ì…(XSS) ë°©ì§€
+- **êµ¬í˜„**: `sanitize-html` ë¼ì´ë¸ŒëŸ¬ë¦¬ë¥¼ ì‚¬ìš©í•œ ì»¤ìŠ¤í…€ íŒŒì´í”„ ì ìš©
 
 ```typescript
 // src/common/pipes/sanitize-input.pipe.ts
@@ -88,52 +88,52 @@ export class SanitizeInputPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
     if (typeof value === 'string') {
       return sanitizeHtml(value, {
-        allowedTags: [],       // ¸ğµç ÅÂ±× Á¦°Å
-        allowedAttributes: {}, // ¸ğµç ¼Ó¼º Á¦°Å
+        allowedTags: [],       // ëª¨ë“  íƒœê·¸ ì œê±°
+        allowedAttributes: {}, // ëª¨ë“  ì†ì„± ì œê±°
       });
     }
-    // °´Ã¼ Àç±Í Å½»ö ·ÎÁ÷ »ı·«
+    // ê°ì²´ ì¬ê·€ íƒìƒ‰ ë¡œì§ ìƒëµ
     return value;
   }
 }
 ```
 
-### °ËÁõ ¹æ¹ı
+### ê²€ì¦ ë°©ë²•
 ```bash
-# XSS ½Ãµµ Å×½ºÆ®
+# XSS ì‹œë„ í…ŒìŠ¤íŠ¸
 curl -X POST http://localhost:3000/api/users \
   -H "Content-Type: application/json" \
   -d '{"name": "<script>alert(1)</script>John"}'
-# ±â´ë °á°ú: "John" (ÅÂ±×°¡ Á¦°ÅµÈ »óÅÂ·Î ÀúÀå)
+# ê¸°ëŒ€ ê²°ê³¼: "John" (íƒœê·¸ê°€ ì œê±°ëœ ìƒíƒœë¡œ ì €ì¥)
 ```
 
 ---
 
-## 4. Rate Limiting & ºñÁ¤»ó Æ®·¡ÇÈ ¹æ¾î
+## 4. Rate Limiting & ë¹„ì •ìƒ íŠ¸ë˜í”½ ë°©ì–´
 
 ### 4.1 ThrottlerModule (Application Level)
-- **¸ñÀû**: Æ¯Á¤ IPÀÇ °úµµÇÑ ¿äÃ» Â÷´Ü (DDoS ¹× Brute Force ¹æÁö)
-- **¼³Á¤**: 60ÃÊ(TTL) µ¿¾È 100È¸(Limit) ¿äÃ» Çã¿ë
+- **ëª©ì **: íŠ¹ì • IPì˜ ê³¼ë„í•œ ìš”ì²­ ì°¨ë‹¨ (DDoS ë° Brute Force ë°©ì§€)
+- **ì„¤ì •**: 60ì´ˆ(TTL) ë™ì•ˆ 100íšŒ(Limit) ìš”ì²­ í—ˆìš©
 
 ```typescript
 // src/app.module.ts
 ThrottlerModule.forRootAsync({
   useFactory: (config: ConfigService) => [{
-    ttl: 60000, // 1ºĞ
-    limit: 100, // 100È¸
+    ttl: 60000, // 1ë¶„
+    limit: 100, // 100íšŒ
   }],
 }),
 
-// Global Guard Àû¿ë
+// Global Guard ì ìš©
 {
   provide: APP_GUARD,
   useClass: ThrottlerGuard,
 }
 ```
 
-### 4.2 Body Size Á¦ÇÑ
-- **¸ñÀû**: ´ë¿ë·® Payload Àü¼ÛÀ» ÅëÇÑ DoS °ø°İ ¹æÁö
-- **¼³Á¤**: JSON ¹× URL-encoded µ¥ÀÌÅÍ ÃÖ´ë 10MB·Î Á¦ÇÑ
+### 4.2 Body Size ì œí•œ
+- **ëª©ì **: ëŒ€ìš©ëŸ‰ Payload ì „ì†¡ì„ í†µí•œ DoS ê³µê²© ë°©ì§€
+- **ì„¤ì •**: JSON ë° URL-encoded ë°ì´í„° ìµœëŒ€ 10MBë¡œ ì œí•œ
 
 ```typescript
 // src/main.ts
@@ -141,30 +141,30 @@ app.useBodyParser('json', { limit: '10mb' });
 app.useBodyParser('urlencoded', { limit: '10mb', extended: true });
 ```
 
-### °ËÁõ ¹æ¹ı
-- **Artillery** µîÀ» »ç¿ëÇÏ¿© 1ºĞ ³» 100È¸ ÀÌ»ó ¿äÃ» ½Ã `429 Too Many Requests` ÀÀ´ä È®ÀÎ.
+### ê²€ì¦ ë°©ë²•
+- **Artillery** ë“±ì„ ì‚¬ìš©í•˜ì—¬ 1ë¶„ ë‚´ 100íšŒ ì´ìƒ ìš”ì²­ ì‹œ `429 Too Many Requests` ì‘ë‹µ í™•ì¸.
 
 ---
 
-## 5. Resilience (Timeout / Retry / Circuit Breaker / Å¥À×)
+## 5. Resilience (Timeout / Retry / Circuit Breaker / íì‰)
 
 ### 5.1 HTTP Client Retry & Timeout
-- **¸ñÀû**: ¿ÜºÎ ¼­ºñ½º ÀÏ½ÃÀû Àå¾Ö ½Ã ÀÚµ¿ º¹±¸ ¹× ¹«ÇÑ ´ë±â ¹æÁö
-- **±¸Çö**: `axios-retry` ¹× `timeout` ¼³Á¤
+- **ëª©ì **: ì™¸ë¶€ ì„œë¹„ìŠ¤ ì¼ì‹œì  ì¥ì•  ì‹œ ìë™ ë³µêµ¬ ë° ë¬´í•œ ëŒ€ê¸° ë°©ì§€
+- **êµ¬í˜„**: `axios-retry` ë° `timeout` ì„¤ì •
 
 ```typescript
 // src/common/http/http-client.module.ts
 HttpModule.registerAsync({
   useFactory: async (config: ConfigService) => ({
-    timeout: configService.get('HTTP_TIMEOUT', 5000), // 5ÃÊ Å¸ÀÓ¾Æ¿ô
+    timeout: configService.get('HTTP_TIMEOUT', 5000), // 5ì´ˆ íƒ€ì„ì•„ì›ƒ
     maxRedirects: 5,
   }),
 }),
 
-// OnModuleInit¿¡¼­ Retry ¼³Á¤
+// OnModuleInitì—ì„œ Retry ì„¤ì •
 axiosRetry(axios, {
-  retries: 3, // ÃÖ´ë 3È¸ Àç½Ãµµ
-  retryDelay: axiosRetry.exponentialDelay, // Áö¼ö ¹é¿ÀÇÁ
+  retries: 3, // ìµœëŒ€ 3íšŒ ì¬ì‹œë„
+  retryDelay: axiosRetry.exponentialDelay, // ì§€ìˆ˜ ë°±ì˜¤í”„
   retryCondition: (error) => {
     return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response?.status === 429;
   },
@@ -173,11 +173,11 @@ axiosRetry(axios, {
 
 ---
 
-## 6. º¸¾È ¹Ìµé¿ş¾î ¹× ¼­¹ö ¼³Á¤
+## 6. ë³´ì•ˆ ë¯¸ë“¤ì›¨ì–´ ë° ì„œë²„ ì„¤ì •
 
 ### 6.1 Helmet
-- **¸ñÀû**: HTTP º¸¾È Çì´õ(CSP, HSTS, X-Frame-Options µî) ÀÚµ¿ ¼³Á¤
-- **Àû¿ë**: `main.ts` ÃÖ»ó´Ü¿¡ Àû¿ë
+- **ëª©ì **: HTTP ë³´ì•ˆ í—¤ë”(CSP, HSTS, X-Frame-Options ë“±) ìë™ ì„¤ì •
+- **ì ìš©**: `main.ts` ìµœìƒë‹¨ì— ì ìš©
 
 ```typescript
 // src/main.ts
@@ -186,28 +186,28 @@ app.use(helmet());
 ```
 
 ### 6.2 CORS (Cross-Origin Resource Sharing)
-- **¸ñÀû**: Çã¿ëµÈ µµ¸ŞÀÎ¿¡¼­¸¸ API Á¢±Ù Çã¿ë
-- **ÁÖÀÇ**: ¿î¿µ ¹èÆ÷ ½Ã `origin: true` ´ë½Å ±¸Ã¼ÀûÀÎ µµ¸ŞÀÎ ¸ñ·Ï ¸í½Ã ÇÊ¿ä
+- **ëª©ì **: í—ˆìš©ëœ ë„ë©”ì¸ì—ì„œë§Œ API ì ‘ê·¼ í—ˆìš©
+- **ì£¼ì˜**: ìš´ì˜ ë°°í¬ ì‹œ `origin: true` ëŒ€ì‹  êµ¬ì²´ì ì¸ ë„ë©”ì¸ ëª©ë¡ ëª…ì‹œ í•„ìš”
 
 ```typescript
 app.enableCors({
-  origin: true, // ?? ¿î¿µ ½Ã ['https://my-domain.com'] À¸·Î º¯°æ
+  origin: true, // âš ï¸ ìš´ì˜ ì‹œ ['https://my-domain.com'] ìœ¼ë¡œ ë³€ê²½
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   credentials: true,
 });
 ```
 
 ### 6.3 Trust Proxy
-- **¸ñÀû**: ·Îµå¹ë·±¼­/ÇÁ·Ï½Ã µÚ¿¡¼­ Å¬¶óÀÌ¾ğÆ®ÀÇ ½ÇÁ¦ IP ½Äº°
-- **¼³Á¤**: `expressApp.set('trust proxy', 1);`
+- **ëª©ì **: ë¡œë“œë°¸ëŸ°ì„œ/í”„ë¡ì‹œ ë’¤ì—ì„œ í´ë¼ì´ì–¸íŠ¸ì˜ ì‹¤ì œ IP ì‹ë³„
+- **ì„¤ì •**: `expressApp.set('trust proxy', 1);`
 
 ---
 
-## 7. ·Î±ë¡¤¸ğ´ÏÅÍ¸µ¡¤¾Ë¸² Ã¼°è
+## 7. ë¡œê¹…Â·ëª¨ë‹ˆí„°ë§Â·ì•Œë¦¼ ì²´ê³„
 
-### 7.1 ±¸Á¶È­µÈ ·Î±ë (Winston)
-- **¸ñÀû**: ·Î±× ÆÄ½Ì ¹× °Ë»ö ¿ëÀÌ¼º È®º¸ (JSON/Text Æ÷¸Ë)
-- **±¸Çö**: Console ¹× Daily Rotate File(ÀÏº° ·Î±× ÆÄÀÏ ºĞ¸®)
+### 7.1 êµ¬ì¡°í™”ëœ ë¡œê¹… (Winston)
+- **ëª©ì **: ë¡œê·¸ íŒŒì‹± ë° ê²€ìƒ‰ ìš©ì´ì„± í™•ë³´ (JSON/Text í¬ë§·)
+- **êµ¬í˜„**: Console ë° Daily Rotate File(ì¼ë³„ ë¡œê·¸ íŒŒì¼ ë¶„ë¦¬)
 
 ```typescript
 // src/common/logger/logger.module.ts
@@ -216,14 +216,14 @@ new winstonDaily({
   datePattern: 'YYYY-MM-DD',
   dirname: 'logs',
   filename: `%DATE%.log`,
-  maxFiles: 30, // 30ÀÏ º¸°ü
+  maxFiles: 30, // 30ì¼ ë³´ê´€
   zippedArchive: true,
 })
 ```
 
 ### 7.2 HTTP Request Logging & Masking
-- **¸ñÀû**: ¸ğµç ¿äÃ»/ÀÀ´ä ±â·Ï ¹× ¹Î°¨Á¤º¸(ºñ¹Ğ¹øÈ£ µî) ³ëÃâ ¹æÁö
-- **±¸Çö**: `LoggerMiddleware`¿¡¼­ Body Masking Ã³¸®
+- **ëª©ì **: ëª¨ë“  ìš”ì²­/ì‘ë‹µ ê¸°ë¡ ë° ë¯¼ê°ì •ë³´(ë¹„ë°€ë²ˆí˜¸ ë“±) ë…¸ì¶œ ë°©ì§€
+- **êµ¬í˜„**: `LoggerMiddleware`ì—ì„œ Body Masking ì²˜ë¦¬
 
 ```typescript
 // src/common/middleware/logger.middleware.ts
@@ -234,25 +234,25 @@ sensitiveFields.forEach((field) => {
 ```
 
 ### 7.3 Global Exception Filter
-- **¸ñÀû**: ¿¹¿Ü ¹ß»ı ½Ã ÀÏ°üµÈ ¿¡·¯ ÀÀ´ä Æ÷¸Ë Á¦°ø ¹× ¿¡·¯ ·Î±ë
-- **±¸Çö**: `GlobalExceptionFilter`¿¡¼­ `statusCode`, `errorCode`, `stack` Æ®·¹ÀÌ½º ·Î±ë
+- **ëª©ì **: ì˜ˆì™¸ ë°œìƒ ì‹œ ì¼ê´€ëœ ì—ëŸ¬ ì‘ë‹µ í¬ë§· ì œê³µ ë° ì—ëŸ¬ ë¡œê¹…
+- **êµ¬í˜„**: `GlobalExceptionFilter`ì—ì„œ `statusCode`, `errorCode`, `stack` íŠ¸ë ˆì´ìŠ¤ ë¡œê¹…
 
 ---
 
-## 8. DB ¹× Äõ¸® ¼º´É ÃÖÀûÈ­
+## 8. DB ë° ì¿¼ë¦¬ ì„±ëŠ¥ ìµœì í™”
 
 ### 8.1 Connection Pool
-- **¸ñÀû**: DB ¿¬°á ¿À¹öÇìµå °¨¼Ò ¹× µ¿½Ã Ã³¸®·® Áõ´ë
-- **¼³Á¤**: TypeORM ¼³Á¤ ³» Ç® »çÀÌÁî Á¶Á¤ (±âº»°ª È°¿ë ¶Ç´Â ¸í½ÃÀû ¼³Á¤)
+- **ëª©ì **: DB ì—°ê²° ì˜¤ë²„í—¤ë“œ ê°ì†Œ ë° ë™ì‹œ ì²˜ë¦¬ëŸ‰ ì¦ëŒ€
+- **ì„¤ì •**: TypeORM ì„¤ì • ë‚´ í’€ ì‚¬ì´ì¦ˆ ì¡°ì • (ê¸°ë³¸ê°’ í™œìš© ë˜ëŠ” ëª…ì‹œì  ì„¤ì •)
 
-### 8.2 N+1 ¹®Á¦ ¹æÁö
-- **Àü·«**: `Relations` ¿É¼Ç »ç¿ë ¶Ç´Â `QueryBuilder`·Î Join Fetch ¼öÇà
-- **¿¹½Ã**:
+### 8.2 N+1 ë¬¸ì œ ë°©ì§€
+- **ì „ëµ**: `Relations` ì˜µì…˜ ì‚¬ìš© ë˜ëŠ” `QueryBuilder`ë¡œ Join Fetch ìˆ˜í–‰
+- **ì˜ˆì‹œ**:
 ```typescript
 // Bad
 const users = await userRepo.find();
 for (const user of users) {
-  await profileRepo.findOne({ userId: user.id }); // N+1 ¹ß»ı
+  await profileRepo.findOne({ userId: user.id }); // N+1 ë°œìƒ
 }
 
 // Good
@@ -261,11 +261,11 @@ const users = await userRepo.find({ relations: ['profile'] });
 
 ---
 
-## 9. Å×½ºÆ® ¹× °ËÁõ Àü·«
+## 9. í…ŒìŠ¤íŠ¸ ë° ê²€ì¦ ì „ëµ
 
-### 9.1 ºÎÇÏ Å×½ºÆ® (Artillery)
-- **¸ñÀû**: Æ®·¡ÇÈ ÆøÁÖ ½Ã ¼­¹öÀÇ ÇÑ°èÁ¡ ¹× Rate Limiting µ¿ÀÛ È®ÀÎ
-- **¼³Á¤ ¿¹½Ã (`load-test.yaml`)**:
+### 9.1 ë¶€í•˜ í…ŒìŠ¤íŠ¸ (Artillery)
+- **ëª©ì **: íŠ¸ë˜í”½ í­ì£¼ ì‹œ ì„œë²„ì˜ í•œê³„ì  ë° Rate Limiting ë™ì‘ í™•ì¸
+- **ì„¤ì • ì˜ˆì‹œ (`load-test.yaml`)**:
 
 ```yaml
 config:
@@ -285,41 +285,41 @@ scenarios:
 
 ### 9.2 Health Check
 - **Endpoint**: `/health-check`
-- **¿ëµµ**: ·Îµå¹ë·±¼­(AWS ALB, K8s Liveness Probe)°¡ ¼­¹ö »óÅÂ È®ÀÎ¿ëÀ¸·Î È£Ãâ
+- **ìš©ë„**: ë¡œë“œë°¸ëŸ°ì„œ(AWS ALB, K8s Liveness Probe)ê°€ ì„œë²„ ìƒíƒœ í™•ì¸ìš©ìœ¼ë¡œ í˜¸ì¶œ
 
 ---
 
-## 10. ¹èÆ÷ ¹× ¿î¿µ °í·Á»çÇ×
+## 10. ë°°í¬ ë° ìš´ì˜ ê³ ë ¤ì‚¬í•­
 
 ### 10.1 Graceful Shutdown
-- **¸ñÀû**: ¹èÆ÷ ¶Ç´Â Á¾·á ½Ã ÁøÇà ÁßÀÎ ¿äÃ»À» ¿Ï·áÇÏ°í ¾ÈÀüÇÏ°Ô Á¾·á
-- **NestJS**: ±âº»ÀûÀ¸·Î `enableShutdownHooks()` È£Ãâ ½Ã ÀÛµ¿ (ÇöÀç ÄÚµå¿¡´Â ¸í½ÃµÇ¾î ÀÖÁö ¾ÊÀ¸¹Ç·Î Ãß°¡ ±ÇÀå)
+- **ëª©ì **: ë°°í¬ ë˜ëŠ” ì¢…ë£Œ ì‹œ ì§„í–‰ ì¤‘ì¸ ìš”ì²­ì„ ì™„ë£Œí•˜ê³  ì•ˆì „í•˜ê²Œ ì¢…ë£Œ
+- **NestJS**: ê¸°ë³¸ì ìœ¼ë¡œ `enableShutdownHooks()` í˜¸ì¶œ ì‹œ ì‘ë™ (í˜„ì¬ ì½”ë“œì—ëŠ” ëª…ì‹œë˜ì–´ ìˆì§€ ì•Šìœ¼ë¯€ë¡œ ì¶”ê°€ ê¶Œì¥)
 
 ```typescript
-// main.ts ±ÇÀå »çÇ×
+// main.ts ê¶Œì¥ ì‚¬í•­
 app.enableShutdownHooks();
 ```
 
-### 10.2 È¯°æ º¯¼ö °ü¸®
-- **¿øÄ¢**: `.env` ÆÄÀÏÀº git¿¡ Æ÷ÇÔÇÏÁö ¾ÊÀ¸¸ç, CI/CD ÆÄÀÌÇÁ¶óÀÎ¿¡¼­ ÁÖÀÔ
-- **°ËÁõ**: `ConfigModule`ÀÇ `validationSchema` (Joi)¸¦ ÅëÇØ ÇÊ¼ö È¯°æº¯¼ö ´©¶ô ¹æÁö ±ÇÀå
+### 10.2 í™˜ê²½ ë³€ìˆ˜ ê´€ë¦¬
+- **ì›ì¹™**: `.env` íŒŒì¼ì€ gitì— í¬í•¨í•˜ì§€ ì•Šìœ¼ë©°, CI/CD íŒŒì´í”„ë¼ì¸ì—ì„œ ì£¼ì…
+- **ê²€ì¦**: `ConfigModule`ì˜ `validationSchema` (Joi)ë¥¼ í†µí•´ í•„ìˆ˜ í™˜ê²½ë³€ìˆ˜ ëˆ„ë½ ë°©ì§€ ê¶Œì¥
 
 ---
 
-## 11. ÃÖÁ¾ Ã¼Å©¸®½ºÆ®
+## 11. ìµœì¢… ì²´í¬ë¦¬ìŠ¤íŠ¸
 
-- [x] `ValidationPipe`°¡ Global·Î ¼³Á¤µÇ¾î ÀÖ´Â°¡?
-- [x] `Helmet`ÀÌ Àû¿ëµÇ¾î ÀÖ´Â°¡?
-- [x] `Rate Limiting`ÀÌ ÀûÀıÇÑ ÀÓ°è°ªÀ¸·Î ¼³Á¤µÇ¾î ÀÖ´Â°¡?
-- [x] DB ºñ¹Ğ¹øÈ£ µî ¹Î°¨ Á¤º¸°¡ ·Î±×¿¡ ³²Áö ¾Ê´Â°¡? (Masking È®ÀÎ)
-- [x] ÇÁ·Î´ö¼Ç È¯°æ¿¡¼­ `synchronize: false`·Î ¼³Á¤µÇ¾ú´Â°¡? (ÇöÀç ÄÚµå `true`ÀÌ¹Ç·Î **¼öÁ¤ ÇÊ¼ö**)
-- [x] CORS ¼³Á¤ÀÌ Æ¯Á¤ µµ¸ŞÀÎÀ¸·Î Á¦ÇÑµÇ¾î ÀÖ´Â°¡? (¿î¿µ ¹èÆ÷ Àü È®ÀÎ)
+- [x] `ValidationPipe`ê°€ Globalë¡œ ì„¤ì •ë˜ì–´ ìˆëŠ”ê°€?
+- [x] `Helmet`ì´ ì ìš©ë˜ì–´ ìˆëŠ”ê°€?
+- [x] `Rate Limiting`ì´ ì ì ˆí•œ ì„ê³„ê°’ìœ¼ë¡œ ì„¤ì •ë˜ì–´ ìˆëŠ”ê°€?
+- [x] DB ë¹„ë°€ë²ˆí˜¸ ë“± ë¯¼ê° ì •ë³´ê°€ ë¡œê·¸ì— ë‚¨ì§€ ì•ŠëŠ”ê°€? (Masking í™•ì¸)
+- [x] í”„ë¡œë•ì…˜ í™˜ê²½ì—ì„œ `synchronize: false`ë¡œ ì„¤ì •ë˜ì—ˆëŠ”ê°€? (í˜„ì¬ ì½”ë“œ `true`ì´ë¯€ë¡œ **ìˆ˜ì • í•„ìˆ˜**)
+- [x] CORS ì„¤ì •ì´ íŠ¹ì • ë„ë©”ì¸ìœ¼ë¡œ ì œí•œë˜ì–´ ìˆëŠ”ê°€? (ìš´ì˜ ë°°í¬ ì „ í™•ì¸)
 
 ---
 
-## 12. º¯°æ ·Î±×(Change Log)
+## 12. ë³€ê²½ ë¡œê·¸(Change Log)
 
-| ³¯Â¥ | ÀÛ¾÷ÀÚ | ³»¿ë |
+| ë‚ ì§œ | ì‘ì—…ì | ë‚´ìš© |
 |---|---|---|
-| 2024-12-07 | Backend Team | ÃÖÃÊ ¹®¼­ ÀÛ¼º ¹× ÇöÀç ÇÏµå´× »óÅÂ ÇöÇàÈ­ |
-| 2024-12-16 | Backend Team | ¹®¼­ ÃÖ½ÅÈ­ ¹× ÇÁ·ÎÁ§Æ® Á¤º¸ Ãß°¡ |
+| 2024-12-07 | Backend Team | ìµœì´ˆ ë¬¸ì„œ ì‘ì„± ë° í˜„ì¬ í•˜ë“œë‹ ìƒíƒœ í˜„í–‰í™” |
+| 2024-12-16 | Backend Team | ë¬¸ì„œ ìµœì‹ í™” ë° í”„ë¡œì íŠ¸ ì •ë³´ ì¶”ê°€ |
