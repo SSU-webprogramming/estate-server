@@ -1,231 +1,231 @@
-# È¯°æ º¯¼ö ¼³Á¤ °¡ÀÌµå
+# í™˜ê²½ ë³€ìˆ˜ ì„¤ì • ê°€ì´ë“œ
 
-## °³¿ä
+## ê°œìš”
 
-Estate Server´Â ¾ÖÇÃ¸®ÄÉÀÌ¼Ç ½ÃÀÛ ½Ã ¸ðµç ÇÊ¼ö È¯°æº¯¼ö¸¦ ÀÚµ¿À¸·Î °ËÁõÇÕ´Ï´Ù. ´©¶ôµÇ°Å³ª Àß¸øµÈ È¯°æº¯¼ö°¡ ÀÖÀ» °æ¿ì ¸íÈ®ÇÑ ¿¡·¯ ¸Þ½ÃÁö¿Í ÇÔ²² ¾ÖÇÃ¸®ÄÉÀÌ¼ÇÀÌ ½ÃÀÛµÇÁö ¾Ê½À´Ï´Ù.
+Estate ServerëŠ” ì• í”Œë¦¬ì¼€ì´ì…˜ ì‹œìž‘ ì‹œ ëª¨ë“  í•„ìˆ˜ í™˜ê²½ë³€ìˆ˜ë¥¼ ìžë™ìœ¼ë¡œ ê²€ì¦í•©ë‹ˆë‹¤. ëˆ„ë½ë˜ê±°ë‚˜ ìž˜ëª»ëœ í™˜ê²½ë³€ìˆ˜ê°€ ìžˆì„ ê²½ìš° ëª…í™•í•œ ì—ëŸ¬ ë©”ì‹œì§€ì™€ í•¨ê»˜ ì• í”Œë¦¬ì¼€ì´ì…˜ì´ ì‹œìž‘ë˜ì§€ ì•ŠìŠµë‹ˆë‹¤.
 
-## È¯°æº¯¼ö °ËÁõ ½Ã½ºÅÛ
+## í™˜ê²½ë³€ìˆ˜ ê²€ì¦ ì‹œìŠ¤í…œ
 
-### °ËÁõ ½ÃÁ¡
-- ¾ÖÇÃ¸®ÄÉÀÌ¼Ç ºÎÆÃ ½Ã (NestJS ConfigModule ÃÊ±âÈ­ ´Ü°è)
-- ¸ðµç ¸ðµâÀÌ ·ÎµåµÇ±â Àü¿¡ ½ÇÇà
-- °ËÁõ ½ÇÆÐ ½Ã Áï½Ã ÇÁ·Î¼¼½º Á¾·á
+### ê²€ì¦ ì‹œì 
+- ì• í”Œë¦¬ì¼€ì´ì…˜ ë¶€íŒ… ì‹œ (NestJS ConfigModule ì´ˆê¸°í™” ë‹¨ê³„)
+- ëª¨ë“  ëª¨ë“ˆì´ ë¡œë“œë˜ê¸° ì „ì— ì‹¤í–‰
+- ê²€ì¦ ì‹¤íŒ¨ ì‹œ ì¦‰ì‹œ í”„ë¡œì„¸ìŠ¤ ì¢…ë£Œ
 
-### °ËÁõ ±ÔÄ¢
-- `class-validator`¸¦ »ç¿ëÇÑ °­·ÂÇÑ Å¸ÀÔ °ËÁõ
-- ÇÊ¼ö ÇÊµå ´©¶ô °Ë»ç
-- µ¥ÀÌÅÍ Å¸ÀÔ °ËÁõ (¹®ÀÚ¿­, ¼ýÀÚ, URL µî)
-- °ªÀÇ ¹üÀ§ °ËÁõ (Æ÷Æ® ¹øÈ£, ¹®ÀÚ¿­ ±æÀÌ µî)
-- AI Provider¿¡ µû¸¥ Á¶°ÇºÎ ÇÊ¼ö ÇÊµå °ËÁõ
+### ê²€ì¦ ê·œì¹™
+- `class-validator`ë¥¼ ì‚¬ìš©í•œ ê°•ë ¥í•œ íƒ€ìž… ê²€ì¦
+- í•„ìˆ˜ í•„ë“œ ëˆ„ë½ ê²€ì‚¬
+- ë°ì´í„° íƒ€ìž… ê²€ì¦ (ë¬¸ìžì—´, ìˆ«ìž, URL ë“±)
+- ê°’ì˜ ë²”ìœ„ ê²€ì¦ (í¬íŠ¸ ë²ˆí˜¸, ë¬¸ìžì—´ ê¸¸ì´ ë“±)
+- AI Providerì— ë”°ë¥¸ ì¡°ê±´ë¶€ í•„ìˆ˜ í•„ë“œ ê²€ì¦
 
-## ÇÊ¼ö È¯°æ º¯¼ö
+## í•„ìˆ˜ í™˜ê²½ ë³€ìˆ˜
 
-### µ¥ÀÌÅÍº£ÀÌ½º ¼³Á¤
+### ë°ì´í„°ë² ì´ìŠ¤ ì„¤ì •
 
 ```env
-DB_HOST=localhost              # PostgreSQL È£½ºÆ® ÁÖ¼Ò
-DB_PORT=54322                  # PostgreSQL Æ÷Æ® (1-65535)
-DB_USERNAME=postgres           # PostgreSQL »ç¿ëÀÚ¸í
-DB_PASSWORD=postgres           # PostgreSQL ºñ¹Ð¹øÈ£
-DB_DATABASE=webprogramming     # µ¥ÀÌÅÍº£ÀÌ½º ÀÌ¸§
+DB_HOST=localhost              # PostgreSQL í˜¸ìŠ¤íŠ¸ ì£¼ì†Œ
+DB_PORT=54322                  # PostgreSQL í¬íŠ¸ (1-65535)
+DB_USERNAME=postgres           # PostgreSQL ì‚¬ìš©ìžëª…
+DB_PASSWORD=postgres           # PostgreSQL ë¹„ë°€ë²ˆí˜¸
+DB_DATABASE=webprogramming     # ë°ì´í„°ë² ì´ìŠ¤ ì´ë¦„
 ```
 
-**¼³¸í**:
-- `DB_PORT`´Â À¯È¿ÇÑ Æ÷Æ® ¹üÀ§ (1-65535) ³»ÀÇ ¼ýÀÚ¿©¾ß ÇÕ´Ï´Ù
-- ¿î¿µ È¯°æ¿¡¼­´Â °­·ÂÇÑ ºñ¹Ð¹øÈ£ »ç¿ë ÇÊ¼ö
+**ì„¤ëª…**:
+- `DB_PORT`ëŠ” ìœ íš¨í•œ í¬íŠ¸ ë²”ìœ„ (1-65535) ë‚´ì˜ ìˆ«ìžì—¬ì•¼ í•©ë‹ˆë‹¤
+- ìš´ì˜ í™˜ê²½ì—ì„œëŠ” ê°•ë ¥í•œ ë¹„ë°€ë²ˆí˜¸ ì‚¬ìš© í•„ìˆ˜
 
-### Kakao OAuth ÀÎÁõ
+### Kakao OAuth ì¸ì¦
 
 ```env
 KAKAO_CLIENT_ID=YOUR_KAKAO_CLIENT_ID
 KAKAO_CLIENT_SECRET=YOUR_KAKAO_CLIENT_SECRET
 ```
 
-**¼³¸í**:
-- [Kakao Developers](https://developers.kakao.com/)¿¡¼­ ¾ÖÇÃ¸®ÄÉÀÌ¼Ç µî·Ï ÈÄ ¹ß±Þ
-- Redirect URI µî·Ï ÇÊ¿ä: `http://localhost:3000/auth/kakao/callback`
+**ì„¤ëª…**:
+- [Kakao Developers](https://developers.kakao.com/)ì—ì„œ ì• í”Œë¦¬ì¼€ì´ì…˜ ë“±ë¡ í›„ ë°œê¸‰
+- Redirect URI ë“±ë¡ í•„ìš”: `http://localhost:3000/auth/kakao/callback`
 
-### JWT ÅäÅ«
+### JWT í† í°
 
 ```env
-# JWT Secret Keys (ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÇ ¾ÈÀüÇÑ ·£´ý ¹®ÀÚ¿­)
+# JWT Secret Keys (ìµœì†Œ 32ìž ì´ìƒì˜ ì•ˆì „í•œ ëžœë¤ ë¬¸ìžì—´)
 JWT_SECRET=your_jwt_secret_minimum_32_characters_required
 JWT_REGISTER_SECRET=your_jwt_register_secret_minimum_32_characters
 JWT_REFRESH_SECRET=your_jwt_refresh_secret_minimum_32_characters
 ```
 
-**º¸¾È ±ÇÀå»çÇ×**:
-- °¢ ½ÃÅ©¸´Àº ¼­·Î ´Ù¸¥ °ª »ç¿ë
-- ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÇ ·£´ý ¹®ÀÚ¿­
-- ¿µ¹® ´ë¼Ò¹®ÀÚ, ¼ýÀÚ, Æ¯¼ö¹®ÀÚ Á¶ÇÕ
-- ¿î¿µ È¯°æ¿¡¼­´Â ½ÃÅ©¸´ °ü¸® ¼­ºñ½º »ç¿ë ±ÇÀå (AWS Secrets Manager, HashiCorp Vault µî)
+**ë³´ì•ˆ ê¶Œìž¥ì‚¬í•­**:
+- ê° ì‹œí¬ë¦¿ì€ ì„œë¡œ ë‹¤ë¥¸ ê°’ ì‚¬ìš©
+- ìµœì†Œ 32ìž ì´ìƒì˜ ëžœë¤ ë¬¸ìžì—´
+- ì˜ë¬¸ ëŒ€ì†Œë¬¸ìž, ìˆ«ìž, íŠ¹ìˆ˜ë¬¸ìž ì¡°í•©
+- ìš´ì˜ í™˜ê²½ì—ì„œëŠ” ì‹œí¬ë¦¿ ê´€ë¦¬ ì„œë¹„ìŠ¤ ì‚¬ìš© ê¶Œìž¥ (AWS Secrets Manager, HashiCorp Vault ë“±)
 
-**»ý¼º ¹æ¹ý**:
+**ìƒì„± ë°©ë²•**:
 ```bash
-# Node.js »ç¿ë
+# Node.js ì‚¬ìš©
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
-# OpenSSL »ç¿ë
+# OpenSSL ì‚¬ìš©
 openssl rand -hex 32
 ```
 
-### AI Provider ¼³Á¤
+### AI Provider ì„¤ì •
 
 ```env
-AI_PROVIDER=gemini  # 'gemini' ¶Ç´Â 'chatgpt' Áß ÇÏ³ª ¼±ÅÃ
+AI_PROVIDER=gemini  # 'gemini' ë˜ëŠ” 'chatgpt' ì¤‘ í•˜ë‚˜ ì„ íƒ
 
-# AI_PROVIDER=geminiÀÎ °æ¿ì ÇÊ¼ö
+# AI_PROVIDER=geminiì¸ ê²½ìš° í•„ìˆ˜
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 GEMINI_MODEL_NAME=gemini-1.5-flash
 
-# AI_PROVIDER=chatgptÀÎ °æ¿ì ÇÊ¼ö
+# AI_PROVIDER=chatgptì¸ ê²½ìš° í•„ìˆ˜
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 GPT_MODEL_NAME=gpt-4
 ```
 
-**¼³¸í**:
-- `AI_PROVIDER`´Â ¹Ýµå½Ã `gemini` ¶Ç´Â `chatgpt` Áß ÇÏ³ª¿©¾ß ÇÕ´Ï´Ù
-- ¼±ÅÃÇÑ Provider¿¡ µû¶ó ÇØ´ç API Å°°¡ ÇÊ¼ö·Î ¿ä±¸µË´Ï´Ù
-- Gemini API Å°: [Google AI Studio](https://makersuite.google.com/app/apikey)
-- OpenAI API Å°: [OpenAI Platform](https://platform.openai.com/api-keys)
+**ì„¤ëª…**:
+- `AI_PROVIDER`ëŠ” ë°˜ë“œì‹œ `gemini` ë˜ëŠ” `chatgpt` ì¤‘ í•˜ë‚˜ì—¬ì•¼ í•©ë‹ˆë‹¤
+- ì„ íƒí•œ Providerì— ë”°ë¼ í•´ë‹¹ API í‚¤ê°€ í•„ìˆ˜ë¡œ ìš”êµ¬ë©ë‹ˆë‹¤
+- Gemini API í‚¤: [Google AI Studio](https://makersuite.google.com/app/apikey)
+- OpenAI API í‚¤: [OpenAI Platform](https://platform.openai.com/api-keys)
 
-### AWS S3 / MinIO ¼³Á¤
+### AWS S3 / MinIO ì„¤ì •
 
 ```env
 AWS_ACCESS_KEY_ID=minioadmin
 AWS_SECRET_ACCESS_KEY=minioadmin
-AWS_S3_ENDPOINT=http://localhost:9000  # À¯È¿ÇÑ URL Çü½Ä ÇÊ¿ä
+AWS_S3_ENDPOINT=http://localhost:9000  # ìœ íš¨í•œ URL í˜•ì‹ í•„ìš”
 AWS_S3_BUCKET_NAME=documents
 AWS_REGION=us-east-1
 ```
 
-**¼³¸í**:
-- ·ÎÄÃ °³¹ß: Docker Compose·Î ½ÇÇàµÇ´Â MinIO »ç¿ë
-- ¿î¿µ È¯°æ: AWS S3 ¶Ç´Â È£È¯ ½ºÅä¸®Áö »ç¿ë
-- `AWS_S3_ENDPOINT`´Â À¯È¿ÇÑ URL Çü½ÄÀÌ¾î¾ß ÇÕ´Ï´Ù
+**ì„¤ëª…**:
+- ë¡œì»¬ ê°œë°œ: Docker Composeë¡œ ì‹¤í–‰ë˜ëŠ” MinIO ì‚¬ìš©
+- ìš´ì˜ í™˜ê²½: AWS S3 ë˜ëŠ” í˜¸í™˜ ìŠ¤í† ë¦¬ì§€ ì‚¬ìš©
+- `AWS_S3_ENDPOINT`ëŠ” ìœ íš¨í•œ URL í˜•ì‹ì´ì–´ì•¼ í•©ë‹ˆë‹¤
 
-### ¾ÏÈ£È­ ¼³Á¤
+### ì•”í˜¸í™” ì„¤ì •
 
 ```env
-# ¹Î°¨Á¤º¸ ¾ÏÈ£È­ Å° (ÃÖ¼Ò 32ÀÚ ÀÌ»ó)
+# ë¯¼ê°ì •ë³´ ì•”í˜¸í™” í‚¤ (ìµœì†Œ 32ìž ì´ìƒ)
 ENCRYPTION_KEY=your_encryption_key_minimum_32_characters_required
 
-# ¾ÏÈ£È­ È°¼ºÈ­ ¿©ºÎ (±âº»°ª: true)
+# ì•”í˜¸í™” í™œì„±í™” ì—¬ë¶€ (ê¸°ë³¸ê°’: true)
 ENCRYPTION_ENABLED=true
 ```
 
-**¼³¸í**:
-- »ç¿ëÀÚ ÀÌ¸ÞÀÏ, ÁÖ¼Ò, ¼ÒÀ¯ÀÚ¸í µî ¹Î°¨Á¤º¸ ¾ÏÈ£È­¿¡ »ç¿ë
-- AES-256-GCM ¾Ë°í¸®Áò »ç¿ë
-- **?? Áß¿ä**: ÇÑ ¹ø ¼³Á¤ÇÑ Å°´Â Àý´ë º¯°æÇÏÁö ¸» °Í (±âÁ¸ µ¥ÀÌÅÍ º¹È£È­ ºÒ°¡)
+**ì„¤ëª…**:
+- ì‚¬ìš©ìž ì´ë©”ì¼, ì£¼ì†Œ, ì†Œìœ ìžëª… ë“± ë¯¼ê°ì •ë³´ ì•”í˜¸í™”ì— ì‚¬ìš©
+- AES-256-GCM ì•Œê³ ë¦¬ì¦˜ ì‚¬ìš©
+- **?? ì¤‘ìš”**: í•œ ë²ˆ ì„¤ì •í•œ í‚¤ëŠ” ì ˆëŒ€ ë³€ê²½í•˜ì§€ ë§ ê²ƒ (ê¸°ì¡´ ë°ì´í„° ë³µí˜¸í™” ë¶ˆê°€)
 
-**»ý¼º ¹æ¹ý**:
+**ìƒì„± ë°©ë²•**:
 ```bash
-# OpenSSL »ç¿ë
+# OpenSSL ì‚¬ìš©
 openssl rand -base64 32
 
-# Node.js »ç¿ë
+# Node.js ì‚¬ìš©
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
-## ¼±ÅÃÀû È¯°æ º¯¼ö
+## ì„ íƒì  í™˜ê²½ ë³€ìˆ˜
 
-### ±âº» ¼³Á¤
+### ê¸°ë³¸ ì„¤ì •
 
 ```env
 NODE_ENV=development  # development | production | test
 ```
 
-### JWT ÅäÅ« ¸¸·á ½Ã°£
+### JWT í† í° ë§Œë£Œ ì‹œê°„
 
 ```env
-JWT_ACCESS_TOKEN_EXPIRATION_TIME=1h      # ±âº»°ª: 1h
-JWT_REFRESH_TOKEN_EXPIRATION_TIME=7d     # ±âº»°ª: 7d
-JWT_REFRESH_TOKEN_EXPIRATION_TIME_TTL=604800  # ±âº»°ª: 604800 (7ÀÏ, ÃÊ ´ÜÀ§)
+JWT_ACCESS_TOKEN_EXPIRATION_TIME=1h      # ê¸°ë³¸ê°’: 1h
+JWT_REFRESH_TOKEN_EXPIRATION_TIME=7d     # ê¸°ë³¸ê°’: 7d
+JWT_REFRESH_TOKEN_EXPIRATION_TIME_TTL=604800  # ê¸°ë³¸ê°’: 604800 (7ì¼, ì´ˆ ë‹¨ìœ„)
 ```
 
-**¼³¸í**:
-- Access Token: API ¿äÃ» ½Ã »ç¿ë, Âª°Ô ¼³Á¤ (1½Ã°£ ±ÇÀå)
-- Refresh Token: Access Token °»½Å ½Ã »ç¿ë, ±æ°Ô ¼³Á¤ (7ÀÏ ±ÇÀå)
-- TTL: Redis¿¡ Refresh Token ÀúÀå ½Ã ¸¸·á ½Ã°£ (ÃÊ ´ÜÀ§)
+**ì„¤ëª…**:
+- Access Token: API ìš”ì²­ ì‹œ ì‚¬ìš©, ì§§ê²Œ ì„¤ì • (1ì‹œê°„ ê¶Œìž¥)
+- Refresh Token: Access Token ê°±ì‹  ì‹œ ì‚¬ìš©, ê¸¸ê²Œ ì„¤ì • (7ì¼ ê¶Œìž¥)
+- TTL: Redisì— Refresh Token ì €ìž¥ ì‹œ ë§Œë£Œ ì‹œê°„ (ì´ˆ ë‹¨ìœ„)
 
-### Redis ¼³Á¤
+### Redis ì„¤ì •
 
 ```env
-REDIS_HOST=localhost  # ±âº»°ª: localhost
-REDIS_PORT=6379       # ±âº»°ª: 6379
+REDIS_HOST=localhost  # ê¸°ë³¸ê°’: localhost
+REDIS_PORT=6379       # ê¸°ë³¸ê°’: 6379
 ```
 
-**¼³¸í**:
-- Ä³½Ì ¹× Refresh Token ÀúÀå¿¡ »ç¿ë
-- ·ÎÄÃ °³¹ß: Docker Compose·Î ½ÇÇà
+**ì„¤ëª…**:
+- ìºì‹± ë° Refresh Token ì €ìž¥ì— ì‚¬ìš©
+- ë¡œì»¬ ê°œë°œ: Docker Composeë¡œ ì‹¤í–‰
 
-### ÇÁ·ÐÆ®¿£µå ¼³Á¤
+### í”„ë¡ íŠ¸ì—”ë“œ ì„¤ì •
 
 ```env
-FRONTEND_URL=http://localhost:3001  # ÇÁ·ÐÆ®¿£µå URL
+FRONTEND_URL=http://localhost:3001  # í”„ë¡ íŠ¸ì—”ë“œ URL
 ```
 
-**¼³¸í**:
-- CORS ¼³Á¤ ¹× ¸®´ÙÀÌ·º¼Ç¿¡ »ç¿ë
-- ¿î¿µ È¯°æ¿¡¼­´Â ½ÇÁ¦ ÇÁ·ÐÆ®¿£µå µµ¸ÞÀÎÀ¸·Î ¼³Á¤
+**ì„¤ëª…**:
+- CORS ì„¤ì • ë° ë¦¬ë‹¤ì´ë ‰ì…˜ì— ì‚¬ìš©
+- ìš´ì˜ í™˜ê²½ì—ì„œëŠ” ì‹¤ì œ í”„ë¡ íŠ¸ì—”ë“œ ë„ë©”ì¸ìœ¼ë¡œ ì„¤ì •
 
-### HTTP Å¬¶óÀÌ¾ðÆ® ¼³Á¤
+### HTTP í´ë¼ì´ì–¸íŠ¸ ì„¤ì •
 
 ```env
-HTTP_TIMEOUT=5000  # HTTP ¿äÃ» Å¸ÀÓ¾Æ¿ô (¹Ð¸®ÃÊ, ±âº»°ª: 5000)
+HTTP_TIMEOUT=5000  # HTTP ìš”ì²­ íƒ€ìž„ì•„ì›ƒ (ë°€ë¦¬ì´ˆ, ê¸°ë³¸ê°’: 5000)
 ```
 
-**¼³¸í**:
-- ¿ÜºÎ API È£Ãâ ½Ã Å¸ÀÓ¾Æ¿ô ½Ã°£
-- AI API, OCR API µî¿¡ Àû¿ë
+**ì„¤ëª…**:
+- ì™¸ë¶€ API í˜¸ì¶œ ì‹œ íƒ€ìž„ì•„ì›ƒ ì‹œê°„
+- AI API, OCR API ë“±ì— ì ìš©
 
-### Clova OCR (¼±ÅÃ»çÇ×)
+### Clova OCR (ì„ íƒì‚¬í•­)
 
 ```env
 CLOVA_API_KEY=YOUR_CLOVA_API_KEY
 CLOVA_API_GATEWAY=YOUR_CLOVA_API_GATEWAY
 ```
 
-**¼³¸í**:
-- ¹®¼­ OCR Ã³¸®¿¡ »ç¿ë (¼±ÅÃ»çÇ×)
-- [Naver Cloud Platform](https://www.ncloud.com/)¿¡¼­ ¹ß±Þ
+**ì„¤ëª…**:
+- ë¬¸ì„œ OCR ì²˜ë¦¬ì— ì‚¬ìš© (ì„ íƒì‚¬í•­)
+- [Naver Cloud Platform](https://www.ncloud.com/)ì—ì„œ ë°œê¸‰
 
-## ¿¡·¯ ¸Þ½ÃÁö ¿¹½Ã
+## ì—ëŸ¬ ë©”ì‹œì§€ ì˜ˆì‹œ
 
-### ÇÊ¼ö ÇÊµå ´©¶ô
-
-```
-È¯°æ º¯¼ö °ËÁõ ½ÇÆÐ:
-[DB_HOST] DB_HOST´Â ÇÊ¼ö °ªÀÔ´Ï´Ù.
-[JWT_SECRET] JWT_SECRETÀº ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù.
-```
-
-### µ¥ÀÌÅÍ Å¸ÀÔ ¿À·ù
+### í•„ìˆ˜ í•„ë“œ ëˆ„ë½
 
 ```
-È¯°æ º¯¼ö °ËÁõ ½ÇÆÐ:
+í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:
+[DB_HOST] DB_HOSTëŠ” í•„ìˆ˜ ê°’ìž…ë‹ˆë‹¤.
+[JWT_SECRET] JWT_SECRETì€ ìµœì†Œ 32ìž ì´ìƒì´ì–´ì•¼ í•©ë‹ˆë‹¤.
+```
+
+### ë°ì´í„° íƒ€ìž… ì˜¤ë¥˜
+
+```
+í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:
 [DB_PORT] DB_PORT must be a number conforming to the specified constraints
 [AWS_S3_ENDPOINT] AWS_S3_ENDPOINT must be a valid URL
 ```
 
-### Enum °ª ¿À·ù
+### Enum ê°’ ì˜¤ë¥˜
 
 ```
-È¯°æ º¯¼ö °ËÁõ ½ÇÆÐ:
-[AI_PROVIDER] AI_PROVIDER´Â gemini ¶Ç´Â chatgpt Áß ÇÏ³ª¿©¾ß ÇÕ´Ï´Ù.
+í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:
+[AI_PROVIDER] AI_PROVIDERëŠ” gemini ë˜ëŠ” chatgpt ì¤‘ í•˜ë‚˜ì—¬ì•¼ í•©ë‹ˆë‹¤.
 ```
 
-### AI Providerº° Á¶°ÇºÎ ÇÊ¼ö ÇÊµå ´©¶ô
+### AI Providerë³„ ì¡°ê±´ë¶€ í•„ìˆ˜ í•„ë“œ ëˆ„ë½
 
 ```
-È¯°æ º¯¼ö °ËÁõ ½ÇÆÐ:
-[GEMINI_API_KEY] AI_PROVIDER°¡ geminiÀÎ °æ¿ì GEMINI_API_KEY´Â ÇÊ¼öÀÔ´Ï´Ù.
+í™˜ê²½ ë³€ìˆ˜ ê²€ì¦ ì‹¤íŒ¨:
+[GEMINI_API_KEY] AI_PROVIDERê°€ geminiì¸ ê²½ìš° GEMINI_API_KEYëŠ” í•„ìˆ˜ìž…ë‹ˆë‹¤.
 ```
 
-## È¯°æ º¯¼ö ÆÄÀÏ ¿¹½Ã
+## í™˜ê²½ ë³€ìˆ˜ íŒŒì¼ ì˜ˆì‹œ
 
-### °³¹ß È¯°æ (`.env`)
+### ê°œë°œ í™˜ê²½ (`.env`)
 
 ```env
 # --- Database
@@ -239,7 +239,7 @@ DB_DATABASE=webprogramming
 KAKAO_CLIENT_ID=YOUR_KAKAO_CLIENT_ID
 KAKAO_CLIENT_SECRET=YOUR_KAKAO_CLIENT_SECRET
 
-# --- JWT (ÃÖ¼Ò 32ÀÚ ÀÌ»ó)
+# --- JWT (ìµœì†Œ 32ìž ì´ìƒ)
 JWT_SECRET=your_jwt_secret_minimum_32_characters_required
 JWT_REGISTER_SECRET=your_jwt_register_secret_minimum_32_characters
 JWT_REFRESH_SECRET=your_jwt_refresh_secret_minimum_32_characters
@@ -268,11 +268,11 @@ REDIS_PORT=6379
 # --- Frontend
 FRONTEND_URL=http://localhost:3001
 
-# --- Encryption (ÃÖ¼Ò 32ÀÚ ÀÌ»ó)
+# --- Encryption (ìµœì†Œ 32ìž ì´ìƒ)
 ENCRYPTION_KEY=your_encryption_key_minimum_32_characters_required
 ENCRYPTION_ENABLED=true
 
-# --- Clova OCR (¼±ÅÃ)
+# --- Clova OCR (ì„ íƒ)
 # CLOVA_API_KEY=YOUR_CLOVA_API_KEY
 # CLOVA_API_GATEWAY=YOUR_CLOVA_API_GATEWAY
 
@@ -283,11 +283,11 @@ HTTP_TIMEOUT=5000
 NODE_ENV=development
 ```
 
-### ¿î¿µ È¯°æ
+### ìš´ì˜ í™˜ê²½
 
-¿î¿µ È¯°æ¿¡¼­´Â `.env` ÆÄÀÏ ´ë½Å ´ÙÀ½ ¹æ¹ýÀ» »ç¿ëÇÏ´Â °ÍÀ» ±ÇÀåÇÕ´Ï´Ù:
+ìš´ì˜ í™˜ê²½ì—ì„œëŠ” `.env` íŒŒì¼ ëŒ€ì‹  ë‹¤ìŒ ë°©ë²•ì„ ì‚¬ìš©í•˜ëŠ” ê²ƒì„ ê¶Œìž¥í•©ë‹ˆë‹¤:
 
-#### Docker È¯°æº¯¼ö
+#### Docker í™˜ê²½ë³€ìˆ˜
 
 ```yaml
 # docker-compose.yml
@@ -319,99 +319,99 @@ stringData:
 #### AWS Systems Manager Parameter Store
 
 ```bash
-# ÆÄ¶ó¹ÌÅÍ ÀúÀå
+# íŒŒë¼ë¯¸í„° ì €ìž¥
 aws ssm put-parameter \
   --name "/estate-server/prod/JWT_SECRET" \
   --value "your_jwt_secret" \
   --type "SecureString"
 ```
 
-## Æ®·¯ºí½´ÆÃ
+## íŠ¸ëŸ¬ë¸”ìŠˆíŒ…
 
-### ¾ÖÇÃ¸®ÄÉÀÌ¼ÇÀÌ ½ÃÀÛµÇÁö ¾ÊÀ» ¶§
+### ì• í”Œë¦¬ì¼€ì´ì…˜ì´ ì‹œìž‘ë˜ì§€ ì•Šì„ ë•Œ
 
-1. **¿¡·¯ ¸Þ½ÃÁö¸¦ ÁÖÀÇ ±í°Ô ÀÐ±â**
-   - ¾î¶² È¯°æº¯¼ö°¡ ´©¶ôµÇ¾ú´ÂÁö Á¤È®È÷ Ç¥½ÃµÊ
+1. **ì—ëŸ¬ ë©”ì‹œì§€ë¥¼ ì£¼ì˜ ê¹Šê²Œ ì½ê¸°**
+   - ì–´ë–¤ í™˜ê²½ë³€ìˆ˜ê°€ ëˆ„ë½ë˜ì—ˆëŠ”ì§€ ì •í™•ížˆ í‘œì‹œë¨
 
-2. **´©¶ôµÈ È¯°æº¯¼ö È®ÀÎ**
+2. **ëˆ„ë½ëœ í™˜ê²½ë³€ìˆ˜ í™•ì¸**
    ```bash
    cat .env | grep VARIABLE_NAME
    ```
 
-3. **`.env` ÆÄÀÏÀÇ ¿ÀÅ¸ È®ÀÎ**
-   - º¯¼ö¸í ´ë¼Ò¹®ÀÚ È®ÀÎ
-   - `=` ¾ÕµÚ °ø¹é ¾ø´ÂÁö È®ÀÎ
+3. **`.env` íŒŒì¼ì˜ ì˜¤íƒ€ í™•ì¸**
+   - ë³€ìˆ˜ëª… ëŒ€ì†Œë¬¸ìž í™•ì¸
+   - `=` ì•žë’¤ ê³µë°± ì—†ëŠ”ì§€ í™•ì¸
 
-4. **¹®ÀÚ¿­ °ª¿¡ µû¿ÈÇ¥ È®ÀÎ**
-   - `.env` ÆÄÀÏ¿¡¼­´Â º¸Åë µû¿ÈÇ¥ ºÒÇÊ¿ä
-   - Æ¯¼ö¹®ÀÚ°¡ Æ÷ÇÔµÈ °æ¿ì¿¡¸¸ »ç¿ë
+4. **ë¬¸ìžì—´ ê°’ì— ë”°ì˜´í‘œ í™•ì¸**
+   - `.env` íŒŒì¼ì—ì„œëŠ” ë³´í†µ ë”°ì˜´í‘œ ë¶ˆí•„ìš”
+   - íŠ¹ìˆ˜ë¬¸ìžê°€ í¬í•¨ëœ ê²½ìš°ì—ë§Œ ì‚¬ìš©
 
-### È¯°æº¯¼ö°¡ Á¦´ë·Î ·ÎµåµÇÁö ¾ÊÀ» ¶§
+### í™˜ê²½ë³€ìˆ˜ê°€ ì œëŒ€ë¡œ ë¡œë“œë˜ì§€ ì•Šì„ ë•Œ
 
-1. **`.env` ÆÄÀÏ À§Ä¡ È®ÀÎ**
+1. **`.env` íŒŒì¼ ìœ„ì¹˜ í™•ì¸**
    ```bash
    ls -la | grep .env
    ```
-   - ÇÁ·ÎÁ§Æ® ·çÆ® µð·ºÅä¸®¿¡ À§Ä¡ÇØ¾ß ÇÔ
+   - í”„ë¡œì íŠ¸ ë£¨íŠ¸ ë””ë ‰í† ë¦¬ì— ìœ„ì¹˜í•´ì•¼ í•¨
 
-2. **ÆÄÀÏ¸í È®ÀÎ**
-   - `.env` (¼û±è ÆÄÀÏ)
-   - `.env.example`ÀÌ³ª `env` ¾Æ´Ô
+2. **íŒŒì¼ëª… í™•ì¸**
+   - `.env` (ìˆ¨ê¹€ íŒŒì¼)
+   - `.env.example`ì´ë‚˜ `env` ì•„ë‹˜
 
-3. **¾ÖÇÃ¸®ÄÉÀÌ¼Ç Àç½ÃÀÛ**
+3. **ì• í”Œë¦¬ì¼€ì´ì…˜ ìž¬ì‹œìž‘**
    ```bash
    npm run start:dev
    ```
 
-4. **È¯°æº¯¼ö °ª È®ÀÎ** (µð¹ö±ë ¸ñÀû)
+4. **í™˜ê²½ë³€ìˆ˜ ê°’ í™•ì¸** (ë””ë²„ê¹… ëª©ì )
    ```typescript
    console.log(process.env.JWT_SECRET);
    ```
 
-### JWT Secret °ü·Ã ¿À·ù
+### JWT Secret ê´€ë ¨ ì˜¤ë¥˜
 
-**¹®Á¦**: "JWT_SECRETÀº ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù"
+**ë¬¸ì œ**: "JWT_SECRETì€ ìµœì†Œ 32ìž ì´ìƒì´ì–´ì•¼ í•©ë‹ˆë‹¤"
 
-**ÇØ°á**:
+**í•´ê²°**:
 ```bash
-# 32ÀÚ ÀÌ»óÀÇ ·£´ý ¹®ÀÚ¿­ »ý¼º
+# 32ìž ì´ìƒì˜ ëžœë¤ ë¬¸ìžì—´ ìƒì„±
 openssl rand -hex 32
 ```
 
-### AI Provider ¼³Á¤ ¿À·ù
+### AI Provider ì„¤ì • ì˜¤ë¥˜
 
-**¹®Á¦**: "AI_PROVIDER°¡ geminiÀÎ °æ¿ì GEMINI_API_KEY´Â ÇÊ¼öÀÔ´Ï´Ù"
+**ë¬¸ì œ**: "AI_PROVIDERê°€ geminiì¸ ê²½ìš° GEMINI_API_KEYëŠ” í•„ìˆ˜ìž…ë‹ˆë‹¤"
 
-**ÇØ°á**:
-1. `AI_PROVIDER=gemini`·Î ¼³Á¤Çß´ÂÁö È®ÀÎ
-2. `GEMINI_API_KEY`°¡ ¼³Á¤µÇ¾î ÀÖ´ÂÁö È®ÀÎ
-3. API Å°°¡ À¯È¿ÇÑÁö È®ÀÎ
+**í•´ê²°**:
+1. `AI_PROVIDER=gemini`ë¡œ ì„¤ì •í–ˆëŠ”ì§€ í™•ì¸
+2. `GEMINI_API_KEY`ê°€ ì„¤ì •ë˜ì–´ ìžˆëŠ”ì§€ í™•ì¸
+3. API í‚¤ê°€ ìœ íš¨í•œì§€ í™•ì¸
 
-### ¾ÏÈ£È­ Å° °ü·Ã ¿À·ù
+### ì•”í˜¸í™” í‚¤ ê´€ë ¨ ì˜¤ë¥˜
 
-**¹®Á¦**: "ENCRYPTION_KEY´Â ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù"
+**ë¬¸ì œ**: "ENCRYPTION_KEYëŠ” ìµœì†Œ 32ìž ì´ìƒì´ì–´ì•¼ í•©ë‹ˆë‹¤"
 
-**ÇØ°á**:
+**í•´ê²°**:
 ```bash
-# 32¹ÙÀÌÆ® ¾ÏÈ£È­ Å° »ý¼º
+# 32ë°”ì´íŠ¸ ì•”í˜¸í™” í‚¤ ìƒì„±
 openssl rand -base64 32
 ```
 
-## º¸¾È Ã¼Å©¸®½ºÆ®
+## ë³´ì•ˆ ì²´í¬ë¦¬ìŠ¤íŠ¸
 
-- [ ] `.env` ÆÄÀÏÀÌ `.gitignore`¿¡ Æ÷ÇÔµÇ¾î ÀÖ´Â°¡?
-- [ ] ¸ðµç Secret Å°°¡ ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÎ°¡?
-- [ ] °³¹ß/¿î¿µ È¯°æº°·Î ´Ù¸¥ Secret Å°¸¦ »ç¿ëÇÏ´Â°¡?
-- [ ] ¿î¿µ È¯°æ¿¡¼­´Â ½ÃÅ©¸´ °ü¸® ¼­ºñ½º¸¦ »ç¿ëÇÏ´Â°¡?
-- [ ] Git È÷½ºÅä¸®¿¡ Secret Å°°¡ Ä¿¹ÔµÇÁö ¾Ê¾Ò´Â°¡?
-- [ ] ÆÀ¿øµéÀÌ `.env.example` ÆÄÀÏÀ» Âü°íÇÏ¿© ¼³Á¤ÇÒ ¼ö ÀÖ´Â°¡?
+- [ ] `.env` íŒŒì¼ì´ `.gitignore`ì— í¬í•¨ë˜ì–´ ìžˆëŠ”ê°€?
+- [ ] ëª¨ë“  Secret í‚¤ê°€ ìµœì†Œ 32ìž ì´ìƒì¸ê°€?
+- [ ] ê°œë°œ/ìš´ì˜ í™˜ê²½ë³„ë¡œ ë‹¤ë¥¸ Secret í‚¤ë¥¼ ì‚¬ìš©í•˜ëŠ”ê°€?
+- [ ] ìš´ì˜ í™˜ê²½ì—ì„œëŠ” ì‹œí¬ë¦¿ ê´€ë¦¬ ì„œë¹„ìŠ¤ë¥¼ ì‚¬ìš©í•˜ëŠ”ê°€?
+- [ ] Git ížˆìŠ¤í† ë¦¬ì— Secret í‚¤ê°€ ì»¤ë°‹ë˜ì§€ ì•Šì•˜ëŠ”ê°€?
+- [ ] íŒ€ì›ë“¤ì´ `.env.example` íŒŒì¼ì„ ì°¸ê³ í•˜ì—¬ ì„¤ì •í•  ìˆ˜ ìžˆëŠ”ê°€?
 
-## Âü°í ÀÚ·á
+## ì°¸ê³  ìžë£Œ
 
-- [NestJS Config °ø½Ä ¹®¼­](https://docs.nestjs.com/techniques/configuration)
-- [class-validator °ø½Ä ¹®¼­](https://github.com/typestack/class-validator)
-- [°ËÁõ ·ÎÁ÷ ÄÚµå](../src/config/env.validation.ts)
-- [µ¥ÀÌÅÍ ¾ÏÈ£È­ °¡ÀÌµå](./data-encryption-guide.md)
+- [NestJS Config ê³µì‹ ë¬¸ì„œ](https://docs.nestjs.com/techniques/configuration)
+- [class-validator ê³µì‹ ë¬¸ì„œ](https://github.com/typestack/class-validator)
+- [ê²€ì¦ ë¡œì§ ì½”ë“œ](../src/config/env.validation.ts)
+- [ë°ì´í„° ì•”í˜¸í™” ê°€ì´ë“œ](./data-encryption-guide.md)
 
 ---
 

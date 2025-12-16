@@ -30,13 +30,13 @@ sequenceDiagram
     Kakao-->>-Server: 사용자 프로필 (이메일, 이름 등)
     
     Note over Server, DB: 4. 사용자 처리
-    Server->>+DB: providerId로 사용자 조회
+    Server->>DB: providerId로 사용자 조회
     alt 신규 사용자
-        DB-->>-Server: null
-        Server->>+DB: 새 사용자 생성
-        DB-->>-Server: 생성된 사용자
+        DB-->>Server: null
+        Server->>DB: 새 사용자 생성
+        DB-->>Server: 생성된 사용자
     else 기존 사용자
-        DB-->>-Server: 기존 사용자
+        DB-->>Server: 기존 사용자
     end
     
     Note over Server, Redis: 5. JWT 발급 및 저장

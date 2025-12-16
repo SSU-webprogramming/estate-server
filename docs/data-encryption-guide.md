@@ -1,58 +1,58 @@
-# µ¥ÀÌÅÍ ¾ÏÈ£È­ ±¸Çö °¡ÀÌµå
+# ë°ì´í„° ì•”í˜¸í™” êµ¬í˜„ ê°€ì´ë“œ
 
-## °³¿ä
+## ê°œìš”
 
-º» ¹®¼­´Â Estate Server (NestJS + TypeORM)¿¡¼­ ¹Î°¨Á¤º¸ ¾ÏÈ£È­ ±¸Çö¿¡ ´ëÇÑ »ó¼¼ °¡ÀÌµåÀÔ´Ï´Ù. »ç¿ëÀÚ ÀÌ¸ŞÀÏ, ÁÖ¼Ò, ¼ÒÀ¯ÀÚ¸í µîÀÇ °³ÀÎÁ¤º¸¸¦ AES-256-GCM ¾Ë°í¸®ÁòÀ¸·Î ¾ÏÈ£È­ÇÏ¿© ¾ÈÀüÇÏ°Ô º¸È£ÇÕ´Ï´Ù.
+ë³¸ ë¬¸ì„œëŠ” Estate Server (NestJS + TypeORM)ì—ì„œ ë¯¼ê°ì •ë³´ ì•”í˜¸í™” êµ¬í˜„ì— ëŒ€í•œ ìƒì„¸ ê°€ì´ë“œì…ë‹ˆë‹¤. ì‚¬ìš©ì ì´ë©”ì¼, ì£¼ì†Œ, ì†Œìœ ìëª… ë“±ì˜ ê°œì¸ì •ë³´ë¥¼ AES-256-GCM ì•Œê³ ë¦¬ì¦˜ìœ¼ë¡œ ì•”í˜¸í™”í•˜ì—¬ ì•ˆì „í•˜ê²Œ ë³´í˜¸í•©ë‹ˆë‹¤.
 
-### ¾ÏÈ£È­ ´ë»ó ÇÊµå
+### ì•”í˜¸í™” ëŒ€ìƒ í•„ë“œ
 
-#### User ¿£Æ¼Æ¼
-- `email`: ÀÌ¸ŞÀÏ ÁÖ¼Ò (°³ÀÎ ½Äº° °¡´É)
-- `username`: »ç¿ëÀÚ¸í (°³ÀÎ ½Äº° °¡´É)
+#### User ì—”í‹°í‹°
+- `email`: ì´ë©”ì¼ ì£¼ì†Œ (ê°œì¸ ì‹ë³„ ê°€ëŠ¥)
+- `username`: ì‚¬ìš©ìëª… (ê°œì¸ ì‹ë³„ ê°€ëŠ¥)
 
-#### EstateAnalysisReport ¿£Æ¼Æ¼
-- `address`: ÁÖ¼Ò (°³ÀÎ ½Äº° ¹× Àç»ê Á¤º¸)
-- `currentOwner`: ÇöÀç ¼ÒÀ¯ÀÚ (°³ÀÎ ½Äº° °¡´É)
+#### EstateAnalysisReport ì—”í‹°í‹°
+- `address`: ì£¼ì†Œ (ê°œì¸ ì‹ë³„ ë° ì¬ì‚° ì •ë³´)
+- `currentOwner`: í˜„ì¬ ì†Œìœ ì (ê°œì¸ ì‹ë³„ ê°€ëŠ¥)
 
-### ¾ÏÈ£È­ ¹æ½Ä
+### ì•”í˜¸í™” ë°©ì‹
 
-- **¾Ë°í¸®Áò**: AES-256-GCM
-- **Å° ±æÀÌ**: 256 bits (32 bytes)
-- **IV**: ¸Å¹ø ·£´ı »ı¼º (128 bits)
-- **Auth Tag**: µ¥ÀÌÅÍ ¹«°á¼º °ËÁõ¿ë (128 bits)
-- **ÀÎÄÚµù**: Hex
+- **ì•Œê³ ë¦¬ì¦˜**: AES-256-GCM
+- **í‚¤ ê¸¸ì´**: 256 bits (32 bytes)
+- **IV**: ë§¤ë²ˆ ëœë¤ ìƒì„± (128 bits)
+- **Auth Tag**: ë°ì´í„° ë¬´ê²°ì„± ê²€ì¦ìš© (128 bits)
+- **ì¸ì½”ë”©**: Hex
 
-### ¾ÏÈ£È­ µ¥ÀÌÅÍ Çü½Ä
+### ì•”í˜¸í™” ë°ì´í„° í˜•ì‹
 
 ```
 iv:authTag:encryptedData
 ```
 
-°¢ ºÎºĞÀº hex·Î ÀÎÄÚµùµÇ¾î Äİ·Ğ(:)À¸·Î ±¸ºĞµË´Ï´Ù.
+ê° ë¶€ë¶„ì€ hexë¡œ ì¸ì½”ë”©ë˜ì–´ ì½œë¡ (:)ìœ¼ë¡œ êµ¬ë¶„ë©ë‹ˆë‹¤.
 
 ---
 
-## È¯°æ º¯¼ö ¼³Á¤
+## í™˜ê²½ ë³€ìˆ˜ ì„¤ì •
 
-### .env ÆÄÀÏ ¿¹½Ã
+### .env íŒŒì¼ ì˜ˆì‹œ
 
 ```bash
 # ==========================================
-# ¾ÏÈ£È­ ¼³Á¤
+# ì•”í˜¸í™” ì„¤ì •
 # ==========================================
-# ¹Î°¨Á¤º¸ ¾ÏÈ£È­¿¡ »ç¿ëµÇ´Â Å°
-# ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÇ ¾ÈÀüÇÑ ·£´ı ¹®ÀÚ¿­À» »ç¿ëÇÏ¼¼¿ä
-# »ı¼º ¿¹½Ã: openssl rand -base64 32
-# ?? ÁÖÀÇ: ¿î¿µ È¯°æ°ú °³¹ß È¯°æ¿¡¼­ ¹İµå½Ã ´Ù¸¥ Å°¸¦ »ç¿ëÇÏ¼¼¿ä
-# ?? ÇÑ ¹ø ¼³Á¤ÇÑ Å°´Â º¯°æÇÏ¸é ±âÁ¸ ¾ÏÈ£È­µÈ µ¥ÀÌÅÍ¸¦ º¹È£È­ÇÒ ¼ö ¾ø½À´Ï´Ù
+# ë¯¼ê°ì •ë³´ ì•”í˜¸í™”ì— ì‚¬ìš©ë˜ëŠ” í‚¤
+# ìµœì†Œ 32ì ì´ìƒì˜ ì•ˆì „í•œ ëœë¤ ë¬¸ìì—´ì„ ì‚¬ìš©í•˜ì„¸ìš”
+# ìƒì„± ì˜ˆì‹œ: openssl rand -base64 32
+# ?? ì£¼ì˜: ìš´ì˜ í™˜ê²½ê³¼ ê°œë°œ í™˜ê²½ì—ì„œ ë°˜ë“œì‹œ ë‹¤ë¥¸ í‚¤ë¥¼ ì‚¬ìš©í•˜ì„¸ìš”
+# ?? í•œ ë²ˆ ì„¤ì •í•œ í‚¤ëŠ” ë³€ê²½í•˜ë©´ ê¸°ì¡´ ì•”í˜¸í™”ëœ ë°ì´í„°ë¥¼ ë³µí˜¸í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤
 ENCRYPTION_KEY=your_encryption_key_minimum_32_characters_required_keep_it_secret
 
-# ¾ÏÈ£È­ È°¼ºÈ­ ¿©ºÎ (±âº»°ª: true)
-# Å×½ºÆ® È¯°æ¿¡¼­¸¸ false·Î ¼³Á¤ °¡´É
+# ì•”í˜¸í™” í™œì„±í™” ì—¬ë¶€ (ê¸°ë³¸ê°’: true)
+# í…ŒìŠ¤íŠ¸ í™˜ê²½ì—ì„œë§Œ falseë¡œ ì„¤ì • ê°€ëŠ¥
 ENCRYPTION_ENABLED=true
 ```
 
-### ¾ÏÈ£È­ Å° »ı¼º ¹æ¹ı
+### ì•”í˜¸í™” í‚¤ ìƒì„± ë°©ë²•
 
 **Linux/Mac:**
 ```bash
@@ -66,9 +66,9 @@ require('crypto').randomBytes(32).toString('base64')
 
 ---
 
-## ±¸Çö »ó¼¼
+## êµ¬í˜„ ìƒì„¸
 
-### 1. EncryptionTransformer ±¸Çö
+### 1. EncryptionTransformer êµ¬í˜„
 
 `src/common/utils/encryption.transformer.ts`
 
@@ -94,14 +94,14 @@ export class EncryptionTransformer implements ValueTransformer {
     if (!key || key.trim().length === 0) {
       throw new CustomException(
         ErrorCode.INTERNAL_SERVER_ERROR,
-        '¾ÏÈ£È­ Å°°¡ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù.',
+        'ì•”í˜¸í™” í‚¤ê°€ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.',
       );
     }
 
     if (key.length < 32) {
       throw new CustomException(
         ErrorCode.INTERNAL_SERVER_ERROR,
-        '¾ÏÈ£È­ Å°´Â ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù.',
+        'ì•”í˜¸í™” í‚¤ëŠ” ìµœì†Œ 32ì ì´ìƒì´ì–´ì•¼ í•©ë‹ˆë‹¤.',
       );
     }
   }
@@ -124,7 +124,7 @@ export class EncryptionTransformer implements ValueTransformer {
     } catch (error) {
       throw new CustomException(
         ErrorCode.INTERNAL_SERVER_ERROR,
-        'µ¥ÀÌÅÍ ¾ÏÈ£È­¿¡ ½ÇÆĞÇß½À´Ï´Ù.',
+        'ë°ì´í„° ì•”í˜¸í™”ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.',
       );
     }
   }
@@ -155,13 +155,13 @@ export class EncryptionTransformer implements ValueTransformer {
     } catch (error) {
       throw new CustomException(
         ErrorCode.INTERNAL_SERVER_ERROR,
-        'µ¥ÀÌÅÍ º¹È£È­¿¡ ½ÇÆĞÇß½À´Ï´Ù.',
+        'ë°ì´í„° ë³µí˜¸í™”ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.',
       );
     }
   }
 }
 
-// ½Ì±ÛÅæ ÆĞÅÏÀ¸·Î ±¸Çö
+// ì‹±ê¸€í†¤ íŒ¨í„´ìœ¼ë¡œ êµ¬í˜„
 const transformerCache = new Map<string, EncryptionTransformer>();
 
 export function createEncryptionTransformer(encryptionKey: string): EncryptionTransformer {
@@ -172,7 +172,7 @@ export function createEncryptionTransformer(encryptionKey: string): EncryptionTr
 }
 ```
 
-### 2. ¾ÏÈ£È­ Config ¼³Á¤
+### 2. ì•”í˜¸í™” Config ì„¤ì •
 
 `src/config/encryption.config.ts`
 
@@ -186,14 +186,14 @@ export default registerAs('encryption', () => ({
 }));
 ```
 
-### 3. È¯°æº¯¼ö °ËÁõ Ãß°¡
+### 3. í™˜ê²½ë³€ìˆ˜ ê²€ì¦ ì¶”ê°€
 
-`src/config/env.validation.ts`¿¡ ´ÙÀ½ ÇÊµå Ãß°¡:
+`src/config/env.validation.ts`ì— ë‹¤ìŒ í•„ë“œ ì¶”ê°€:
 
 ```typescript
-// === ¾ÏÈ£È­ ¼³Á¤ ===
+// === ì•”í˜¸í™” ì„¤ì • ===
 @IsString()
-@MinLength(32, { message: 'ENCRYPTION_KEY´Â ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÌ¾î¾ß ÇÕ´Ï´Ù.' })
+@MinLength(32, { message: 'ENCRYPTION_KEYëŠ” ìµœì†Œ 32ì ì´ìƒì´ì–´ì•¼ í•©ë‹ˆë‹¤.' })
 ENCRYPTION_KEY: string;
 
 @IsString()
@@ -201,9 +201,9 @@ ENCRYPTION_KEY: string;
 ENCRYPTION_ENABLED?: string;
 ```
 
-### 4. AppModule ¼³Á¤
+### 4. AppModule ì„¤ì •
 
-`src/app.module.ts`¿¡¼­ encryption config ·Îµå:
+`src/app.module.ts`ì—ì„œ encryption config ë¡œë“œ:
 
 ```typescript
 import encryptionConfig from '@/config/encryption.config';
@@ -215,15 +215,15 @@ import encryptionConfig from '@/config/encryption.config';
       load: [redisConfig, encryptionConfig],
       validate,
     }),
-    // ... ±âÅ¸ imports
+    // ... ê¸°íƒ€ imports
   ],
 })
 export class AppModule {}
 ```
 
-### 5. ¿£Æ¼Æ¼¿¡ ¾ÏÈ£È­ Àû¿ë
+### 5. ì—”í‹°í‹°ì— ì•”í˜¸í™” ì ìš©
 
-#### User ¿£Æ¼Æ¼ ¿¹½Ã
+#### User ì—”í‹°í‹° ì˜ˆì‹œ
 
 ```typescript
 import { getEncryptionTransformer } from '@/common/utils/encryption.transformer';
@@ -232,27 +232,27 @@ import { getEncryptionTransformer } from '@/common/utils/encryption.transformer'
 export class User {
   @Column({ 
     name: 'email',
-    type: 'text', // varchar¿¡¼­ text·Î º¯°æ
+    type: 'text', // varcharì—ì„œ textë¡œ ë³€ê²½
     unique: true,
-    comment: 'ÀÌ¸ŞÀÏ ÁÖ¼Ò (¾ÏÈ£È­)',
+    comment: 'ì´ë©”ì¼ ì£¼ì†Œ (ì•”í˜¸í™”)',
     transformer: getEncryptionTransformer(),
   })
   email: string;
 
   @Column({ 
     name: 'username',
-    type: 'text', // varchar¿¡¼­ text·Î º¯°æ
+    type: 'text', // varcharì—ì„œ textë¡œ ë³€ê²½
     nullable: true,
-    comment: '»ç¿ëÀÚ¸í (¾ÏÈ£È­)',
+    comment: 'ì‚¬ìš©ìëª… (ì•”í˜¸í™”)',
     transformer: getEncryptionTransformer(),
   })
   username: string | null;
 }
 ```
 
-**ÁÖÀÇ:** `getEncryptionTransformer()`´Â ½Ì±ÛÅæ ÆĞÅÏÀ¸·Î ±¸ÇöµÇ¾î ÀÖÀ¸¸ç, È¯°æº¯¼ö¿¡¼­ lazyÇÏ°Ô ¾ÏÈ£È­ Å°¸¦ °¡Á®¿É´Ï´Ù. µû¶ó¼­ ¿£Æ¼Æ¼ ·Îµå ½ÃÁ¡ÀÌ ¾Æ´Ñ ½ÇÁ¦ »ç¿ë ½ÃÁ¡¿¡ Å°¸¦ °ËÁõÇÕ´Ï´Ù.
+**ì£¼ì˜:** `getEncryptionTransformer()`ëŠ” ì‹±ê¸€í†¤ íŒ¨í„´ìœ¼ë¡œ êµ¬í˜„ë˜ì–´ ìˆìœ¼ë©°, í™˜ê²½ë³€ìˆ˜ì—ì„œ lazyí•˜ê²Œ ì•”í˜¸í™” í‚¤ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤. ë”°ë¼ì„œ ì—”í‹°í‹° ë¡œë“œ ì‹œì ì´ ì•„ë‹Œ ì‹¤ì œ ì‚¬ìš© ì‹œì ì— í‚¤ë¥¼ ê²€ì¦í•©ë‹ˆë‹¤.
 
-#### EstateAnalysisReport ¿£Æ¼Æ¼ ¿¹½Ã
+#### EstateAnalysisReport ì—”í‹°í‹° ì˜ˆì‹œ
 
 ```typescript
 import { getEncryptionTransformer } from '@/common/utils/encryption.transformer';
@@ -261,17 +261,17 @@ import { getEncryptionTransformer } from '@/common/utils/encryption.transformer'
 export class EstateAnalysisReport {
   @Column({ 
     name: 'address', 
-    type: 'text', // varchar¿¡¼­ text·Î º¯°æ
-    comment: 'ÁÖ¼Ò (¾ÏÈ£È­)',
+    type: 'text', // varcharì—ì„œ textë¡œ ë³€ê²½
+    comment: 'ì£¼ì†Œ (ì•”í˜¸í™”)',
     transformer: getEncryptionTransformer(),
   })
   address: string;
 
   @Column({ 
     name: 'current_owner', 
-    type: 'text', // varchar¿¡¼­ text·Î º¯°æ
+    type: 'text', // varcharì—ì„œ textë¡œ ë³€ê²½
     nullable: true,
-    comment: 'ÇöÀç ¼ÒÀ¯ÀÚ (¾ÏÈ£È­)',
+    comment: 'í˜„ì¬ ì†Œìœ ì (ì•”í˜¸í™”)',
     transformer: getEncryptionTransformer(),
   })
   currentOwner: string | null;
@@ -280,13 +280,13 @@ export class EstateAnalysisReport {
 
 ---
 
-## ¼­ºñ½º °èÃş¿¡¼­ÀÇ »ç¿ë
+## ì„œë¹„ìŠ¤ ê³„ì¸µì—ì„œì˜ ì‚¬ìš©
 
-### ±âº» »ç¿ë ¿¹½Ã
+### ê¸°ë³¸ ì‚¬ìš© ì˜ˆì‹œ
 
-ValueTransformer°¡ ÀÚµ¿À¸·Î ¾ÏÈ£È­/º¹È£È­¸¦ Ã³¸®ÇÏ¹Ç·Î, ¼­ºñ½º °èÃş¿¡¼­´Â Æò¹®À¸·Î ÀÛ¾÷ÇÒ ¼ö ÀÖ½À´Ï´Ù.
+ValueTransformerê°€ ìë™ìœ¼ë¡œ ì•”í˜¸í™”/ë³µí˜¸í™”ë¥¼ ì²˜ë¦¬í•˜ë¯€ë¡œ, ì„œë¹„ìŠ¤ ê³„ì¸µì—ì„œëŠ” í‰ë¬¸ìœ¼ë¡œ ì‘ì—…í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤.
 
-#### UserService ¿¹½Ã
+#### UserService ì˜ˆì‹œ
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -304,37 +304,37 @@ export class UserService {
   ) {}
 
   /**
-   * »ç¿ëÀÚ »ı¼º
-   * - email, usernameÀº ÀÚµ¿À¸·Î ¾ÏÈ£È­µÇ¾î DB¿¡ ÀúÀåµÊ
+   * ì‚¬ìš©ì ìƒì„±
+   * - email, usernameì€ ìë™ìœ¼ë¡œ ì•”í˜¸í™”ë˜ì–´ DBì— ì €ì¥ë¨
    */
   async createUser(createUserDto: CreateUserDto): Promise<UserResponseDto> {
     const user = this.userRepository.create({
-      email: createUserDto.email, // Æò¹®À¸·Î Àü´Ş
-      username: createUserDto.username, // Æò¹®À¸·Î Àü´Ş
+      email: createUserDto.email, // í‰ë¬¸ìœ¼ë¡œ ì „ë‹¬
+      username: createUserDto.username, // í‰ë¬¸ìœ¼ë¡œ ì „ë‹¬
       providerType: createUserDto.providerType,
       providerId: createUserDto.providerId,
     });
 
     const savedUser = await this.userRepository.save(user);
     
-    // ÀúÀå ÈÄ Á¶È¸ ½Ã ÀÚµ¿À¸·Î º¹È£È­µÊ
+    // ì €ì¥ í›„ ì¡°íšŒ ì‹œ ìë™ìœ¼ë¡œ ë³µí˜¸í™”ë¨
     return this.toResponseDto(savedUser);
   }
 
   /**
-   * ÀÌ¸ŞÀÏ·Î »ç¿ëÀÚ Á¶È¸
-   * - Á¶È¸ ½Ã ÀÚµ¿À¸·Î º¹È£È­µÊ
+   * ì´ë©”ì¼ë¡œ ì‚¬ìš©ì ì¡°íšŒ
+   * - ì¡°íšŒ ì‹œ ìë™ìœ¼ë¡œ ë³µí˜¸í™”ë¨
    */
   async findByEmail(email: string): Promise<User | null> {
-    // TypeORMÀÇ where Á¶°Ç¿¡¼­´Â ¾ÏÈ£È­µÈ °ªÀ¸·Î ºñ±³ÇÒ ¼ö ¾øÀ½
-    // µû¶ó¼­ ÀüÃ¼ Á¶È¸ ÈÄ ¸Ş¸ğ¸®¿¡¼­ ÇÊÅÍ¸µÇÏ°Å³ª, º°µµÀÇ ÀÎµ¦½Ì Àü·« ÇÊ¿ä
+    // TypeORMì˜ where ì¡°ê±´ì—ì„œëŠ” ì•”í˜¸í™”ëœ ê°’ìœ¼ë¡œ ë¹„êµí•  ìˆ˜ ì—†ìŒ
+    // ë”°ë¼ì„œ ì „ì²´ ì¡°íšŒ í›„ ë©”ëª¨ë¦¬ì—ì„œ í•„í„°ë§í•˜ê±°ë‚˜, ë³„ë„ì˜ ì¸ë±ì‹± ì „ëµ í•„ìš”
     const users = await this.userRepository.find();
     return users.find(user => user.email === email) || null;
   }
 
   /**
-   * »ç¿ëÀÚ ID·Î Á¶È¸
-   * - Á¶È¸ ½Ã ¹Î°¨Á¤º¸°¡ ÀÚµ¿À¸·Î º¹È£È­µÊ
+   * ì‚¬ìš©ì IDë¡œ ì¡°íšŒ
+   * - ì¡°íšŒ ì‹œ ë¯¼ê°ì •ë³´ê°€ ìë™ìœ¼ë¡œ ë³µí˜¸í™”ë¨
    */
   async findById(userId: number): Promise<User | null> {
     return await this.userRepository.findOne({
@@ -343,17 +343,17 @@ export class UserService {
   }
 
   /**
-   * »ç¿ëÀÚ Á¤º¸ ¾÷µ¥ÀÌÆ®
-   * - ¾÷µ¥ÀÌÆ® ½Ã ÀÚµ¿À¸·Î ¾ÏÈ£È­µÊ
+   * ì‚¬ìš©ì ì •ë³´ ì—…ë°ì´íŠ¸
+   * - ì—…ë°ì´íŠ¸ ì‹œ ìë™ìœ¼ë¡œ ì•”í˜¸í™”ë¨
    */
   async updateUser(userId: number, updateData: Partial<CreateUserDto>): Promise<UserResponseDto> {
     const user = await this.findById(userId);
     
     if (!user) {
-      throw new CustomException(ErrorCode.USER_NOT_FOUND, '»ç¿ëÀÚ¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.');
+      throw new CustomException(ErrorCode.USER_NOT_FOUND, 'ì‚¬ìš©ìë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.');
     }
 
-    // Æò¹®À¸·Î ¾÷µ¥ÀÌÆ® (ÀÚµ¿À¸·Î ¾ÏÈ£È­µÊ)
+    // í‰ë¬¸ìœ¼ë¡œ ì—…ë°ì´íŠ¸ (ìë™ìœ¼ë¡œ ì•”í˜¸í™”ë¨)
     if (updateData.email) {
       user.email = updateData.email;
     }
@@ -366,11 +366,11 @@ export class UserService {
   }
 
   private toResponseDto(user: User): UserResponseDto {
-    // º¹È£È­µÈ µ¥ÀÌÅÍ°¡ ±×´ë·Î DTO·Î º¯È¯µÊ
+    // ë³µí˜¸í™”ëœ ë°ì´í„°ê°€ ê·¸ëŒ€ë¡œ DTOë¡œ ë³€í™˜ë¨
     return {
       userId: user.userId,
-      email: user.email, // ÀÌ¹Ì º¹È£È­µÈ Æò¹®
-      username: user.username, // ÀÌ¹Ì º¹È£È­µÈ Æò¹®
+      email: user.email, // ì´ë¯¸ ë³µí˜¸í™”ëœ í‰ë¬¸
+      username: user.username, // ì´ë¯¸ ë³µí˜¸í™”ëœ í‰ë¬¸
       role: user.role,
       createdAt: user.createdAt,
     };
@@ -378,7 +378,7 @@ export class UserService {
 }
 ```
 
-#### EstateAnalysisReportService ¿¹½Ã
+#### EstateAnalysisReportService ì˜ˆì‹œ
 
 ```typescript
 import { Injectable } from '@nestjs/common';
@@ -396,17 +396,17 @@ export class EstateAnalysisReportService {
   ) {}
 
   /**
-   * ºĞ¼® ¸®Æ÷Æ® »ı¼º
-   * - address, currentOwner´Â ÀÚµ¿À¸·Î ¾ÏÈ£È­µÇ¾î ÀúÀåµÊ
+   * ë¶„ì„ ë¦¬í¬íŠ¸ ìƒì„±
+   * - address, currentOwnerëŠ” ìë™ìœ¼ë¡œ ì•”í˜¸í™”ë˜ì–´ ì €ì¥ë¨
    */
   async createReport(dto: CreateAnalysisReportDto): Promise<AnalysisReportResponseDto> {
     const report = this.analysisReportRepository.create({
       estateId: dto.estateId,
-      address: dto.address, // Æò¹®À¸·Î Àü´Ş (ÀÚµ¿ ¾ÏÈ£È­)
-      currentOwner: dto.currentOwner, // Æò¹®À¸·Î Àü´Ş (ÀÚµ¿ ¾ÏÈ£È­)
+      address: dto.address, // í‰ë¬¸ìœ¼ë¡œ ì „ë‹¬ (ìë™ ì•”í˜¸í™”)
+      currentOwner: dto.currentOwner, // í‰ë¬¸ìœ¼ë¡œ ì „ë‹¬ (ìë™ ì•”í˜¸í™”)
       safetyScore: dto.safetyScore,
       buildingStructure: dto.buildingStructure,
-      // ... ±âÅ¸ ÇÊµå
+      // ... ê¸°íƒ€ í•„ë“œ
     });
 
     const savedReport = await this.analysisReportRepository.save(report);
@@ -414,8 +414,8 @@ export class EstateAnalysisReportService {
   }
 
   /**
-   * ºĞ¼® ¸®Æ÷Æ® Á¶È¸
-   * - Á¶È¸ ½Ã ¹Î°¨Á¤º¸°¡ ÀÚµ¿À¸·Î º¹È£È­µÊ
+   * ë¶„ì„ ë¦¬í¬íŠ¸ ì¡°íšŒ
+   * - ì¡°íšŒ ì‹œ ë¯¼ê°ì •ë³´ê°€ ìë™ìœ¼ë¡œ ë³µí˜¸í™”ë¨
    */
   async findById(reportId: number): Promise<EstateAnalysisReport | null> {
     return await this.analysisReportRepository.findOne({
@@ -425,7 +425,7 @@ export class EstateAnalysisReportService {
   }
 
   /**
-   * Æ¯Á¤ ºÎµ¿»êÀÇ ºĞ¼® ¸®Æ÷Æ® Á¶È¸
+   * íŠ¹ì • ë¶€ë™ì‚°ì˜ ë¶„ì„ ë¦¬í¬íŠ¸ ì¡°íšŒ
    */
   async findByEstateId(estateId: number): Promise<EstateAnalysisReport | null> {
     return await this.analysisReportRepository.findOne({
@@ -437,11 +437,11 @@ export class EstateAnalysisReportService {
     return {
       id: report.id,
       estateId: report.estateId,
-      address: report.address, // ÀÌ¹Ì º¹È£È­µÈ Æò¹®
-      currentOwner: report.currentOwner, // ÀÌ¹Ì º¹È£È­µÈ Æò¹®
+      address: report.address, // ì´ë¯¸ ë³µí˜¸í™”ëœ í‰ë¬¸
+      currentOwner: report.currentOwner, // ì´ë¯¸ ë³µí˜¸í™”ëœ í‰ë¬¸
       safetyScore: report.safetyScore,
       analyzedAt: report.analyzedAt,
-      // ... ±âÅ¸ ÇÊµå
+      // ... ê¸°íƒ€ í•„ë“œ
     };
   }
 }
@@ -449,17 +449,17 @@ export class EstateAnalysisReportService {
 
 ---
 
-## ÁÖÀÇ»çÇ× ¹× Á¦¾à»çÇ×
+## ì£¼ì˜ì‚¬í•­ ë° ì œì•½ì‚¬í•­
 
-### 1. ¾ÏÈ£È­µÈ ÇÊµåÀÇ °Ë»ö Á¦¾à
+### 1. ì•”í˜¸í™”ëœ í•„ë“œì˜ ê²€ìƒ‰ ì œì•½
 
-**¹®Á¦Á¡:**
-- ¾ÏÈ£È­µÈ ÇÊµå´Â WHERE Á¶°ÇÀ¸·Î Á÷Á¢ °Ë»öÇÒ ¼ö ¾ø½À´Ï´Ù.
-- µ¿ÀÏÇÑ Æò¹®ÀÌ¶óµµ ¸Å¹ø ´Ù¸¥ IV¸¦ »ç¿ëÇÏ¹Ç·Î ¾ÏÈ£¹®ÀÌ ´Ù¸¨´Ï´Ù.
+**ë¬¸ì œì :**
+- ì•”í˜¸í™”ëœ í•„ë“œëŠ” WHERE ì¡°ê±´ìœ¼ë¡œ ì§ì ‘ ê²€ìƒ‰í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.
+- ë™ì¼í•œ í‰ë¬¸ì´ë¼ë„ ë§¤ë²ˆ ë‹¤ë¥¸ IVë¥¼ ì‚¬ìš©í•˜ë¯€ë¡œ ì•”í˜¸ë¬¸ì´ ë‹¤ë¦…ë‹ˆë‹¤.
 
-**ÇØ°á ¹æ¾È:**
+**í•´ê²° ë°©ì•ˆ:**
 
-#### ¹æ¾È 1: ÀüÃ¼ Á¶È¸ ÈÄ ¸Ş¸ğ¸® ÇÊÅÍ¸µ (¼Ò±Ô¸ğ µ¥ÀÌÅÍ)
+#### ë°©ì•ˆ 1: ì „ì²´ ì¡°íšŒ í›„ ë©”ëª¨ë¦¬ í•„í„°ë§ (ì†Œê·œëª¨ ë°ì´í„°)
 
 ```typescript
 async findByEmail(email: string): Promise<User | null> {
@@ -468,7 +468,7 @@ async findByEmail(email: string): Promise<User | null> {
 }
 ```
 
-#### ¹æ¾È 2: ÇØ½Ã ÀÎµ¦½º ÄÃ·³ Ãß°¡ (´ë±Ô¸ğ µ¥ÀÌÅÍ)
+#### ë°©ì•ˆ 2: í•´ì‹œ ì¸ë±ìŠ¤ ì»¬ëŸ¼ ì¶”ê°€ (ëŒ€ê·œëª¨ ë°ì´í„°)
 
 ```typescript
 @Entity('users')
@@ -480,7 +480,7 @@ export class User {
   })
   email: string;
 
-  // °Ë»ö¿ë ÇØ½Ã ÄÃ·³ Ãß°¡
+  // ê²€ìƒ‰ìš© í•´ì‹œ ì»¬ëŸ¼ ì¶”ê°€
   @Column({ 
     name: 'email_hash',
     type: 'varchar',
@@ -490,13 +490,13 @@ export class User {
   emailHash: string;
 }
 
-// Service¿¡¼­ »ç¿ë
+// Serviceì—ì„œ ì‚¬ìš©
 async createUser(dto: CreateUserDto): Promise<User> {
   const emailHash = crypto.createHash('sha256').update(dto.email).digest('hex');
   
   const user = this.userRepository.create({
     email: dto.email,
-    emailHash: emailHash, // °Ë»ö¿ë ÇØ½Ã
+    emailHash: emailHash, // ê²€ìƒ‰ìš© í•´ì‹œ
   });
 
   return await this.userRepository.save(user);
@@ -510,21 +510,21 @@ async findByEmail(email: string): Promise<User | null> {
 }
 ```
 
-### 2. ¾ÏÈ£È­ Å° °ü¸®
+### 2. ì•”í˜¸í™” í‚¤ ê´€ë¦¬
 
-**Áß¿ä:**
-- ÇÑ ¹ø ¼³Á¤ÇÑ ¾ÏÈ£È­ Å°´Â Àı´ë º¯°æÇÏ¸é ¾È µË´Ï´Ù.
-- Å°¸¦ º¯°æÇÏ¸é ±âÁ¸ ¾ÏÈ£È­µÈ µ¥ÀÌÅÍ¸¦ º¹È£È­ÇÒ ¼ö ¾ø½À´Ï´Ù.
-- °³¹ß/½ºÅ×ÀÌÂ¡/¿î¿µ È¯°æº°·Î ´Ù¸¥ Å°¸¦ »ç¿ëÇÏ¼¼¿ä.
-- Å°´Â ¾ÈÀüÇÑ ½ÃÅ©¸´ °ü¸® ½Ã½ºÅÛ(AWS Secrets Manager, HashiCorp Vault µî)¿¡ ÀúÀåÇÏ¼¼¿ä.
+**ì¤‘ìš”:**
+- í•œ ë²ˆ ì„¤ì •í•œ ì•”í˜¸í™” í‚¤ëŠ” ì ˆëŒ€ ë³€ê²½í•˜ë©´ ì•ˆ ë©ë‹ˆë‹¤.
+- í‚¤ë¥¼ ë³€ê²½í•˜ë©´ ê¸°ì¡´ ì•”í˜¸í™”ëœ ë°ì´í„°ë¥¼ ë³µí˜¸í™”í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.
+- ê°œë°œ/ìŠ¤í…Œì´ì§•/ìš´ì˜ í™˜ê²½ë³„ë¡œ ë‹¤ë¥¸ í‚¤ë¥¼ ì‚¬ìš©í•˜ì„¸ìš”.
+- í‚¤ëŠ” ì•ˆì „í•œ ì‹œí¬ë¦¿ ê´€ë¦¬ ì‹œìŠ¤í…œ(AWS Secrets Manager, HashiCorp Vault ë“±)ì— ì €ì¥í•˜ì„¸ìš”.
 
-**Å° ·ÎÅ×ÀÌ¼ÇÀÌ ÇÊ¿äÇÑ °æ¿ì:**
+**í‚¤ ë¡œí…Œì´ì…˜ì´ í•„ìš”í•œ ê²½ìš°:**
 
 ```typescript
-// 1. »õ·Î¿î ¾ÏÈ£È­ Å° È¯°æº¯¼ö Ãß°¡
+// 1. ìƒˆë¡œìš´ ì•”í˜¸í™” í‚¤ í™˜ê²½ë³€ìˆ˜ ì¶”ê°€
 ENCRYPTION_KEY_NEW=new_encryption_key
 
-// 2. ¸¶ÀÌ±×·¹ÀÌ¼Ç ½ºÅ©¸³Æ® ÀÛ¼º
+// 2. ë§ˆì´ê·¸ë ˆì´ì…˜ ìŠ¤í¬ë¦½íŠ¸ ì‘ì„±
 async function rotateEncryptionKeys() {
   const oldTransformer = createEncryptionTransformer(process.env.ENCRYPTION_KEY);
   const newTransformer = createEncryptionTransformer(process.env.ENCRYPTION_KEY_NEW);
@@ -532,36 +532,36 @@ async function rotateEncryptionKeys() {
   const users = await userRepository.find();
   
   for (const user of users) {
-    // ±âÁ¸ ¾ÏÈ£È­µÈ µ¥ÀÌÅÍ¸¦ ¼öµ¿À¸·Î º¹È£È­
+    // ê¸°ì¡´ ì•”í˜¸í™”ëœ ë°ì´í„°ë¥¼ ìˆ˜ë™ìœ¼ë¡œ ë³µí˜¸í™”
     const rawEmail = oldTransformer.from(user.email);
-    // »õ·Î¿î Å°·Î Àç¾ÏÈ£È­
+    // ìƒˆë¡œìš´ í‚¤ë¡œ ì¬ì•”í˜¸í™”
     user.email = newTransformer.to(rawEmail);
     await userRepository.save(user);
   }
 }
 ```
 
-### 3. ¼º´É °í·Á»çÇ×
+### 3. ì„±ëŠ¥ ê³ ë ¤ì‚¬í•­
 
-- ¾ÏÈ£È­/º¹È£È­ ¿¬»êÀº CPU ÀÚ¿øÀ» ¼Ò¸ğÇÕ´Ï´Ù.
-- ´ë·®ÀÇ µ¥ÀÌÅÍ¸¦ Á¶È¸ÇÒ ¶§´Â ÆäÀÌÁö³×ÀÌ¼ÇÀ» »ç¿ëÇÏ¼¼¿ä.
-- ÇÊ¿äÇÑ °æ¿ì Redis µîÀÇ Ä³½ÌÀ» È°¿ëÇÏ¼¼¿ä.
+- ì•”í˜¸í™”/ë³µí˜¸í™” ì—°ì‚°ì€ CPU ìì›ì„ ì†Œëª¨í•©ë‹ˆë‹¤.
+- ëŒ€ëŸ‰ì˜ ë°ì´í„°ë¥¼ ì¡°íšŒí•  ë•ŒëŠ” í˜ì´ì§€ë„¤ì´ì…˜ì„ ì‚¬ìš©í•˜ì„¸ìš”.
+- í•„ìš”í•œ ê²½ìš° Redis ë“±ì˜ ìºì‹±ì„ í™œìš©í•˜ì„¸ìš”.
 
-### 4. ·Î±ë ½Ã ÁÖÀÇ»çÇ×
+### 4. ë¡œê¹… ì‹œ ì£¼ì˜ì‚¬í•­
 
-**Àı´ë ÇÏÁö ¸»¾Æ¾ß ÇÒ °Í:**
+**ì ˆëŒ€ í•˜ì§€ ë§ì•„ì•¼ í•  ê²ƒ:**
 
 ```typescript
-// ? ³ª»Û ¿¹½Ã - ¹Î°¨Á¤º¸°¡ ·Î±×¿¡ ³ëÃâµÊ
-logger.error(`»ç¿ëÀÚ »ı¼º ½ÇÆĞ: email=${user.email}, username=${user.username}`);
+// ? ë‚˜ìœ ì˜ˆì‹œ - ë¯¼ê°ì •ë³´ê°€ ë¡œê·¸ì— ë…¸ì¶œë¨
+logger.error(`ì‚¬ìš©ì ìƒì„± ì‹¤íŒ¨: email=${user.email}, username=${user.username}`);
 
-// ? ÁÁÀº ¿¹½Ã - ½Äº°ÀÚ¸¸ ·Î±ë
-logger.error(`»ç¿ëÀÚ »ı¼º ½ÇÆĞ: userId=${user.userId}`);
+// ? ì¢‹ì€ ì˜ˆì‹œ - ì‹ë³„ìë§Œ ë¡œê¹…
+logger.error(`ì‚¬ìš©ì ìƒì„± ì‹¤íŒ¨: userId=${user.userId}`);
 ```
 
-### 5. ¸¶ÀÌ±×·¹ÀÌ¼Ç ½Ã ÁÖÀÇ»çÇ×
+### 5. ë§ˆì´ê·¸ë ˆì´ì…˜ ì‹œ ì£¼ì˜ì‚¬í•­
 
-±âÁ¸ µ¥ÀÌÅÍ°¡ ÀÖ´Â °æ¿ì, ¸¶ÀÌ±×·¹ÀÌ¼Ç ½ºÅ©¸³Æ®¸¦ ÀÛ¼ºÇÏ¿© ¾ÏÈ£È­¸¦ Àû¿ëÇØ¾ß ÇÕ´Ï´Ù.
+ê¸°ì¡´ ë°ì´í„°ê°€ ìˆëŠ” ê²½ìš°, ë§ˆì´ê·¸ë ˆì´ì…˜ ìŠ¤í¬ë¦½íŠ¸ë¥¼ ì‘ì„±í•˜ì—¬ ì•”í˜¸í™”ë¥¼ ì ìš©í•´ì•¼ í•©ë‹ˆë‹¤.
 
 ```typescript
 import { MigrationInterface, QueryRunner } from 'typeorm';
@@ -572,14 +572,14 @@ export class EncryptUserData1234567890 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const transformer = createEncryptionTransformer(process.env.ENCRYPTION_KEY);
     
-    // 1. ÄÃ·³ Å¸ÀÔ º¯°æ
+    // 1. ì»¬ëŸ¼ íƒ€ì… ë³€ê²½
     await queryRunner.query(`
       ALTER TABLE users 
       ALTER COLUMN email TYPE text,
       ALTER COLUMN username TYPE text
     `);
 
-    // 2. ±âÁ¸ µ¥ÀÌÅÍ ¾ÏÈ£È­
+    // 2. ê¸°ì¡´ ë°ì´í„° ì•”í˜¸í™”
     const users = await queryRunner.query(`SELECT user_id, email, username FROM users`);
     
     for (const user of users) {
@@ -596,7 +596,7 @@ export class EncryptUserData1234567890 implements MigrationInterface {
   public async down(queryRunner: QueryRunner): Promise<void> {
     const transformer = createEncryptionTransformer(process.env.ENCRYPTION_KEY);
     
-    // 1. µ¥ÀÌÅÍ º¹È£È­
+    // 1. ë°ì´í„° ë³µí˜¸í™”
     const users = await queryRunner.query(`SELECT user_id, email, username FROM users`);
     
     for (const user of users) {
@@ -609,7 +609,7 @@ export class EncryptUserData1234567890 implements MigrationInterface {
       );
     }
 
-    // 2. ÄÃ·³ Å¸ÀÔ ¿øº¹
+    // 2. ì»¬ëŸ¼ íƒ€ì… ì›ë³µ
     await queryRunner.query(`
       ALTER TABLE users 
       ALTER COLUMN email TYPE varchar(255),
@@ -621,24 +621,24 @@ export class EncryptUserData1234567890 implements MigrationInterface {
 
 ---
 
-## º¸¾È Ã¼Å©¸®½ºÆ®
+## ë³´ì•ˆ ì²´í¬ë¦¬ìŠ¤íŠ¸
 
-- [ ] ¾ÏÈ£È­ Å°´Â È¯°æº¯¼ö·Î °ü¸®µÇ°í ÀÖ´Â°¡?
-- [ ] ¾ÏÈ£È­ Å°´Â ÃÖ¼Ò 32ÀÚ ÀÌ»óÀÎ°¡?
-- [ ] °³¹ß/¿î¿µ È¯°æº°·Î ´Ù¸¥ ¾ÏÈ£È­ Å°¸¦ »ç¿ëÇÏ´Â°¡?
-- [ ] ¾ÏÈ£È­ Å°´Â ½ÃÅ©¸´ °ü¸® ½Ã½ºÅÛ¿¡ ¾ÈÀüÇÏ°Ô ÀúÀåµÇ¾î ÀÖ´Â°¡?
-- [ ] ¼Ò½ºÄÚµå¿¡ ¾ÏÈ£È­ Å°°¡ ÇÏµåÄÚµùµÇ¾î ÀÖÁö ¾ÊÀº°¡?
-- [ ] ·Î±×¿¡ ¹Î°¨Á¤º¸°¡ Ãâ·ÂµÇÁö ¾Ê´Â°¡?
-- [ ] Git È÷½ºÅä¸®¿¡ ¾ÏÈ£È­ Å°°¡ Ä¿¹ÔµÇÁö ¾Ê¾Ò´Â°¡?
-- [ ] .env ÆÄÀÏÀÌ .gitignore¿¡ Æ÷ÇÔµÇ¾î ÀÖ´Â°¡?
-- [ ] ¿¡·¯ ¸Ş½ÃÁö¿¡ ¹Î°¨Á¤º¸°¡ Æ÷ÇÔµÇÁö ¾Ê´Â°¡?
-- [ ] ¾ÏÈ£È­µÈ ÇÊµåÀÇ °Ë»ö Á¦¾à»çÇ×À» ÀÌÇØÇÏ°í ÀÖ´Â°¡?
+- [ ] ì•”í˜¸í™” í‚¤ëŠ” í™˜ê²½ë³€ìˆ˜ë¡œ ê´€ë¦¬ë˜ê³  ìˆëŠ”ê°€?
+- [ ] ì•”í˜¸í™” í‚¤ëŠ” ìµœì†Œ 32ì ì´ìƒì¸ê°€?
+- [ ] ê°œë°œ/ìš´ì˜ í™˜ê²½ë³„ë¡œ ë‹¤ë¥¸ ì•”í˜¸í™” í‚¤ë¥¼ ì‚¬ìš©í•˜ëŠ”ê°€?
+- [ ] ì•”í˜¸í™” í‚¤ëŠ” ì‹œí¬ë¦¿ ê´€ë¦¬ ì‹œìŠ¤í…œì— ì•ˆì „í•˜ê²Œ ì €ì¥ë˜ì–´ ìˆëŠ”ê°€?
+- [ ] ì†ŒìŠ¤ì½”ë“œì— ì•”í˜¸í™” í‚¤ê°€ í•˜ë“œì½”ë”©ë˜ì–´ ìˆì§€ ì•Šì€ê°€?
+- [ ] ë¡œê·¸ì— ë¯¼ê°ì •ë³´ê°€ ì¶œë ¥ë˜ì§€ ì•ŠëŠ”ê°€?
+- [ ] Git íˆìŠ¤í† ë¦¬ì— ì•”í˜¸í™” í‚¤ê°€ ì»¤ë°‹ë˜ì§€ ì•Šì•˜ëŠ”ê°€?
+- [ ] .env íŒŒì¼ì´ .gitignoreì— í¬í•¨ë˜ì–´ ìˆëŠ”ê°€?
+- [ ] ì—ëŸ¬ ë©”ì‹œì§€ì— ë¯¼ê°ì •ë³´ê°€ í¬í•¨ë˜ì§€ ì•ŠëŠ”ê°€?
+- [ ] ì•”í˜¸í™”ëœ í•„ë“œì˜ ê²€ìƒ‰ ì œì•½ì‚¬í•­ì„ ì´í•´í•˜ê³  ìˆëŠ”ê°€?
 
 ---
 
-## Å×½ºÆ® °¡ÀÌµå
+## í…ŒìŠ¤íŠ¸ ê°€ì´ë“œ
 
-### ´ÜÀ§ Å×½ºÆ® ¿¹½Ã
+### ë‹¨ìœ„ í…ŒìŠ¤íŠ¸ ì˜ˆì‹œ
 
 ```typescript
 import { EncryptionTransformer } from '@/common/utils/encryption.transformer';
@@ -651,8 +651,8 @@ describe('EncryptionTransformer', () => {
     transformer = new EncryptionTransformer(testKey);
   });
 
-  describe('¾ÏÈ£È­ ¹× º¹È£È­', () => {
-    it('Æò¹®À» ¾ÏÈ£È­ÇÏ°í º¹È£È­ÇÏ¸é ¿øº»°ú °°¾Æ¾ß ÇÑ´Ù', () => {
+  describe('ì•”í˜¸í™” ë° ë³µí˜¸í™”', () => {
+    it('í‰ë¬¸ì„ ì•”í˜¸í™”í•˜ê³  ë³µí˜¸í™”í•˜ë©´ ì›ë³¸ê³¼ ê°™ì•„ì•¼ í•œë‹¤', () => {
       const plaintext = 'test@example.com';
       const encrypted = transformer.to(plaintext);
       const decrypted = transformer.from(encrypted);
@@ -660,7 +660,7 @@ describe('EncryptionTransformer', () => {
       expect(decrypted).toBe(plaintext);
     });
 
-    it('µ¿ÀÏÇÑ Æò¹®À» ¿©·¯ ¹ø ¾ÏÈ£È­ÇÏ¸é ´Ù¸¥ ¾ÏÈ£¹®ÀÌ »ı¼ºµÇ¾î¾ß ÇÑ´Ù', () => {
+    it('ë™ì¼í•œ í‰ë¬¸ì„ ì—¬ëŸ¬ ë²ˆ ì•”í˜¸í™”í•˜ë©´ ë‹¤ë¥¸ ì•”í˜¸ë¬¸ì´ ìƒì„±ë˜ì–´ì•¼ í•œë‹¤', () => {
       const plaintext = 'test@example.com';
       const encrypted1 = transformer.to(plaintext);
       const encrypted2 = transformer.to(plaintext);
@@ -668,25 +668,25 @@ describe('EncryptionTransformer', () => {
       expect(encrypted1).not.toBe(encrypted2);
     });
 
-    it('null °ªÀº null·Î ¹İÈ¯µÇ¾î¾ß ÇÑ´Ù', () => {
+    it('null ê°’ì€ nullë¡œ ë°˜í™˜ë˜ì–´ì•¼ í•œë‹¤', () => {
       expect(transformer.to(null)).toBeNull();
       expect(transformer.from(null)).toBeNull();
     });
 
-    it('ºó ¹®ÀÚ¿­Àº null·Î ¹İÈ¯µÇ¾î¾ß ÇÑ´Ù', () => {
+    it('ë¹ˆ ë¬¸ìì—´ì€ nullë¡œ ë°˜í™˜ë˜ì–´ì•¼ í•œë‹¤', () => {
       expect(transformer.to('')).toBeNull();
       expect(transformer.from('')).toBeNull();
     });
   });
 
-  describe('Å° °ËÁõ', () => {
-    it('32ÀÚ ¹Ì¸¸ÀÇ Å°´Â ¿¡·¯¸¦ ¹ß»ı½ÃÄÑ¾ß ÇÑ´Ù', () => {
+  describe('í‚¤ ê²€ì¦', () => {
+    it('32ì ë¯¸ë§Œì˜ í‚¤ëŠ” ì—ëŸ¬ë¥¼ ë°œìƒì‹œì¼œì•¼ í•œë‹¤', () => {
       expect(() => {
         new EncryptionTransformer('short-key');
       }).toThrow();
     });
 
-    it('ºó Å°´Â ¿¡·¯¸¦ ¹ß»ı½ÃÄÑ¾ß ÇÑ´Ù', () => {
+    it('ë¹ˆ í‚¤ëŠ” ì—ëŸ¬ë¥¼ ë°œìƒì‹œì¼œì•¼ í•œë‹¤', () => {
       expect(() => {
         new EncryptionTransformer('');
       }).toThrow();
@@ -695,7 +695,7 @@ describe('EncryptionTransformer', () => {
 });
 ```
 
-### ÅëÇÕ Å×½ºÆ® ¿¹½Ã
+### í†µí•© í…ŒìŠ¤íŠ¸ ì˜ˆì‹œ
 
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
@@ -703,7 +703,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 
-describe('UserService - ¾ÏÈ£È­ ÅëÇÕ Å×½ºÆ®', () => {
+describe('UserService - ì•”í˜¸í™” í†µí•© í…ŒìŠ¤íŠ¸', () => {
   let service: UserService;
   let module: TestingModule;
 
@@ -732,7 +732,7 @@ describe('UserService - ¾ÏÈ£È­ ÅëÇÕ Å×½ºÆ®', () => {
     await module.close();
   });
 
-  it('»ç¿ëÀÚ »ı¼º ½Ã ÀÌ¸ŞÀÏÀÌ ¾ÏÈ£È­µÇ¾î ÀúÀåµÇ°í Á¶È¸ ½Ã º¹È£È­µÇ¾î¾ß ÇÑ´Ù', async () => {
+  it('ì‚¬ìš©ì ìƒì„± ì‹œ ì´ë©”ì¼ì´ ì•”í˜¸í™”ë˜ì–´ ì €ì¥ë˜ê³  ì¡°íšŒ ì‹œ ë³µí˜¸í™”ë˜ì–´ì•¼ í•œë‹¤', async () => {
     const email = 'test@example.com';
     const username = 'testuser';
 
@@ -755,50 +755,50 @@ describe('UserService - ¾ÏÈ£È­ ÅëÇÕ Å×½ºÆ®', () => {
 
 ---
 
-## ¹®Á¦ ÇØ°á °¡ÀÌµå
+## ë¬¸ì œ í•´ê²° ê°€ì´ë“œ
 
-### 1. "¾ÏÈ£È­ Å°°¡ ¼³Á¤µÇÁö ¾Ê¾Ò½À´Ï´Ù" ¿¡·¯
+### 1. "ì•”í˜¸í™” í‚¤ê°€ ì„¤ì •ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤" ì—ëŸ¬
 
-**¿øÀÎ:** `ENCRYPTION_KEY` È¯°æº¯¼ö°¡ ¼³Á¤µÇÁö ¾ÊÀ½
+**ì›ì¸:** `ENCRYPTION_KEY` í™˜ê²½ë³€ìˆ˜ê°€ ì„¤ì •ë˜ì§€ ì•ŠìŒ
 
-**ÇØ°á:**
+**í•´ê²°:**
 ```bash
-# .env ÆÄÀÏ¿¡ Ãß°¡
+# .env íŒŒì¼ì— ì¶”ê°€
 ENCRYPTION_KEY=your_encryption_key_minimum_32_characters_required
 ```
 
-### 2. "µ¥ÀÌÅÍ º¹È£È­¿¡ ½ÇÆĞÇß½À´Ï´Ù" ¿¡·¯
+### 2. "ë°ì´í„° ë³µí˜¸í™”ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤" ì—ëŸ¬
 
-**¿øÀÎ:**
-- ¾ÏÈ£È­ Å°°¡ º¯°æµÊ
-- µ¥ÀÌÅÍ Çü½ÄÀÌ ¿Ã¹Ù¸£Áö ¾ÊÀ½
-- µ¥ÀÌÅÍº£ÀÌ½ºÀÇ µ¥ÀÌÅÍ°¡ ¼Õ»óµÊ
+**ì›ì¸:**
+- ì•”í˜¸í™” í‚¤ê°€ ë³€ê²½ë¨
+- ë°ì´í„° í˜•ì‹ì´ ì˜¬ë°”ë¥´ì§€ ì•ŠìŒ
+- ë°ì´í„°ë² ì´ìŠ¤ì˜ ë°ì´í„°ê°€ ì†ìƒë¨
 
-**ÇØ°á:**
-1. ¾ÏÈ£È­ Å°°¡ º¯°æµÇÁö ¾Ê¾Ò´ÂÁö È®ÀÎ
-2. µ¥ÀÌÅÍº£ÀÌ½ºÀÇ ¾ÏÈ£È­µÈ µ¥ÀÌÅÍ Çü½Ä È®ÀÎ (`iv:authTag:encryptedData`)
-3. ÇÊ¿äÇÑ °æ¿ì ¹é¾÷¿¡¼­ µ¥ÀÌÅÍ º¹±¸
+**í•´ê²°:**
+1. ì•”í˜¸í™” í‚¤ê°€ ë³€ê²½ë˜ì§€ ì•Šì•˜ëŠ”ì§€ í™•ì¸
+2. ë°ì´í„°ë² ì´ìŠ¤ì˜ ì•”í˜¸í™”ëœ ë°ì´í„° í˜•ì‹ í™•ì¸ (`iv:authTag:encryptedData`)
+3. í•„ìš”í•œ ê²½ìš° ë°±ì—…ì—ì„œ ë°ì´í„° ë³µêµ¬
 
-### 3. ¼º´É ÀúÇÏ
+### 3. ì„±ëŠ¥ ì €í•˜
 
-**¿øÀÎ:** ´ë·®ÀÇ µ¥ÀÌÅÍ Á¶È¸ ½Ã º¹È£È­ ¿¬»ê ºÎÇÏ
+**ì›ì¸:** ëŒ€ëŸ‰ì˜ ë°ì´í„° ì¡°íšŒ ì‹œ ë³µí˜¸í™” ì—°ì‚° ë¶€í•˜
 
-**ÇØ°á:**
-- ÆäÀÌÁö³×ÀÌ¼Ç Àû¿ë
-- Ä³½Ì Àü·« µµÀÔ
-- ÇÊ¿äÇÑ ÇÊµå¸¸ ¼±ÅÃÀûÀ¸·Î Á¶È¸
+**í•´ê²°:**
+- í˜ì´ì§€ë„¤ì´ì…˜ ì ìš©
+- ìºì‹± ì „ëµ ë„ì…
+- í•„ìš”í•œ í•„ë“œë§Œ ì„ íƒì ìœ¼ë¡œ ì¡°íšŒ
 
 ---
 
-## °á·Ğ
+## ê²°ë¡ 
 
-º» °¡ÀÌµå¸¦ µû¶ó ±¸ÇöÇÏ¸é NestJS + TypeORM È¯°æ¿¡¼­ ¾ÈÀüÇÏ°Ô ¹Î°¨Á¤º¸¸¦ ¾ÏÈ£È­ÇÒ ¼ö ÀÖ½À´Ï´Ù. 
+ë³¸ ê°€ì´ë“œë¥¼ ë”°ë¼ êµ¬í˜„í•˜ë©´ NestJS + TypeORM í™˜ê²½ì—ì„œ ì•ˆì „í•˜ê²Œ ë¯¼ê°ì •ë³´ë¥¼ ì•”í˜¸í™”í•  ìˆ˜ ìˆìŠµë‹ˆë‹¤. 
 
-ÇÙ½É ¿øÄ¢:
-1. **ÀÚµ¿È­**: TypeORM ValueTransformer¸¦ »ç¿ëÇÏ¿© Åõ¸íÇÑ ¾ÏÈ£È­/º¹È£È­
-2. **º¸¾È**: AES-256-GCM ¾Ë°í¸®Áò°ú ·£´ı IV·Î °­·ÂÇÑ º¸¾È Á¦°ø
-3. **ÆíÀÇ¼º**: ¼­ºñ½º °èÃş¿¡¼­´Â Æò¹®À¸·Î ÀÛ¾÷ °¡´É
-4. **¾ÈÀü¼º**: Å° °ËÁõ, ¿¡·¯ Ã³¸®, ·Î±ë ½Ã ¹Î°¨Á¤º¸ º¸È£
+í•µì‹¬ ì›ì¹™:
+1. **ìë™í™”**: TypeORM ValueTransformerë¥¼ ì‚¬ìš©í•˜ì—¬ íˆ¬ëª…í•œ ì•”í˜¸í™”/ë³µí˜¸í™”
+2. **ë³´ì•ˆ**: AES-256-GCM ì•Œê³ ë¦¬ì¦˜ê³¼ ëœë¤ IVë¡œ ê°•ë ¥í•œ ë³´ì•ˆ ì œê³µ
+3. **í¸ì˜ì„±**: ì„œë¹„ìŠ¤ ê³„ì¸µì—ì„œëŠ” í‰ë¬¸ìœ¼ë¡œ ì‘ì—… ê°€ëŠ¥
+4. **ì•ˆì „ì„±**: í‚¤ ê²€ì¦, ì—ëŸ¬ ì²˜ë¦¬, ë¡œê¹… ì‹œ ë¯¼ê°ì •ë³´ ë³´í˜¸
 
-¾ÏÈ£È­ Å° °ü¸®¿Í °Ë»ö Á¦¾à»çÇ×À» ÃæºĞÈ÷ ÀÌÇØÇÏ°í, º¸¾È Ã¼Å©¸®½ºÆ®¸¦ ÁØ¼öÇÏ¼¼¿ä.
+ì•”í˜¸í™” í‚¤ ê´€ë¦¬ì™€ ê²€ìƒ‰ ì œì•½ì‚¬í•­ì„ ì¶©ë¶„íˆ ì´í•´í•˜ê³ , ë³´ì•ˆ ì²´í¬ë¦¬ìŠ¤íŠ¸ë¥¼ ì¤€ìˆ˜í•˜ì„¸ìš”.
 
