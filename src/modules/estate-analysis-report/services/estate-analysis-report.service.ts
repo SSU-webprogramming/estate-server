@@ -3,6 +3,7 @@ import { TextGeneratorPort, FileWithMimeType } from '@/modules/estate-analysis-r
 import { ANALYSIS_CACHE_STRATEGY_PORT } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
 import type { AnalysisCacheStrategyPort } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
 import { SYSTEM_PROMPT } from '@/modules/estate-analysis-report/prompts/system.prompt';
+import { DOCUMENT_VALIDATOR_SYSTEM_PROMPT, buildDocumentValidationPrompt } from '@/modules/estate-analysis-report/prompts/document-validator.prompt';
 import { Document } from '@/modules/document/entities/document.entity';
 import { EstateService } from '@/modules/estate/services/estate.service';
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
@@ -19,6 +20,9 @@ import { EstateAnalysisReportRepository } from '@/modules/estate-analysis-report
 import { DocumentRepository } from '@/modules/document/repositories/document.repository';
 import { RedisService } from '@/modules/redis/redis.service';
 import { Duration } from 'js-joda';
+import { DocumentValidationResultDto } from '@/modules/estate-analysis-report/dto/document-validation-result.dto';
+import { CustomException } from '@/common/errors/custom-exception';
+import { ErrorCode } from '@/common/errors/error';
 @Injectable()
 export class EstateAnalysisReportService {
   constructor(
@@ -76,25 +80,35 @@ export class EstateAnalysisReportService {
       throw new Error('분석할 문서를 찾을 수 없습니다.');
     }
 
-    // 4. Document에 Estate 정보 할당 및 저장
+    // 4. 이전에 부동산 문서가 아니라고 판별된 문서가 있는지 체크 (캐시된 판별 결과)
+    const nonRealEstateDocuments = documents.filter(doc => doc.isRealEstateDocument === false);
+    if (nonRealEstateDocuments.length > 0) {
+      const docNames = nonRealEstateDocuments.map(doc => doc.originalName).join(', ');
+      throw new CustomException(
+        ErrorCode.NOT_REAL_ESTATE_DOCUMENT,
+        `부동산 문서가 아니라고 판별된 문서가 포함되어 있습니다. 파일을 다시 올려주세요.`,
+      );
+    }
+
+    // 5. Document에 Estate 정보 할당 및 저장
     for (const document of documents) {
       document.estateId = savedEstateDto.estateId;
     }
     await this.documentRepository.save(documents);
 
-    // 5. OCR 처리 및 텍스트 추출
+    // 6. OCR 처리 및 텍스트 추출
     const { ocrText, documentData } = await this.documentProcessingService.processOcrAndExtractText(documents);
 
-    // 6. OCR 텍스트에서 주소 추출 (실패 시 입력 주소 사용)
+    // 7. OCR 텍스트에서 주소 추출 (실패 시 입력 주소 사용)
     const extractedAddress = this.extractAddressFromOcrText(ocrText) || createEstateAnalysisDto.address;
 
-    // 7. 캐시 조회 여부 결정
+    // 8. 캐시 조회 여부 결정
     let cachedAnalysis: EstateAnalysisReport | null = null;
     const forceReAnalyze = createEstateAnalysisDto.forceReAnalyze ?? false;
 
-    // 8. 강제 재분석이 아니고 주소가 있으면 캐시 조회
+    // 9. 강제 재분석이 아니고 주소가 있으면 캐시 조회 (1차 LLM 건너뛰기 가능)
     if (!forceReAnalyze && extractedAddress) {
-      console.log(`[EstateAnalysisReport] 캐시 검색 시도: ${extractedAddress}`);
+      console.log(`[EstateAnalysisReport] 주소 기반 캐시 검색 시도: ${extractedAddress}`);
       cachedAnalysis = await this.analysisCacheStrategyPort.findCachedAnalysis(
         extractedAddress,
         userId,
@@ -103,14 +117,48 @@ export class EstateAnalysisReportService {
 
     let analysisReport: EstateAnalysisReport;
 
-    // 9. 캐시 히트 여부에 따라 분기 처리
+    // 10. 캐시 히트 여부에 따라 분기 처리
     if (cachedAnalysis) {
-      // 9-1. 캐시된 분석 결과 재사용
-      console.log(`[EstateAnalysisReport] 캐시 히트! 기존 분석 재사용 (원본 ID: ${cachedAnalysis.id})`);
+      // 10-1. 캐시 히트: 1차 LLM(문서 판별) 건너뛰고 기존 분석 재사용
+      console.log(`[EstateAnalysisReport] 주소 기반 캐시 히트! 기존 분석 재사용 (원본 ID: ${cachedAnalysis.id})`);
+      
+      // 문서를 부동산 문서로 표시 (캐시된 분석이 있다는 것은 이미 검증된 것)
+      for (const document of documents) {
+        document.isRealEstateDocument = true;
+        document.documentValidatedAt = new Date();
+      }
+      await this.documentRepository.save(documents);
+      
       analysisReport = await this.copyAnalysisFromCache(savedEstateDto.estateId, cachedAnalysis);
     } else {
-      // 9-2. AI를 통한 새로운 분석 수행
-      console.log(`[EstateAnalysisReport] 캐시 미스. AI 분석 요청`);
+      // 10-2. 캐시 미스: 1차 LLM(문서 판별) 수행 필요
+      console.log(`[EstateAnalysisReport] 캐시 미스. 문서 판별 시작`);
+      
+      // 문서 판별 (1차 검증: OCR 텍스트로 부동산 문서 여부 확인)
+      let isRealEstateDocument = false;
+      try {
+        isRealEstateDocument = await this.validateRealEstateDocument(ocrText);
+        
+        // 부동산 문서로 판별된 경우 결과 저장 (캐싱)
+        for (const document of documents) {
+          document.isRealEstateDocument = true;
+          document.documentValidatedAt = new Date();
+        }
+        await this.documentRepository.save(documents);
+      } catch (error) {
+        // 부동산 문서가 아니거나 판별 불확실한 경우 false로 저장 (캐싱)
+        for (const document of documents) {
+          document.isRealEstateDocument = false;
+          document.documentValidatedAt = new Date();
+        }
+        await this.documentRepository.save(documents);
+        
+        // 예외를 다시 던져서 분석 프로세스 중단
+        throw error;
+      }
+
+      // 10-3. AI를 통한 새로운 분석 수행 (2차 분석: Multimodal LLM)
+      console.log(`[EstateAnalysisReport] 2차 분석 시작 (Multimodal LLM)`);
       analysisReport = await this.performAiAnalysis(
         savedEstateDto.estateId,
         documents,
@@ -119,10 +167,10 @@ export class EstateAnalysisReportService {
       );
     }
 
-    // 10. 사용하지 않는 문서 삭제
+    // 11. 사용하지 않는 문서 삭제
     await this.deleteUnusedDocuments(createEstateAnalysisDto.documentIds);
 
-    // 11. 새로운 분석인 경우 캐시 저장
+    // 12. 새로운 분석인 경우 캐시 저장
     if (!cachedAnalysis && extractedAddress && analysisReport.estateId) {
       await this.analysisCacheStrategyPort.saveCachedAnalysis(
         extractedAddress,
@@ -131,13 +179,70 @@ export class EstateAnalysisReportService {
       );
     }
 
-    // 12. 분석 결과 캐시 무효화
+    // 13. 분석 결과 캐시 무효화
     if (analysisReport.estateId) {
       await this.estateAnalysisReportCacheService.invalidate(analysisReport.estateId);
     }
 
-    // 13. 응답 DTO로 변환 후 반환
+    // 14. 응답 DTO로 변환 후 반환
     return EstateAnalysisReportMapper.toResponseDto(analysisReport);
+  }
+
+  /**
+   * 부동산 문서 여부 판별 (1차 검증)
+   * OCR 텍스트만으로 Text LLM을 사용하여 부동산 문서인지 판단
+   * @param ocrText - OCR로 추출된 텍스트
+   * @returns 부동산 문서 여부 (true: 부동산 문서, false: 아님)
+   * @throws CustomException - 부동산 문서가 아니거나 판별이 불확실한 경우
+   */
+  private async validateRealEstateDocument(ocrText: string): Promise<boolean> {
+    // 1. OCR 텍스트가 너무 짧은 경우 예외 처리
+    if (ocrText.length < 30) {
+      throw new CustomException(ErrorCode.OCR_TEXT_TOO_SHORT);
+    }
+
+    // 2. 문서 판별 프롬프트 생성
+    const userPrompt = buildDocumentValidationPrompt(ocrText);
+
+    // 3. Text LLM으로 문서 판별 요청
+    console.log('[EstateAnalysisReport] 문서 판별 시작 (Text LLM)');
+    const validationResultText = await this.textGeneratorPort.generateText(
+      DOCUMENT_VALIDATOR_SYSTEM_PROMPT,
+      userPrompt,
+    );
+
+    // 4. JSON 파싱
+    const validationResult: DocumentValidationResultDto = ErrorHandler.parseJson(
+      validationResultText,
+      {
+        isRealEstateDocument: false,
+        confidence: 0,
+        documentType: null,
+        reason: '문서 판별 결과를 파싱할 수 없습니다.',
+      },
+    );
+
+    console.log('[EstateAnalysisReport] 문서 판별 결과:', validationResult);
+
+    // 5. 신뢰도가 낮은 경우 (애매한 경우)
+    if (validationResult.confidence < 0.6) {
+      throw new CustomException(
+        ErrorCode.DOCUMENT_VALIDATION_UNCERTAIN,
+        `문서 유형을 명확히 판별할 수 없습니다. (신뢰도: ${validationResult.confidence.toFixed(2)}) 더 선명한 이미지를 업로드하거나, 부동산 관련 문서가 맞는지 확인해주세요.`,
+      );
+    }
+
+    // 6. 부동산 문서가 아닌 경우
+    if (!validationResult.isRealEstateDocument) {      
+      throw new CustomException(ErrorCode.NOT_REAL_ESTATE_DOCUMENT, '업로드하신 문서는 부동산 관련 문서가 아닙니다. 등기부등본, 건축물대장, 전세계약서 등을 업로드해주세요.');
+    }
+
+    // 7. 부동산 문서로 판별된 경우 로깅 및 결과 반환
+    console.log(
+      `[EstateAnalysisReport] 문서 판별 성공: ${validationResult.documentType || '알 수 없음'} (신뢰도: ${validationResult.confidence.toFixed(2)})`,
+    );
+    
+    return true;
   }
 
   /**

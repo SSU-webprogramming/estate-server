@@ -6,6 +6,11 @@ export interface FileWithMimeType {
 }
 
 export abstract class TextGeneratorPort {
+  abstract generateText(
+    systemPrompt: string,
+    userPrompt: string,
+  ): Promise<string>;
+
   abstract generateTextFromImage(
     systemPrompt: string,
     userPrompt: string,

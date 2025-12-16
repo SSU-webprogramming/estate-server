@@ -31,6 +31,9 @@ export enum ErrorCode {
   // Document
   DOCUMENT_PROCESSING_FAILED = 'DOC001',
   DOCUMENT_ANALYSIS_FAILED = 'DOC002',
+  NOT_REAL_ESTATE_DOCUMENT = 'DOC003',
+  OCR_TEXT_TOO_SHORT = 'DOC004',
+  DOCUMENT_VALIDATION_UNCERTAIN = 'DOC005',
 
   // Database
   DATABASE_ERROR = 'D001',
@@ -130,6 +133,18 @@ export const ErrorDictionary: Record<
   [ErrorCode.DOCUMENT_ANALYSIS_FAILED]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,
     message: '문서 분석 중 오류가 발생했습니다.',
+  },
+  [ErrorCode.NOT_REAL_ESTATE_DOCUMENT]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '부동산 관련 문서가 아닙니다. 등기부등본, 건축물대장, 전세계약서 등을 업로드해주세요.',
+  },
+  [ErrorCode.OCR_TEXT_TOO_SHORT]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: 'OCR로 추출한 텍스트가 너무 짧습니다. 더 선명한 이미지를 업로드해주세요.',
+  },
+  [ErrorCode.DOCUMENT_VALIDATION_UNCERTAIN]: {
+    status: HttpStatus.BAD_REQUEST,
+    message: '문서 유형을 명확히 판별할 수 없습니다. 더 선명한 이미지를 업로드하거나, 부동산 관련 문서가 맞는지 확인해주세요.',
   },
   [ErrorCode.DATABASE_ERROR]: {
     status: HttpStatus.INTERNAL_SERVER_ERROR,

@@ -29,6 +29,38 @@ export class ChatGptService implements TextGeneratorPort {
     this.gptModelName = modelName;
   }
 
+  async generateText(
+    systemPrompt: string,
+    userPrompt: string,
+  ): Promise<string> {
+    try {
+      const response = await this.openai.chat.completions.create({
+        model: this.gptModelName,
+        messages: [
+          {
+            role: 'system',
+            content: systemPrompt,
+          },
+          {
+            role: 'user',
+            content: userPrompt,
+          },
+        ],
+        response_format: { type: 'json_object' },
+        max_tokens: 1024,
+      });
+
+      const content = response.choices[0].message.content;
+      if (content === null) {
+        throw new CustomException(ErrorCode.GPT_API_REQUEST_FAILED);
+      }
+      return content;
+    } catch (error) {
+      console.error('Error generating text with ChatGPT:', error);
+      throw new CustomException(ErrorCode.GPT_API_REQUEST_FAILED);
+    }
+  }
+
   async generateTextFromImage(
     systemPrompt: string,
     userPrompt: string,

@@ -32,6 +32,60 @@ export class GeminiService implements TextGeneratorPort {
     this.geminiModelName = modelName;
   }
 
+  async generateText(
+    systemPrompt: string,
+    userPrompt: string,
+  ): Promise<string> {
+    try {
+      const model = this.geminiApi.getGenerativeModel({
+        model: this.geminiModelName,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: SchemaType.OBJECT,
+            properties: {
+              isRealEstateDocument: {
+                type: SchemaType.BOOLEAN,
+                description: '부동산 관련 문서 여부',
+              },
+              confidence: {
+                type: SchemaType.NUMBER,
+                description: '신뢰도 (0.0 ~ 1.0 사이의 값)',
+              },
+              documentType: {
+                type: SchemaType.STRING,
+                description: '문서 유형 (예: "등기부등본", "건축물대장", "전세계약서" 등)',
+                nullable: true,
+              },
+              reason: {
+                type: SchemaType.STRING,
+                description: '판단 근거 (한국어로 간단히 설명)',
+              },
+            },
+            required: ['isRealEstateDocument', 'confidence', 'reason'],
+          },
+        },
+      });
+
+      const result = await model.generateContent({
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: systemPrompt }, { text: userPrompt }],
+          },
+        ],
+      });
+
+      const response = await result.response;
+      return response.text();
+    } catch (error) {
+      console.error('Gemini로 텍스트 생성 중 오류 발생:', error);
+      if (error.message.includes('API key not valid')) {
+        throw new CustomException(ErrorCode.GEMINI_API_KEY_INVALID);
+      }
+      throw new CustomException(ErrorCode.GEMINI_API_REQUEST_FAILED);
+    }
+  }
   
   async generateTextFromImage(
     systemPrompt: string,

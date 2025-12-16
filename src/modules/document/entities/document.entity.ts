@@ -125,6 +125,24 @@ export class Document {
   })
   extractedText: string | null;
 
+  /** 부동산 문서 여부 (null: 미판별, true: 부동산 문서, false: 부동산 문서 아님) */
+  @Column({
+    name: 'is_real_estate_document',
+    type: 'boolean',
+    nullable: true,
+    comment: '부동산 문서 여부 (null: 미판별, true: 부동산 문서, false: 부동산 문서 아님)'
+  })
+  isRealEstateDocument: boolean | null;
+
+  /** 문서 판별 일시 */
+  @Column({
+    name: 'document_validated_at',
+    type: 'timestamp',
+    nullable: true,
+    comment: '문서 판별 일시'
+  })
+  documentValidatedAt: Date | null;
+
   /** 업로드 일시 */
   @CreateDateColumn({ 
     name: 'uploaded_at', 
