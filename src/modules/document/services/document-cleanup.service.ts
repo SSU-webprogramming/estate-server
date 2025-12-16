@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, IsNull } from 'typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Document } from '@/modules/document/entities/document.entity';
+import { DocumentRepository } from '@/modules/document/repositories/document.repository';
 import { S3Port } from '@/common/ports/s3.port';
 import { ErrorHandler } from '@/common/utils/error-handler.util';
 
@@ -11,53 +10,54 @@ export class DocumentCleanupService {
   private readonly logger = new Logger(DocumentCleanupService.name);
 
   constructor(
-    @InjectRepository(Document)
-    private readonly documentRepository: Repository<Document>,
+    private readonly documentRepository: DocumentRepository,
     private readonly s3Port: S3Port,
   ) {}
 
-  /**
-   * 1시간마다 실행되는 배치 작업
-   * estate와 연결되지 않은 문서들을 삭제합니다.
-   */
   @Cron(CronExpression.EVERY_HOUR)
   async cleanupUnlinkedDocuments(): Promise<void> {
-    this.logger.log('Starting cleanup of unlinked documents...');
+    this.logger.log('연결되지 않은 문서 정리 작업 시작');
 
     try {
-      const unlinkedDocuments = await this.documentRepository.find({
-        where: { estateId: IsNull() },
-      });
+      const unlinkedDocuments = await this.findUnlinkedDocuments();
 
       if (unlinkedDocuments.length === 0) {
-        this.logger.log('No unlinked documents found.');
+        this.logger.log('연결되지 않은 문서 없음');
         return;
       }
 
-      this.logger.log(`Found ${unlinkedDocuments.length} unlinked documents to delete.`);
+      await this.deleteS3Files(unlinkedDocuments);
+      await this.deleteDocumentRecords();
 
-      const { successCount, failureCount } = await ErrorHandler.handleBatchOperation(
-        unlinkedDocuments,
-        async (document) => {
-          await this.s3Port.delete(document.s3Key);
-          this.logger.debug(`Deleted S3 file: ${document.s3Key}`);
-        },
-        'S3 파일 삭제',
-        this.logger,
-      );
-
-      this.logger.log(`S3 파일 삭제 결과: 성공 ${successCount}개, 실패 ${failureCount}개`);
-
-      const deleteResult = await this.documentRepository.delete({
-        estateId: IsNull(),
-      });
-
-      this.logger.log(
-        `Cleanup completed. Deleted ${deleteResult.affected || 0} unlinked documents.`,
-      );
+      this.logger.log('문서 정리 작업 완료');
     } catch (error) {
-      this.logger.error('Error during document cleanup:', error);
+      this.logger.error('문서 정리 작업 중 오류 발생:', error);
     }
+  }
+
+  private async findUnlinkedDocuments(): Promise<Document[]> {
+    return this.documentRepository.findUnlinked();
+  }
+
+  private async deleteS3Files(documents: Document[]): Promise<void> {
+    this.logger.log(`${documents.length}개의 연결되지 않은 문서 발견`);
+
+    const { successCount, failureCount } = await ErrorHandler.handleBatchOperation(
+      documents,
+      async (document) => {
+        await this.s3Port.delete(document.s3Key);
+        this.logger.debug(`S3 파일 삭제: ${document.s3Key}`);
+      },
+      'S3 파일 삭제',
+      this.logger,
+    );
+
+    this.logger.log(`S3 파일 삭제 결과: 성공 ${successCount}개, 실패 ${failureCount}개`);
+  }
+
+  private async deleteDocumentRecords(): Promise<void> {
+    const deleteResult = await this.documentRepository.deleteUnlinked();
+    this.logger.log(`DB 레코드 삭제: ${deleteResult.affected || 0}개`);
   }
 }
 

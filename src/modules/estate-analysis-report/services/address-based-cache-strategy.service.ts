@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { AnalysisCacheStrategyPort } from '@/modules/estate-analysis-report/ports/analysis-cache-strategy.port';
 import { EstateAnalysisReport } from '@/modules/estate-analysis-report/entities/estate-analysis-report.entity';
+import { EstateAnalysisReportRepository } from '@/modules/estate-analysis-report/repositories/estate-analysis-report.repository';
 import { RedisService } from '@/modules/redis/redis.service';
 import { normalizeAddress } from '@/common/utils/address.util';
 import { Duration } from 'js-joda';
 
 /**
- * 주소 기반 분석 캐싱 전략 (Strategy Pattern)
+ * 주소 기반 분석 캐싱 전략
  * Redis를 활용한 O(1) 캐시 조회, TTL 90일
  */
 @Injectable()
@@ -18,8 +17,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
 
   constructor(
     private readonly redisService: RedisService,
-    @InjectRepository(EstateAnalysisReport)
-    private readonly analysisReportRepository: Repository<EstateAnalysisReport>,
+    private readonly analysisReportRepository: EstateAnalysisReportRepository,
   ) {}
 
   /**
@@ -41,7 +39,7 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
     const normalized = normalizeAddress(address);
     const cacheKey = this.getCacheKey(address, userId);
     
-    console.log(`[AddressBasedCache-Redis] 🔍 캐시 조회 시작`);
+    console.log(`[AddressBasedCache-Redis] 캐시 조회 시작`);
     console.log(`  - 원본 주소: "${address}"`);
     console.log(`  - 정규화 주소: "${normalized}"`);
     console.log(`  - userId: ${userId}`);
@@ -52,22 +50,20 @@ export class AddressBasedCacheStrategyService implements AnalysisCacheStrategyPo
       const cachedEstateId = await this.redisService.get(cacheKey);
 
       if (!cachedEstateId) {
-        console.log(`[AddressBasedCache-Redis] ❌ 캐시 미스 (Redis에 키 없음)`);
+        console.log(`[AddressBasedCache-Redis] ❌ 캐시 미스`);
         return null;
       }
 
       console.log(`  - Redis에서 조회된 estateId: ${cachedEstateId}`);
 
-      // 목적: estateId로 실제 분석 결과 조회 (DB 쿼리 최소화)
+      // estateId로 실제 분석 결과 조회 (DB 쿼리 최소화)
       const estateId = parseInt(cachedEstateId, 10);
-      const analysis = await this.analysisReportRepository.findOne({
-        where: { estateId },
-      });
+      const analysis = await this.analysisReportRepository.findOneByEstateId(estateId);
 
-      // 목적: 데이터 정합성 보장 (Redis-DB 불일치 방지)
+      // 데이터 정합성 보장 (Redis-DB 불일치 방지)
       if (!analysis) {
         await this.redisService.del(cacheKey);
-        console.log(`[AddressBasedCache-Redis] ❌ 캐시 불일치, 무효화 (DB에 없음)`);
+        console.log(`[AddressBasedCache-Redis] ❌ 캐시 불일치, 무효화`);
         return null;
       }
 

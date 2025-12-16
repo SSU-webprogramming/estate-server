@@ -29,6 +29,12 @@ export class EstateAnalysisReportRepository {
     });
   }
 
+  async findOneByEstateId(estateId: number): Promise<EstateAnalysisReport | null> {
+    return this.repository.findOne({
+      where: { estateId },
+    });
+  }
+
   async createQueryBuilder(alias: string) {
     return this.repository.createQueryBuilder(alias);
   }

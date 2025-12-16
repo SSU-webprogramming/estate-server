@@ -53,5 +53,12 @@ export class DocumentRepository {
       docId: In(docIds),
     });
   }
+
+  async deleteUnlinked(): Promise<{ affected?: number | null }> {
+    const result = await this.repository.delete({
+      estateId: IsNull(),
+    });
+    return { affected: result.affected };
+  }
 }
 

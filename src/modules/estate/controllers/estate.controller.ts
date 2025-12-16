@@ -3,7 +3,6 @@ import {
   Post,
   Body,
   UseGuards,
-  Req,
   HttpCode,
   HttpStatus,
   Get,
@@ -17,8 +16,6 @@ import { CreateEstateDto } from '@/modules/estate/dto/request/create-estate.dto'
 import { EstateResponseDto } from '@/modules/estate/dto/response/estate-response.dto';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
-import { Roles } from '@/modules/auth/decorators/roles.decorator';
-import { UserRole } from '@/common/enums/user-role.enum';
 import { GetEstateListDto } from '@/modules/estate/dto/request/get-estate-list.dto';
 import { PaginationResponseDto } from '@/common/dto/pagination-response.dto';
 import {
@@ -40,15 +37,12 @@ export class EstateController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.CREATED)
+  @ApiCreateEstate()
   async create(
     @GetUser() user: User,
     @Body() createEstateDto: CreateEstateDto,
   ): Promise<EstateResponseDto> {
-    const estateResponse = await this.estateService.create(
-      user.userId,
-      createEstateDto,
-    );
-    return estateResponse;
+    return this.estateService.create(user.userId, createEstateDto);
   }
 
   @Get()

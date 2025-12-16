@@ -64,16 +64,18 @@ export class EstateRepository {
     });
   }
 
-  async findByNormalizedAddress(
-    address: string,
-    userId?: number,
-  ): Promise<Estate[]> {
+  async findByNormalizedAddress(address: string, userId?: number): Promise<Estate[]> {
     const normalized = normalizeAddress(address);
     
     if (!normalized) {
       return [];
     }
 
+    const estates = await this.fetchEstatesWithAnalysis(userId);
+    return this.filterByNormalizedAddress(estates, normalized);
+  }
+
+  private async fetchEstatesWithAnalysis(userId?: number): Promise<Estate[]> {
     const qb = this.repository
       .createQueryBuilder('estate')
       .leftJoinAndSelect('estate.analysisResult', 'analysisResult')
@@ -84,11 +86,13 @@ export class EstateRepository {
       qb.andWhere('estate.userId = :userId', { userId });
     }
 
-    const estates = await qb.getMany();
+    return qb.getMany();
+  }
 
+  private filterByNormalizedAddress(estates: Estate[], normalizedAddress: string): Estate[] {
     return estates.filter((estate) => {
       const estateNormalized = normalizeAddress(estate.address);
-      return estateNormalized === normalized;
+      return estateNormalized === normalizedAddress;
     });
   }
 

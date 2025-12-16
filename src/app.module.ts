@@ -82,8 +82,7 @@ import { CacheModule } from '@/common/cache/cache.module';
   ],
 })
 export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    // health api 제외 모든 요청 로깅
+  configure(consumer: MiddlewareConsumer): void {
     consumer
       .apply(LoggerMiddleware)
       .exclude({ path: '/health', method: RequestMethod.GET })

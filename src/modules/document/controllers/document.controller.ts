@@ -51,12 +51,11 @@ export class DocumentController {
     @Query() uploadDocumentDto: UploadDocumentDto,
     @GetUser() user: User,
   ): Promise<DocumentResponseDto> {
-    const document = await this.documentService.uploadAndCreateDocument(
+    return this.documentService.uploadAndCreateDocument(
       file,
       uploadDocumentDto.documentType,
       user.userId,
     );
-    return document;
   }
 
   @Get('documents')
@@ -74,7 +73,6 @@ export class DocumentController {
   async getDocument(
     @Param('documentId', ParseIntPipe) documentId: number,
   ): Promise<DocumentInfoResponseDto> {
-    const response = await this.documentService.getDocument(documentId);
-    return response;
+    return this.documentService.getDocument(documentId);
   }
 }

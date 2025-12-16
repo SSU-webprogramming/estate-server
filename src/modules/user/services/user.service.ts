@@ -31,13 +31,9 @@ export class UserService {
     getUserListDto: GetUserListDto,
   ): Promise<PaginationResponseDto<UserResponseDto>> {
     const [users, total] = await this.userRepository.findAllWithPagination(getUserListDto);
-
+    
     const userDtos = UserMapper.toResponseDtoList(users);
-    const meta = new PaginationMetaDto(
-      getUserListDto.page,
-      getUserListDto.limit,
-      total,
-    );
+    const meta = new PaginationMetaDto(getUserListDto.page, getUserListDto.limit, total);
 
     return new PaginationResponseDto(userDtos, meta);
   }
@@ -62,21 +58,25 @@ export class UserService {
   }
 
   async update(userId: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
-    const user = await this.userRepository.findOne(userId);
-    if (!user) {
-      throw new CustomException(ErrorCode.USER_NOT_FOUND);
-    }
+    const user = await this.findUserOrThrow(userId);
+    
     Object.assign(user, updateUserDto);
     const savedUser = await this.userRepository.save(user);
+    
     return UserMapper.toResponseDto(savedUser);
   }
 
   async remove(userId: number): Promise<void> {
+    await this.findUserOrThrow(userId);
+    await this.userRepository.remove(userId);
+  }
+
+  private async findUserOrThrow(userId: number): Promise<any> {
     const user = await this.userRepository.findOne(userId);
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
-    await this.userRepository.remove(userId);
+    return user;
   }
 
   async deleteUsers(userIds: number[]): Promise<void> {
@@ -85,6 +85,18 @@ export class UserService {
 
 
   async agreeTerms(dto: AgreeTermsRequestDto, userId: number): Promise<Record<string, boolean>> {
+    const user = await this.findUserForTermsAgreement(userId);
+    
+    this.termsValidator.validateNotAlreadyAgreed(user.agreedTerms);
+    await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
+
+    user.agreedTerms = dto.agreedTerms;
+    const savedUser = await this.saveUserTermsAgreement(user);
+    
+    return savedUser.agreedTerms || {};
+  }
+
+  private async findUserForTermsAgreement(userId: number): Promise<any> {
     const user = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.findOneBy({ userId }),
       '사용자 조회',
@@ -94,15 +106,13 @@ export class UserService {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
 
-    this.termsValidator.validateNotAlreadyAgreed(user.agreedTerms);
-    await this.termsValidator.validateRequiredTerms(dto.agreedTerms);
+    return user;
+  }
 
-    user.agreedTerms = dto.agreedTerms;
-    const savedUser = await ErrorHandler.handleDatabaseOperation(
+  private async saveUserTermsAgreement(user: any): Promise<any> {
+    return ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.save(user),
       '사용자 약관 동의 저장',
     );
-    
-    return savedUser.agreedTerms || {};
   }
 }

@@ -13,11 +13,19 @@ export class TermMapper {
   }
 
   static fromUpdateDto(dto: UpdateTermDto): Partial<Term> {
-    return {
-      ...(dto.title && { title: dto.title }),
-      ...(dto.content && { content: dto.content }),
-      ...(dto.isRequired !== undefined && { isRequired: dto.isRequired }),
-    };
+    const updateData: Partial<Term> = {};
+    
+    if (dto.title) {
+      updateData.title = dto.title;
+    }
+    if (dto.content) {
+      updateData.content = dto.content;
+    }
+    if (dto.isRequired !== undefined) {
+      updateData.isRequired = dto.isRequired;
+    }
+    
+    return updateData;
   }
 
   static toResponseDto(term: Term): TermResponseDto {

@@ -38,180 +38,204 @@ export class EstateAnalysisReportService {
     private readonly analysisCacheStrategyPort: AnalysisCacheStrategyPort
   ) {}
 
-  /**
-   * 단일 부동산 문서 이미지를 AI로 분석
-   * @param fileBuffer - 분석할 문서의 버퍼
-   * @param mimeType - 문서의 MIME 타입
-   * @returns AI 분석 결과 텍스트
-   */
   async analyzeEsate(fileBuffer: Buffer, mimeType: string): Promise<string> {
-    // 1. 사용자 프롬프트 생성
-    const userPrompt = `다음 문서를 분석하세요.`;
-
-    // 2. AI 텍스트 생성 포트를 통해 이미지 분석 요청
-    return await this.textGeneratorPort.generateTextFromImage(
-      SYSTEM_PROMPT,
-      userPrompt,
-      fileBuffer,
-      mimeType,
-    );
+    const userPrompt = '다음 문서를 분석하세요.';
+    return this.textGeneratorPort.generateTextFromImage(SYSTEM_PROMPT, userPrompt, fileBuffer, mimeType);
   }
 
   /**
-   * 문서들과 함께 부동산 분석 수행 (핵심 비즈니스 로직)
-   * 캐시 전략을 활용하여 중복 AI 분석을 최소화
-   * @param userId - 사용자 ID
-   * @param createEstateAnalysisDto - 부동산 분석 요청 DTO
-   * @returns 부동산 분석 결과 응답 DTO
+   * 문서 기반 부동산 분석 수행
+   * 캐시 전략을 활용하여 중복 AI 분석 최소화
    */
   async analyzeEstateWithDocuments(
     userId: number,
     createEstateAnalysisDto: CreateEstateAnalysisDto,
   ): Promise<EstateAnalysisReportResponseDto> {
-    // 1. Estate DTO 생성 및 매핑 (Mapper 사용)
-    const createEstateDto = EstateAnalysisReportMapper.toCreateEstateDto(createEstateAnalysisDto);
+    // Estate 레코드 생성
+    const savedEstateDto = await this.createEstateRecord(userId, createEstateAnalysisDto);
+    
+    // 문서 검증 및 Estate 연결
+    const documents = await this.validateAndAttachDocuments(createEstateAnalysisDto.documentIds, savedEstateDto.estateId);
+    
+    // OCR 처리 및 주소 추출
+    const { ocrText, documentData } = await this.documentProcessingService.processOcrAndExtractText(documents);
+    const extractedAddress = this.extractAddressFromOcrText(ocrText) || createEstateAnalysisDto.address;
 
-    // 2. Estate 생성 및 저장 (DTO 반환으로 계층 분리 원칙 준수)
-    const savedEstateDto = await this.estateService.createEstateForAnalysis(userId, createEstateDto);
+    if (!extractedAddress) {
+      throw new CustomException(ErrorCode.DOCUMENT_ANALYSIS_FAILED);
+    }
 
-    // 3. Document 조회 및 유효성 검증
-    const documents = await this.documentRepository.findByIds(createEstateAnalysisDto.documentIds);
+    // 캐시 활용 분석 수행
+    const analysisReport = await this.performAnalysisWithCaching(
+      createEstateAnalysisDto,
+      savedEstateDto.estateId,
+      extractedAddress,
+      documents,
+      ocrText,
+      documentData,
+      userId,
+    );
+
+    // 후처리 (미사용 문서 삭제, 캐시 저장)
+    await this.finalizeAnalysis(createEstateAnalysisDto.documentIds, extractedAddress, analysisReport, userId);
+
+    return EstateAnalysisReportMapper.toResponseDto(analysisReport);
+  }
+
+  private async createEstateRecord(userId: number, dto: CreateEstateAnalysisDto): Promise<any> {
+    const createEstateDto = EstateAnalysisReportMapper.toCreateEstateDto(dto);
+    return this.estateService.createEstateForAnalysis(userId, createEstateDto);
+  }
+
+  private async validateAndAttachDocuments(documentIds: number[], estateId: number): Promise<Document[]> {
+    // 문서 조회
+    const documents = await this.documentRepository.findByIds(documentIds);
+    
     if (!documents || documents.length === 0) {
       throw new Error('분석할 문서를 찾을 수 없습니다.');
     }
 
-    // 4. 이전에 부동산 문서가 아니라고 판별된 문서가 있는지 체크 (캐시된 판별 결과)
+    // 부동산 문서 여부 검증
+    this.validateDocumentsAreRealEstate(documents);
+    
+    // Estate에 문서 연결
+    await this.attachDocumentsToEstate(documents, estateId);
+
+    return documents;
+  }
+
+  private validateDocumentsAreRealEstate(documents: Document[]): void {
     const nonRealEstateDocuments = documents.filter(doc => doc.isRealEstateDocument === false);
+    
     if (nonRealEstateDocuments.length > 0) {
-      const docNames = nonRealEstateDocuments.map(doc => doc.originalName).join(', ');
       throw new CustomException(
         ErrorCode.NOT_REAL_ESTATE_DOCUMENT,
-        `부동산 문서가 아니라고 판별된 문서가 포함되어 있습니다. 파일을 다시 올려주세요.`,
+        '부동산 문서가 아니라고 판별된 문서가 포함되어 있습니다. 파일을 다시 올려주세요.',
       );
     }
+  }
 
-    // 5. Document에 Estate 정보 할당 및 저장
+  private async attachDocumentsToEstate(documents: Document[], estateId: number): Promise<void> {
     for (const document of documents) {
-      document.estateId = savedEstateDto.estateId;
+      document.estateId = estateId;
     }
     await this.documentRepository.save(documents);
+  }
 
-    // 6. OCR 처리 및 텍스트 추출
-    const { ocrText, documentData } = await this.documentProcessingService.processOcrAndExtractText(documents);
-
-    // 7. OCR 텍스트에서 주소 추출 (실패 시 입력 주소 사용)
-    const extractedAddress = this.extractAddressFromOcrText(ocrText) || createEstateAnalysisDto.address;
-
-    // 8. 캐시 조회 여부 결정
-    let cachedAnalysis: EstateAnalysisReport | null = null;
-    const forceReAnalyze = createEstateAnalysisDto.forceReAnalyze ?? false;
-
-    // 9. 강제 재분석이 아니고 주소가 있으면 캐시 조회 (1차 LLM 건너뛰기 가능)
+  private async performAnalysisWithCaching(
+    dto: CreateEstateAnalysisDto,
+    estateId: number,
+    extractedAddress: string | null,
+    documents: Document[],
+    ocrText: string,
+    documentData: Array<{ base64: string; buffer: Buffer; mimeType: string; name: string }>,
+    userId: number,
+  ): Promise<EstateAnalysisReport> {
+    const forceReAnalyze = dto.forceReAnalyze ?? false;
+    
+    // 캐시 조회 시도
     if (!forceReAnalyze && extractedAddress) {
-      console.log(`[EstateAnalysisReport] 주소 기반 캐시 검색 시도: ${extractedAddress}`);
-      cachedAnalysis = await this.analysisCacheStrategyPort.findCachedAnalysis(
-        extractedAddress,
-        userId,
-      );
-    }
-
-    let analysisReport: EstateAnalysisReport;
-
-    // 10. 캐시 히트 여부에 따라 분기 처리
-    if (cachedAnalysis) {
-      // 10-1. 캐시 히트: 1차 LLM(문서 판별) 건너뛰고 기존 분석 재사용
-      console.log(`[EstateAnalysisReport] 주소 기반 캐시 히트! 기존 분석 재사용 (원본 ID: ${cachedAnalysis.id})`);
+      const cachedAnalysis = await this.tryGetCachedAnalysis(extractedAddress, userId);
       
-      // 문서를 부동산 문서로 표시 (캐시된 분석이 있다는 것은 이미 검증된 것)
-      for (const document of documents) {
-        document.isRealEstateDocument = true;
-        document.documentValidatedAt = new Date();
+      // 캐시 히트: 기존 분석 재사용
+      if (cachedAnalysis) {
+        await this.markDocumentsAsVerified(documents);
+        return this.copyAnalysisFromCache(estateId, cachedAnalysis);
       }
-      await this.documentRepository.save(documents);
-      
-      analysisReport = await this.copyAnalysisFromCache(savedEstateDto.estateId, cachedAnalysis);
-    } else {
-      // 10-2. 캐시 미스: 1차 LLM(문서 판별) 수행 필요
-      console.log(`[EstateAnalysisReport] 캐시 미스. 문서 판별 시작`);
-      
-      // 문서 판별 (1차 검증: OCR 텍스트로 부동산 문서 여부 확인)
-      let isRealEstateDocument = false;
-      try {
-        isRealEstateDocument = await this.validateRealEstateDocument(ocrText);
-        
-        // 부동산 문서로 판별된 경우 결과 저장 (캐싱)
-        for (const document of documents) {
-          document.isRealEstateDocument = true;
-          document.documentValidatedAt = new Date();
-        }
-        await this.documentRepository.save(documents);
-      } catch (error) {
-        // 부동산 문서가 아니거나 판별 불확실한 경우 false로 저장 (캐싱)
-        for (const document of documents) {
-          document.isRealEstateDocument = false;
-          document.documentValidatedAt = new Date();
-        }
-        await this.documentRepository.save(documents);
-        
-        // 예외를 다시 던져서 분석 프로세스 중단
-        throw error;
-      }
-
-      // 10-3. AI를 통한 새로운 분석 수행 (2차 분석: Multimodal LLM)
-      console.log(`[EstateAnalysisReport] 2차 분석 시작 (Multimodal LLM)`);
-      analysisReport = await this.performAiAnalysis(
-        savedEstateDto.estateId,
-        documents,
-        ocrText,
-        documentData,
-      );
     }
 
-    // 11. 사용하지 않는 문서 삭제
-    await this.deleteUnusedDocuments(createEstateAnalysisDto.documentIds);
+    // 캐시 미스: 새로운 분석 수행
+    return this.performNewAnalysis(estateId, documents, ocrText, documentData);
+  }
 
-    // 12. 새로운 분석인 경우 캐시 저장
-    if (!cachedAnalysis && extractedAddress && analysisReport.estateId) {
-      await this.analysisCacheStrategyPort.saveCachedAnalysis(
-        extractedAddress,
-        userId,
-        analysisReport.estateId,
-      );
+  private async tryGetCachedAnalysis(address: string, userId: number): Promise<EstateAnalysisReport | null> {
+    console.log(`[EstateAnalysisReport] 주소 기반 캐시 검색: ${address}`);
+    const cached = await this.analysisCacheStrategyPort.findCachedAnalysis(address, userId);
+    
+    if (cached) {
+      console.log(`[EstateAnalysisReport] 캐시 히트 (원본 ID: ${cached.id})`);
+    }
+    
+    return cached;
+  }
+
+  private async markDocumentsAsVerified(documents: Document[]): Promise<void> {
+    for (const document of documents) {
+      document.isRealEstateDocument = true;
+      document.documentValidatedAt = new Date();
+    }
+    await this.documentRepository.save(documents);
+  }
+
+  private async performNewAnalysis(
+    estateId: number,
+    documents: Document[],
+    ocrText: string,
+    documentData: Array<{ base64: string; buffer: Buffer; mimeType: string; name: string }>,
+  ): Promise<EstateAnalysisReport> {
+    // 1차 검증: 부동산 관련 파일 여부 판별 (Text LLM)
+    console.log('[EstateAnalysisReport] 캐시 미스. 문서 판별 시작');
+    await this.validateAndMarkDocuments(documents, ocrText);
+    
+    // 2차 분석: 부동산 분석 (Multimodal LLM)
+    console.log('[EstateAnalysisReport] 2차 분석 시작 (Multimodal LLM)');
+    return this.performAiAnalysis(estateId, documents, ocrText, documentData);
+  }
+
+  private async validateAndMarkDocuments(documents: Document[], ocrText: string): Promise<void> {
+    try {
+      await this.validateRealEstateDocument(ocrText);
+      await this.markDocumentsAsVerified(documents);
+    } catch (error) {
+      await this.markDocumentsAsInvalid(documents);
+      throw error;
+    }
+  }
+
+  private async markDocumentsAsInvalid(documents: Document[]): Promise<void> {
+    for (const document of documents) {
+      document.isRealEstateDocument = false;
+      document.documentValidatedAt = new Date();
+    }
+    await this.documentRepository.save(documents);
+  }
+
+  private async finalizeAnalysis(
+    documentIds: number[],
+    extractedAddress: string | null,
+    analysisReport: EstateAnalysisReport,
+    userId: number,
+  ): Promise<void> {
+    await this.deleteUnusedDocuments(documentIds);
+
+    if (extractedAddress && analysisReport.estateId) {
+      await this.analysisCacheStrategyPort.saveCachedAnalysis(extractedAddress, userId, analysisReport.estateId);
     }
 
-    // 13. 분석 결과 캐시 무효화
     if (analysisReport.estateId) {
       await this.estateAnalysisReportCacheService.invalidate(analysisReport.estateId);
     }
-
-    // 14. 응답 DTO로 변환 후 반환
-    return EstateAnalysisReportMapper.toResponseDto(analysisReport);
   }
 
   /**
-   * 부동산 문서 여부 판별 (1차 검증)
-   * OCR 텍스트만으로 Text LLM을 사용하여 부동산 문서인지 판단
-   * @param ocrText - OCR로 추출된 텍스트
-   * @returns 부동산 문서 여부 (true: 부동산 문서, false: 아님)
-   * @throws CustomException - 부동산 문서가 아니거나 판별이 불확실한 경우
+   * 부동산 문서 여부 판별 (Text LLM)
    */
   private async validateRealEstateDocument(ocrText: string): Promise<boolean> {
-    // 1. OCR 텍스트가 너무 짧은 경우 예외 처리
+    // OCR 텍스트 길이 검증
     if (ocrText.length < 30) {
       throw new CustomException(ErrorCode.OCR_TEXT_TOO_SHORT);
     }
 
-    // 2. 문서 판별 프롬프트 생성
+    // LLM 문서 판별 요청
     const userPrompt = buildDocumentValidationPrompt(ocrText);
-
-    // 3. Text LLM으로 문서 판별 요청
     console.log('[EstateAnalysisReport] 문서 판별 시작 (Text LLM)');
+    
     const validationResultText = await this.textGeneratorPort.generateText(
       DOCUMENT_VALIDATOR_SYSTEM_PROMPT,
       userPrompt,
     );
 
-    // 4. JSON 파싱
+    // 결과 파싱
     const validationResult: DocumentValidationResultDto = ErrorHandler.parseJson(
       validationResultText,
       {
@@ -224,7 +248,7 @@ export class EstateAnalysisReportService {
 
     console.log('[EstateAnalysisReport] 문서 판별 결과:', validationResult);
 
-    // 5. 신뢰도가 낮은 경우 (애매한 경우)
+    // 신뢰도 검증
     if (validationResult.confidence < 0.6) {
       throw new CustomException(
         ErrorCode.DOCUMENT_VALIDATION_UNCERTAIN,
@@ -232,12 +256,11 @@ export class EstateAnalysisReportService {
       );
     }
 
-    // 6. 부동산 문서가 아닌 경우
+    // 부동산 문서 여부 확인
     if (!validationResult.isRealEstateDocument) {      
       throw new CustomException(ErrorCode.NOT_REAL_ESTATE_DOCUMENT, '업로드하신 문서는 부동산 관련 문서가 아닙니다. 등기부등본, 건축물대장, 전세계약서 등을 업로드해주세요.');
     }
 
-    // 7. 부동산 문서로 판별된 경우 로깅 및 결과 반환
     console.log(
       `[EstateAnalysisReport] 문서 판별 성공: ${validationResult.documentType || '알 수 없음'} (신뢰도: ${validationResult.confidence.toFixed(2)})`,
     );
@@ -246,69 +269,49 @@ export class EstateAnalysisReportService {
   }
 
   /**
-   * OCR 텍스트에서 주소 정보 추출
-   * 여러 패턴을 시도하여 주소를 찾음
-   * @param ocrText - OCR로 추출된 텍스트
-   * @returns 추출된 주소 또는 null
+   * OCR 텍스트에서 주소 추출
    */
   private extractAddressFromOcrText(ocrText: string): string | null {
-    // 1. OCR 텍스트가 없으면 null 반환
     if (!ocrText) {
       return null;
     }
 
-    // 2. 주소 추출을 위한 정규식 패턴 정의
+    // 정규식 패턴 정의
     const addressPatterns = [
-      /([가-힣]+[시도]\s+[가-힣]+[시군구]\s+[가-힣\s\d-]+)/g, // 시도 + 시군구 패턴
-      /소재지[:\s]*([가-힣\s\d-]+)/g,                           // 소재지 키워드 패턴
-      /주소[:\s]*([가-힣\s\d-]+)/g,                             // 주소 키워드 패턴
+      /([가-힣]+[시도]\s+[가-힣]+[시군구]\s+[가-힣\s\d-]+)/g,
+      /소재지[:\s]*([가-힣\s\d-]+)/g,
+      /주소[:\s]*([가-힣\s\d-]+)/g,
     ];
 
-    // 3. 각 패턴을 순차적으로 시도
+    // 패턴 매칭 시도
     for (const pattern of addressPatterns) {
       const matches = ocrText.match(pattern);
       if (matches && matches.length > 0) {
-        // 4. 매칭 성공 시 불필요한 키워드 제거 후 반환
         return matches[0].replace(/소재지[:\s]*|주소[:\s]*/, '').trim();
       }
     }
 
-    // 5. 모든 패턴 실패 시 null 반환
     return null;
   }
 
   /**
-   * 캐시된 분석 결과를 새로운 Estate에 복사
-   * 기존 분석 결과를 재사용하여 AI 호출 비용 절감
-   * @param estateId - 새로 생성된 Estate ID (Entity가 아닌 ID만 사용하여 계층 분리)
-   * @param cachedAnalysis - 캐시된 분석 리포트
-   * @returns 새로 생성된 분석 리포트
+   * 캐시된 분석 결과 복사 (AI 호출 비용 절감)
    */
   private async copyAnalysisFromCache(
     estateId: number,
     cachedAnalysis: EstateAnalysisReport,
   ): Promise<EstateAnalysisReport> {
-    // 1. 캐시된 분석 결과를 DTO로 변환
+    // DTO 변환
     const cachedData = EstateAnalysisReportMapper.toCachedAnalysisDto(cachedAnalysis);
-    
-    // 2. DTO와 Estate ID를 사용하여 분석 리포트 데이터로 변환
     const analysisReportData = EstateAnalysisReportMapper.fromCachedAnalysis(estateId, cachedData);
     
-    // 3. 엔티티 생성
+    // 엔티티 생성 및 저장
     const analysisReport = this.estateAnalysisReportRepository.create(analysisReportData);
-
-    // 4. 데이터베이스에 저장 후 반환
-    return await this.estateAnalysisReportRepository.save(analysisReport);
+    return this.estateAnalysisReportRepository.save(analysisReport);
   }
 
   /**
-   * AI를 사용하여 실제 부동산 문서 분석 수행
-   * 여러 이미지를 함께 분석하여 종합적인 리포트 생성
-   * @param estateId - Estate ID (Entity가 아닌 ID만 사용하여 계층 분리)
-   * @param documents - 분석할 문서 목록
-   * @param ocrText - OCR로 추출된 텍스트
-   * @param documentData - 문서 데이터 배열 (버퍼, MIME 타입 등)
-   * @returns 생성된 분석 리포트
+   * AI 기반 부동산 문서 분석 (Multimodal LLM)
    */
   private async performAiAnalysis(
     estateId: number,
@@ -316,61 +319,49 @@ export class EstateAnalysisReportService {
     ocrText: string,
     documentData: Array<{ base64: string; buffer: Buffer; mimeType: string; name: string }>,
   ): Promise<EstateAnalysisReport> {
-    // 1. AI 분석을 위한 파일 버퍼 배열 생성
+    // 파일 버퍼 준비
     const fileBuffers: FileWithMimeType[] = documentData.map((data) => ({
       buffer: data.buffer,
       mimeType: data.mimeType,
     }));
 
-    // 2. 문서와 OCR 텍스트를 기반으로 분석 프롬프트 생성
+    // 프롬프트 생성 및 AI 분석 요청
     const userPrompt = this.documentProcessingService.buildAnalysisPrompt(documents, ocrText);
-
-    // 3. AI 텍스트 생성 포트를 통해 다중 이미지 분석 요청
     const analysisResult = await this.textGeneratorPort.generateTextFromImages(
       SYSTEM_PROMPT,
       userPrompt,
       fileBuffers,
     );
 
-    // 4. AI 응답 JSON 파싱 (에러 처리 포함)
+    // JSON 파싱 및 DTO 변환
     const parsedAnalysis: any = ErrorHandler.parseJson(analysisResult, {});
-
-    // 5. 파싱된 결과를 AI 분석 결과 DTO로 변환 (estateId 전달)
     const aiResult = EstateAnalysisReportMapper.toAiAnalysisResultDto(parsedAnalysis, estateId, analysisResult);
-
-    // 6. AI 결과 DTO와 Estate ID를 사용하여 분석 리포트 엔티티 데이터로 변환
     const analysisReportData = EstateAnalysisReportMapper.fromAiAnalysisResult(estateId, aiResult);
     
-    // 7. 엔티티 생성
+    // 엔티티 생성 및 저장
     const analysisReport = this.estateAnalysisReportRepository.create(analysisReportData);
 
-    // 8. 분석 결과 로깅
     console.log('[EstateAnalysisReport] AI 분석 완료:', {
       estateId: analysisReport.estateId,
       safetyScore: analysisReport.safetyScore,
     });
 
-    // 9. 데이터베이스에 저장 후 반환
-    return await this.estateAnalysisReportRepository.save(analysisReport);
+    return this.estateAnalysisReportRepository.save(analysisReport);
   }
 
 
   /**
-   * 연결되지 않은 문서 삭제 (S3 및 DB)
-   * Estate에 연결되지 않은 임시 문서들을 정리
-   * @param usedDocumentIds - 현재 사용 중인 문서 ID 목록
+   * 미사용 문서 삭제 (S3 및 DB)
    */
   private async deleteUnusedDocuments(usedDocumentIds: number[]): Promise<void> {
     try {
-      // 1. Estate와 연결되지 않은 문서 조회
+      // 연결되지 않은 문서 조회 및 필터링
       const unlinkedDocuments = await this.documentRepository.findUnlinked();
-
-      // 2. 현재 사용 중인 문서를 제외하고 삭제 대상 필터링
       const documentsToDelete = unlinkedDocuments.filter(
         (doc) => !usedDocumentIds.includes(doc.docId),
       );
 
-      // 3. S3에서 파일 일괄 삭제 (배치 에러 처리 포함)
+      // S3 파일 삭제
       await ErrorHandler.handleBatchOperation(
         documentsToDelete,
         async (document) => {
@@ -379,84 +370,64 @@ export class EstateAnalysisReportService {
         'S3 파일 삭제',
       );
 
-      // 4. DB에서 문서 레코드 삭제
+      // DB 레코드 삭제
       if (documentsToDelete.length > 0) {
         const docIdsToDelete = documentsToDelete.map((doc) => doc.docId);
         await this.documentRepository.delete(docIdsToDelete);
         console.log(`[EstateAnalysisReport] 미사용 문서 삭제 완료: ${docIdsToDelete.length}건`);
       }
     } catch (error) {
-      // 문서 삭제 실패는 치명적이지 않으므로 로깅만 수행
       console.error('[EstateAnalysisReport] 미사용 문서 삭제 실패:', error);
     }
   }
 
-  /**
-   * Estate ID로 분석 리포트 조회
-   * @param estateId - Estate ID
-   * @returns 분석 리포트 엔티티 또는 null
-   */
-  async findByEstateId(
-    estateId: number,
-  ): Promise<EstateAnalysisReport | null> {
-    return await this.estateAnalysisReportRepository.findByEstateId(estateId);
+  async findByEstateId(estateId: number): Promise<EstateAnalysisReport | null> {
+    return this.estateAnalysisReportRepository.findByEstateId(estateId);
   }
 
   /**
    * 분석 결과 조회 (캐시 우선)
-   * Redis 캐시를 먼저 확인하고, 없으면 DB에서 조회
-   * @param estateId - Estate ID
-   * @returns 분석 리포트 응답 DTO
    */
   async getAnalysisResult(estateId: number): Promise<EstateAnalysisReportResponseDto> {
-    // 1. Redis 캐시에서 조회 시도
+    // Redis 캐시 조회
     const cached = await this.estateAnalysisReportCacheService.get(estateId);
     if (cached) {
       console.log(`[EstateAnalysisReport] 캐시 조회 성공: estateId=${estateId}`);
       return cached;
     }
 
-    // 2. 캐시 미스 시 DB에서 조회
+    // DB 조회
     const analysisReport = await this.findByEstateId(estateId);
-
-    // 3. 데이터가 없으면 빈 응답 반환
     if (!analysisReport) {
       console.log(`[EstateAnalysisReport] 분석 결과 없음: estateId=${estateId}`);
       return EstateAnalysisReportMapper.emptyResponse();
     }
 
-    // 4. 응답 DTO로 변환
+    // DTO 변환 및 캐시 저장
     const responseDto = EstateAnalysisReportMapper.toResponseDto(analysisReport);
-
-    // 5. Redis 캐시에 저장
     await this.estateAnalysisReportCacheService.set(estateId, responseDto);
 
     return responseDto;
   }
 
   /**
-   * 사용자의 분석 리포트 목록 조회 (페이징, Redis 캐시 적용)
-   * @param userId - 사용자 ID
-   * @param query - 검색 조건 DTO
-   * @returns 페이지네이션된 분석 리포트 목록
+   * 분석 리포트 목록 조회 (페이징, Redis 캐시)
    */
   async findAll(userId: number, query: SearchEstateAnalysisDto): Promise<PaginationResponseDto<EstateAnalysisReportResponseDto>> {
-    // 1. Redis 캐시 키 생성 (사용자별, 쿼리별 격리)
+    // 캐시 키 생성
     const cacheKey = `estate-analysis-list:${userId}:page:${query.page || 1}:limit:${query.limit || 10}`;
-    const cacheTTL = Duration.ofSeconds(60).seconds(); // 20분 (기존 @CacheTTL과 동일)
+    const cacheTTL = Duration.ofSeconds(60).seconds();
 
-    // 2. Redis 캐시에서 조회 시도
+    // Redis 캐시 조회
     const cached = await this.redisService.get(cacheKey);
     if (cached) {
       console.log(`[EstateAnalysisReport] Redis 캐시 히트: ${cacheKey}`);
       return JSON.parse(cached);
     }
 
-    // 3. 캐시 미스 시 Repository에서 조회
+    // DB 조회 및 캐시 저장
     console.log(`[EstateAnalysisReport] Redis 캐시 미스: ${cacheKey}`);
     const result = await this.estateAnalysisReportRepository.findAll(userId, query);
-
-    // 4. Redis 캐시에 저장
     await this.redisService.set(cacheKey, JSON.stringify(result), cacheTTL);
 
     return result;

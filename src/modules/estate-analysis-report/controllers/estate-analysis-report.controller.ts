@@ -40,10 +40,7 @@ export class EstateAnalysisReportController {
     @GetUser() user: User,
     @Body() createEstateAnalysisDto: CreateEstateAnalysisDto,
   ): Promise<EstateAnalysisReportResponseDto> {
-    return this.estateAnalysisReportService.analyzeEstateWithDocuments(
-      user.userId,
-      createEstateAnalysisDto,
-    );
+    return this.estateAnalysisReportService.analyzeEstateWithDocuments(user.userId, createEstateAnalysisDto);
   }
 
   @Get(':estateId')

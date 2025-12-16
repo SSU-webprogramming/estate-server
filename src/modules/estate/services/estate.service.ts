@@ -24,16 +24,8 @@ export class EstateService {
     userId: number,
     createEstateDto: CreateEstateDto,
   ): Promise<EstateResponseDto> {
-    const estateData = EstateMapper.fromCreateDto(userId, createEstateDto);
-    const estate = this.estateRepository.create(estateData);
-    const savedEstate = await this.estateRepository.save(estate);
-
-    if (createEstateDto.documentIds && createEstateDto.documentIds.length > 0) {
-      await this.documentService.attachDocumentsToEstate(
-        createEstateDto.documentIds,
-        savedEstate.estateId,
-      );
-    }
+    const savedEstate = await this.createEstate(userId, createEstateDto);
+    await this.attachDocuments(createEstateDto.documentIds, savedEstate.estateId);
 
     return EstateMapper.toResponseDto(savedEstate);
   }
@@ -42,27 +34,30 @@ export class EstateService {
     userId: number,
     createEstateDto: CreateEstateDto,
   ): Promise<EstateResponseDto> {
+    const savedEstate = await this.createEstate(userId, createEstateDto);
+    return EstateMapper.toResponseDto(savedEstate);
+  }
+
+  private async createEstate(userId: number, createEstateDto: CreateEstateDto): Promise<Estate> {
     const estateData = EstateMapper.fromCreateDto(userId, createEstateDto);
     const estate = this.estateRepository.create(estateData);
-    const savedEstate = await this.estateRepository.save(estate);
-    return EstateMapper.toResponseDto(savedEstate);
+    return this.estateRepository.save(estate);
+  }
+
+  private async attachDocuments(documentIds: number[] | undefined, estateId: number): Promise<void> {
+    if (documentIds && documentIds.length > 0) {
+      await this.documentService.attachDocumentsToEstate(documentIds, estateId);
+    }
   }
 
   async findAllWithPagination(
     userId: number,
     getEstateListDto: GetEstateListDto,
   ): Promise<PaginationResponseDto<EstateResponseDto>> {
-    const [estates, total] = await this.estateRepository.findAllWithPagination(
-      userId,
-      getEstateListDto,
-    );
-
+    const [estates, total] = await this.estateRepository.findAllWithPagination(userId, getEstateListDto);
+    
     const estateDtos = EstateMapper.toResponseDtoList(estates);
-    const meta = new PaginationMetaDto(
-      getEstateListDto.page,
-      getEstateListDto.limit,
-      total,
-    );
+    const meta = new PaginationMetaDto(getEstateListDto.page, getEstateListDto.limit, total);
 
     return new PaginationResponseDto(estateDtos, meta);
   }
@@ -91,22 +86,23 @@ export class EstateService {
 
   async remove(estateId: number): Promise<void> {
     const result = await this.estateRepository.delete(estateId);
-    if (result.affected === 0) {
+    
+    if (!result.affected || result.affected === 0) {
       throw new CustomException(ErrorCode.ESTATE_NOT_FOUND);
     }
   }
 
   async deleteEstate(userId: number, estateId: number): Promise<void> {
-    const estate = await this.estateRepository.findOneByUserIdAndEstateId(
-      userId,
-      estateId,
-    );
+    await this.validateEstateOwnership(userId, estateId);
+    await this.estateRepository.softDelete(estateId);
+  }
 
+  private async validateEstateOwnership(userId: number, estateId: number): Promise<void> {
+    const estate = await this.estateRepository.findOneByUserIdAndEstateId(userId, estateId);
+    
     if (!estate) {
       throw new CustomException(ErrorCode.ESTATE_NOT_FOUND);
     }
-
-    await this.estateRepository.softDelete(estateId);
   }
 }
 

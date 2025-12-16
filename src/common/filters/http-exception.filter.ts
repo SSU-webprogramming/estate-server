@@ -25,83 +25,166 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    let statusCode: number;
-    let errorCode: ErrorCode;
-    let error: string;
-    let message: string;
+    const { statusCode, errorCode, error, message } = this.extractErrorInfo(exception);
+    const errorResponsePayload = this.buildErrorResponse(statusCode, errorCode, error, message, request.url);
 
+    this.logError(message, errorResponsePayload, exception);
+    response.status(statusCode).json(errorResponsePayload);
+  }
+
+  private extractErrorInfo(exception: unknown): {
+    statusCode: number;
+    errorCode: ErrorCode;
+    error: string;
+    message: string;
+  } {
     if (exception instanceof CustomException) {
-      statusCode = exception.getStatus();
-      const errorResponse = exception.getResponse() as {
-        errorCode: ErrorCode;
-        message: string;
-      };
-      errorCode = errorResponse.errorCode;
-      error = exception.constructor.name;
-      message = errorResponse.message;
-    } else if (exception instanceof BadRequestException) {
-      statusCode = exception.getStatus();
-      const errorResponse = exception.getResponse();
-      errorCode = ErrorCode.INVALID_INPUT_VALUE;
-      error = 'ValidationError';
-
-      // ValidationPipe 에러인 경우 상세한 메시지 추출
-      if (typeof errorResponse === 'object' && errorResponse !== null) {
-        const response = errorResponse as any;
-        if (response.message && Array.isArray(response.message)) {
-          message = response.message.join(', ');
-        } else if (response.message) {
-          message = response.message;
-        } else {
-          message = '입력값 검증에 실패했습니다.';
-        }
-      } else {
-        message = exception.message || '입력값 검증에 실패했습니다.';
-      }
-    } else if (exception instanceof HttpException) {
-      statusCode = exception.getStatus();
-      const errorResponse = exception.getResponse();
-      errorCode = ErrorCode.INVALID_INPUT_VALUE;
-      error = (errorResponse as any).error || exception.constructor.name;
-      message = (errorResponse as any).message || exception.message;
-    } else if (exception instanceof QueryFailedError) {
-      statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-      errorCode = ErrorCode.QUERY_FAILED;
-      error = 'DatabaseError';
-      message = '데이터 처리 중 오류가 발생했습니다.';
-    } else if (exception instanceof TypeORMError) {
-      statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-      errorCode = ErrorCode.DATABASE_ERROR;
-      error = 'DatabaseError';
-      message = '데이터베이스 연동 중 오류가 발생했습니다.';
-    } else {
-      statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-      errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
-      error = 'InternalServerError';
-      message = '서버 내부 오류가 발생했습니다. 관리자에게 문의해주세요.';
-      console.log(exception);
-      console.log(statusCode);
-      console.log(errorCode);
-      console.log(error);
-      console.log(message);
+      return this.handleCustomException(exception);
     }
+    if (exception instanceof BadRequestException) {
+      return this.handleBadRequestException(exception);
+    }
+    if (exception instanceof HttpException) {
+      return this.handleHttpException(exception);
+    }
+    if (exception instanceof QueryFailedError) {
+      return this.handleQueryFailedError();
+    }
+    if (exception instanceof TypeORMError) {
+      return this.handleTypeORMError();
+    }
+    
+    return this.handleUnknownError();
+  }
 
-    const errorResponsePayload = {
+  private handleCustomException(exception: CustomException): {
+    statusCode: number;
+    errorCode: ErrorCode;
+    error: string;
+    message: string;
+  } {
+    const statusCode = exception.getStatus();
+    const errorResponse = exception.getResponse() as {
+      errorCode: ErrorCode;
+      message: string;
+    };
+    return {
+      statusCode,
+      errorCode: errorResponse.errorCode,
+      error: exception.constructor.name,
+      message: errorResponse.message,
+    };
+  }
+
+  private handleBadRequestException(exception: BadRequestException): {
+    statusCode: number;
+    errorCode: ErrorCode;
+    error: string;
+    message: string;
+  } {
+    const errorResponse = exception.getResponse();
+    const message = this.extractValidationMessage(errorResponse, exception.message);
+    
+    return {
+      statusCode: exception.getStatus(),
+      errorCode: ErrorCode.INVALID_INPUT_VALUE,
+      error: 'ValidationError',
+      message,
+    };
+  }
+
+  private extractValidationMessage(errorResponse: any, defaultMessage: string): string {
+    if (typeof errorResponse === 'object' && errorResponse !== null) {
+      if (errorResponse.message && Array.isArray(errorResponse.message)) {
+        return errorResponse.message.join(', ');
+      }
+      if (errorResponse.message) {
+        return errorResponse.message;
+      }
+    }
+    return defaultMessage || '입력값 검증에 실패했습니다.';
+  }
+
+  private handleHttpException(exception: HttpException): {
+    statusCode: number;
+    errorCode: ErrorCode;
+    error: string;
+    message: string;
+  } {
+    const errorResponse = exception.getResponse();
+    return {
+      statusCode: exception.getStatus(),
+      errorCode: ErrorCode.INVALID_INPUT_VALUE,
+      error: (errorResponse as any).error || exception.constructor.name,
+      message: (errorResponse as any).message || exception.message,
+    };
+  }
+
+  private handleQueryFailedError(): {
+    statusCode: number;
+    errorCode: ErrorCode;
+    error: string;
+    message: string;
+  } {
+    return {
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      errorCode: ErrorCode.QUERY_FAILED,
+      error: 'DatabaseError',
+      message: '데이터 처리 중 오류가 발생했습니다.',
+    };
+  }
+
+  private handleTypeORMError(): {
+    statusCode: number;
+    errorCode: ErrorCode;
+    error: string;
+    message: string;
+  } {
+    return {
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      errorCode: ErrorCode.DATABASE_ERROR,
+      error: 'DatabaseError',
+      message: '데이터베이스 연동 중 오류가 발생했습니다.',
+    };
+  }
+
+  private handleUnknownError(): {
+    statusCode: number;
+    errorCode: ErrorCode;
+    error: string;
+    message: string;
+  } {
+    return {
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      errorCode: ErrorCode.INTERNAL_SERVER_ERROR,
+      error: 'InternalServerError',
+      message: '서버 내부 오류가 발생했습니다. 관리자에게 문의해주세요.',
+    };
+  }
+
+  private buildErrorResponse(
+    statusCode: number,
+    errorCode: ErrorCode,
+    error: string,
+    message: string,
+    path: string,
+  ): any {
+    return {
       statusCode,
       errorCode,
       error,
       message,
       timestamp: new Date().toISOString(),
-      path: request.url,
+      path,
     };
+  }
 
-    const { message: _, ...payload } = errorResponsePayload;
+  private logError(message: string, payload: any, exception: unknown): void {
+    const { message: _, ...logPayload } = payload;
     this.logger.error(message, {
-      ...payload,
+      ...logPayload,
       stack: (exception as any).stack,
       context: GlobalExceptionFilter.name,
     });
-
-    response.status(statusCode).json(errorResponsePayload);
   }
 }

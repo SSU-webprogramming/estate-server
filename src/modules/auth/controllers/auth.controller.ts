@@ -27,6 +27,7 @@ export class AuthController {
   @Get('kakao')
   @UseGuards(KakaoAuthGuard)
   @ApiKakaoLogin()
+  // Step 1: 카카오 인증 페이지로 리다이렉트
   kakaoLogin() {}
 
   @Get('kakao/callback')
@@ -35,22 +36,30 @@ export class AuthController {
   async kakaoLoginCallback(
     @Req() req: RequestWithUser,
   ): Promise<{ access_token: string; refresh_token: string }> {
+    // Step 1: KakaoAuthGuard가 검증한 사용자 정보 추출
     const { user } = req;
-    return await this.authService.handleKakaoLogin(user);
+    
+    // Step 2: 회원가입 또는 로그인 처리 후 토큰 발급
+    return this.authService.handleKakaoLogin(user);
   }
 
   @Post('refresh')
   @ApiRefreshToken()
   async refresh(@Body() refreshTokenDto: RefreshTokenDto
   ): Promise<{ access_token: string; refresh_token: string }> {
-    return await this.authService.refreshTokens(refreshTokenDto);
+    // Step 1: Refresh Token 검증 및 새로운 토큰 쌍 발급
+    return this.authService.refreshTokens(refreshTokenDto);
   }
 
   @Delete('logout')
   @UseGuards(JwtAuthGuard)
   @ApiLogout()
   async logout(@GetUser() user: User): Promise<{ message: string }> {
+    // Step 1: JwtAuthGuard가 검증한 사용자 ID 추출
+    // Step 2: Redis에서 Refresh Token 삭제
     await this.authService.logout(user.userId);
+    
+    // Step 3: 로그아웃 성공 응답 반환
     return { message: 'Logged out successfully' };
   }
 }

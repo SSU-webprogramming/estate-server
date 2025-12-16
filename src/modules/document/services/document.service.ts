@@ -22,23 +22,34 @@ export class DocumentService {
     docType: DocumentType = DocumentType.REGISTRY,
     userId?: number,
   ): Promise<DocumentResponseDto> {
+    const s3Key = await this.uploadFileToS3(file);
+    const savedDocument = await this.createDocumentRecord(file, s3Key, docType, userId);
+    
+    return DocumentMapper.toResponseDto(savedDocument);
+  }
+
+  private async uploadFileToS3(file: Express.Multer.File): Promise<string> {
     const fileUuid = uuidV4();
     const key = `temp/${fileUuid}-${file.originalname}`;
-
+    
     await this.s3Port.upload(file.buffer, key, file.mimetype);
+    return key;
+  }
 
-    const newDocument = this.documentRepository.create({
-      estateId: null,
-      estate: null,
-      userId: userId || null,
-      docType,
-      originalName: file.originalname,
-      s3Key: key,
-      contentType: file.mimetype,
-    });
+  private async createDocumentRecord(
+    file: Express.Multer.File,
+    s3Key: string,
+    docType: DocumentType,
+    userId?: number,
+  ): Promise<Document> {
+    // Step 1: Mapper를 통해 Document 엔티티 데이터 생성
+    const documentData = DocumentMapper.fromUploadedFile(file, s3Key, docType, userId);
+    
+    // Step 2: Repository를 통해 엔티티 인스턴스 생성
+    const newDocument = this.documentRepository.create(documentData);
 
-    const savedDocument = await this.documentRepository.save(newDocument);
-    return DocumentMapper.toResponseDto(savedDocument);
+    // Step 3: DB에 저장 후 반환
+    return this.documentRepository.save(newDocument);
   }
 
 
@@ -58,38 +69,42 @@ export class DocumentService {
     return DocumentMapper.toInfoDtoList(documents);
   }
 
-  async attachDocumentsToEstate(
-    documentIds: number[],
-    estateId: number,
-  ): Promise<void> {
+  async attachDocumentsToEstate(documentIds: number[], estateId: number): Promise<void> {
     if (!documentIds || documentIds.length === 0) {
       return;
     }
 
     const documents = await this.documentRepository.findByIds(documentIds);
-
+    
     for (const document of documents) {
-      document.estateId = estateId;
-
-      if (document.s3Key.startsWith('temp/')) {
-        const fileName = document.s3Key.split('/').pop();
-        const newKey = `${estateId}/${fileName}`;
-
-        try {
-          await this.s3Port.copy(document.s3Key, newKey);
-
-          await this.s3Port.delete(document.s3Key);
-
-          document.s3Key = newKey;
-        } catch (error) {
-          console.error(
-            `Failed to move S3 file from ${document.s3Key} to ${newKey}:`,
-            error,
-          );
-        }
-      }
+      await this.attachDocumentToEstate(document, estateId);
     }
 
     await this.documentRepository.save(documents);
+  }
+
+  private async attachDocumentToEstate(document: Document, estateId: number): Promise<void> {
+    document.estateId = estateId;
+
+    if (this.isTemporaryFile(document.s3Key)) {
+      await this.moveTempFileToPermanent(document, estateId);
+    }
+  }
+
+  private isTemporaryFile(s3Key: string): boolean {
+    return s3Key.startsWith('temp/');
+  }
+
+  private async moveTempFileToPermanent(document: Document, estateId: number): Promise<void> {
+    const fileName = document.s3Key.split('/').pop();
+    const newKey = `${estateId}/${fileName}`;
+
+    try {
+      await this.s3Port.copy(document.s3Key, newKey);
+      await this.s3Port.delete(document.s3Key);
+      document.s3Key = newKey;
+    } catch (error) {
+      console.error(`S3 파일 이동 실패 (${document.s3Key} -> ${newKey}):`, error);
+    }
   }
 }

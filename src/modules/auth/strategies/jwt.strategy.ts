@@ -27,12 +27,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: any): Promise<User> {
+    // Step 1: JWT 페이로드에서 userId 추출 (payload.sub)
+    // Step 2: DB에서 사용자 조회
     const user = await this.userRepository.findOne(payload.sub);
 
+    // Step 3: 사용자가 없으면 예외 발생 (탈퇴 또는 미존재)
     if (!user) {
       throw new CustomException(ErrorCode.USER_NOT_FOUND);
     }
 
+    // Step 4: 사용자 Entity 반환 (req.user에 자동 할당)
     return user;
   }
 }

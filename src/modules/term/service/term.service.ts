@@ -21,23 +21,24 @@ export class TermService {
   }
 
   async findAgreedTerms(user: User): Promise<TermResponseDto[]> {
-    const agreedTermsMap = user.agreedTerms;
-
-    if (!agreedTermsMap) {
-      return [];
-    }
-
-    const agreedTermIds = Object.entries(agreedTermsMap)
-      .filter(([_, isAgreed]) => isAgreed)
-      .map(([termId]) => Number(termId));
-
+    const agreedTermIds = this.extractAgreedTermIds(user.agreedTerms);
+    
     if (agreedTermIds.length === 0) {
       return [];
     }
 
     const terms = await this.termRepository.findByIds(agreedTermIds);
-
     return TermMapper.toResponseDtoList(terms);
+  }
+
+  private extractAgreedTermIds(agreedTermsMap: Record<string, boolean> | null): number[] {
+    if (!agreedTermsMap) {
+      return [];
+    }
+
+    return Object.entries(agreedTermsMap)
+      .filter(([_, isAgreed]) => isAgreed)
+      .map(([termId]) => Number(termId));
   }
 
   async create(dto: CreateTermDto): Promise<TermResponseDto> {
@@ -48,15 +49,20 @@ export class TermService {
   }
 
   async update(id: number, dto: UpdateTermDto): Promise<TermResponseDto> {
-    const term = await this.termRepository.findOne(id);
-    if (!term) {
-      throw new CustomException(ErrorCode.TERM_NOT_FOUND);
-    }
+    const term = await this.findTermOrThrow(id);
 
     const updateData = TermMapper.fromUpdateDto(dto);
     Object.assign(term, updateData);
 
     const updatedTerm = await this.termRepository.save(term);
     return TermMapper.toResponseDto(updatedTerm);
+  }
+
+  private async findTermOrThrow(id: number): Promise<Term> {
+    const term = await this.termRepository.findOne(id);
+    if (!term) {
+      throw new CustomException(ErrorCode.TERM_NOT_FOUND);
+    }
+    return term;
   }
 }

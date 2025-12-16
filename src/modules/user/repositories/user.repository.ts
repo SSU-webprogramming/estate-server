@@ -25,22 +25,27 @@ export class UserRepository {
   async findAllWithPagination(
     getUserListDto: GetUserListDto,
   ): Promise<[User[], number]> {
-    const where: any = {};
-    if (getUserListDto.name) {
-      where.username = Like(`%${getUserListDto.name}%`);
-    }
-    if (getUserListDto.email) {
-      where.email = Like(`%${getUserListDto.email}%`);
-    }
+    const where = this.buildSearchConditions(getUserListDto);
 
     return this.repository.findAndCount({
       where,
       skip: getUserListDto.skip,
       take: getUserListDto.limit,
-      order: {
-        createdAt: 'DESC',
-      },
+      order: { createdAt: 'DESC' },
     });
+  }
+
+  private buildSearchConditions(getUserListDto: GetUserListDto): any {
+    const conditions: any = {};
+    
+    if (getUserListDto.name) {
+      conditions.username = Like(`%${getUserListDto.name}%`);
+    }
+    if (getUserListDto.email) {
+      conditions.email = Like(`%${getUserListDto.email}%`);
+    }
+    
+    return conditions;
   }
 
   async findOne(userId: number): Promise<User | null> {
