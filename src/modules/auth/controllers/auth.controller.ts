@@ -27,7 +27,7 @@ export class AuthController {
   @Get('kakao')
   @UseGuards(KakaoAuthGuard)
   @ApiKakaoLogin()
-  // Step 1: Ä«Ä«¿À ÀÎÁõ ÆäÀÌÁö·Î ¸®´ÙÀÌ·ºÆ®
+  // Step 1: Ä«Ä«ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì·ï¿½Æ®
   kakaoLogin() {}
 
   @Get('kakao/callback')
@@ -35,14 +35,6 @@ export class AuthController {
   @ApiKakaoLoginCallback()
   async kakaoLoginCallback(
     @Req() req: RequestWithUser,
-<<<<<<< HEAD
-  ): Promise<{ access_token: string; refresh_token: string }> {
-    // Step 1: KakaoAuthGuard°¡ °ËÁõÇÑ »ç¿ëÀÚ Á¤º¸ ÃßÃâ
-    const { user } = req;
-    
-    // Step 2: È¸¿ø°¡ÀÔ ¶Ç´Â ·Î±×ÀÎ Ã³¸® ÈÄ ÅäÅ« ¹ß±Þ
-    return this.authService.handleKakaoLogin(user);
-=======
     @Res() res: Response,
   ) {
     const { user } = req;
@@ -52,14 +44,13 @@ export class AuthController {
     const redirectUrl = `${frontendUrl}/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`;
 
     return res.redirect(redirectUrl);
->>>>>>> fix/login
   }
 
   @Post('refresh')
   @ApiRefreshToken()
   async refresh(@Body() refreshTokenDto: RefreshTokenDto
   ): Promise<{ access_token: string; refresh_token: string }> {
-    // Step 1: Refresh Token °ËÁõ ¹× »õ·Î¿î ÅäÅ« ½Ö ¹ß±Þ
+    // Step 1: Refresh Token ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½Å« ï¿½ï¿½ ï¿½ß±ï¿½
     return this.authService.refreshTokens(refreshTokenDto);
   }
 
@@ -67,11 +58,11 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiLogout()
   async logout(@GetUser() user: User): Promise<{ message: string }> {
-    // Step 1: JwtAuthGuard°¡ °ËÁõÇÑ »ç¿ëÀÚ ID ÃßÃâ
-    // Step 2: Redis¿¡¼­ Refresh Token »èÁ¦
+    // Step 1: JwtAuthGuardï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ ID ï¿½ï¿½ï¿½ï¿½
+    // Step 2: Redisï¿½ï¿½ï¿½ï¿½ Refresh Token ï¿½ï¿½ï¿½ï¿½
     await this.authService.logout(user.userId);
     
-    // Step 3: ·Î±×¾Æ¿ô ¼º°ø ÀÀ´ä ¹ÝÈ¯
+    // Step 3: ï¿½Î±×¾Æ¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½È¯
     return { message: 'Logged out successfully' };
   }
 }
