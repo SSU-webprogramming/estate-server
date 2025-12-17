@@ -35,6 +35,11 @@ export class TermController {
     return this.termService.findAgreedTerms(user);
   }
 
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<TermResponseDto> {
+    return this.termService.findOne(id);
+  }
+
   @Post()
   @ApiCreateTerm()
   @UseGuards(JwtAuthGuard, RolesGuard)

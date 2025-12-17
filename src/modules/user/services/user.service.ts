@@ -99,7 +99,7 @@ export class UserService {
   private async findUserForTermsAgreement(userId: number): Promise<any> {
     const user = await ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.findOneBy({ userId }),
-      '사용자 조회',
+      'User lookup',
     );
 
     if (!user) {
@@ -112,7 +112,7 @@ export class UserService {
   private async saveUserTermsAgreement(user: any): Promise<any> {
     return ErrorHandler.handleDatabaseOperation(
       () => this.userRepository.save(user),
-      '사용자 약관 동의 저장',
+      'User terms save',
     );
   }
 }

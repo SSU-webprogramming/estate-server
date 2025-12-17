@@ -35,12 +35,24 @@ export class AuthController {
   @ApiKakaoLoginCallback()
   async kakaoLoginCallback(
     @Req() req: RequestWithUser,
+<<<<<<< HEAD
   ): Promise<{ access_token: string; refresh_token: string }> {
     // Step 1: KakaoAuthGuard가 검증한 사용자 정보 추출
     const { user } = req;
     
     // Step 2: 회원가입 또는 로그인 처리 후 토큰 발급
     return this.authService.handleKakaoLogin(user);
+=======
+    @Res() res: Response,
+  ) {
+    const { user } = req;
+    const tokens = await this.authService.handleKakaoLogin(user);
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+    const redirectUrl = `${frontendUrl}/callback?access_token=${tokens.access_token}&refresh_token=${tokens.refresh_token}`;
+
+    return res.redirect(redirectUrl);
+>>>>>>> fix/login
   }
 
   @Post('refresh')
