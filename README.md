@@ -346,26 +346,3 @@ docker-compose down
 # 볼륨 포함 완전 삭제
 docker-compose down -v
 ```
-
-## 📝 SOLID 원칙 준수
-
-이 프로젝트는 NestJS의 모듈 시스템과 의존성 주입을 활용하여 SOLID 원칙을 엄격히 따릅니다:
-
-- **단일 책임 원칙 (SRP)**: 각 서비스는 하나의 책임만 가짐
-- **개방-폐쇄 원칙 (OCP)**: 전략 패턴으로 확장 가능
-- **리스코프 치환 원칙 (LSP)**: 인터페이스 기반 설계
-- **인터페이스 분리 원칙 (ISP)**: Ports & Adapters
-- **의존성 역전 원칙 (DIP)**: 추상화에 의존
-
-## 📄 라이센스
-
-Private - UNLICENSED
-
-## 👥 기여자
-
-Backend Engineering Team
-
----
-
-**Last Updated**: 2024-12-16  
-**Version**: 1.0.0
